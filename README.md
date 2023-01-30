@@ -1,1 +1,1 @@
-# logcaliper.app
+# http://logcaliper.app
