@@ -24,9 +24,10 @@
 <meta name="twitter:image" content="https://logcaliper.app/images/og.png">
 <meta name="twitter:creator" content="@cbriguet">
 
-<meta name="theme-color" content="#335071">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23335071'/%3E%3Cpath d='M16 6 L23 25 M16 6 L9 25 M11.5 19 h9' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="images/app/convert.png">
+<meta name="theme-color" content="#334F71">
+<link rel="icon" type="image/png" sizes="32x32" href="images/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="images/brand/favicon-64.png">
+<link rel="apple-touch-icon" href="images/brand/apple-touch-icon.png">
 
 <script type="application/ld+json">
 {
@@ -39,13 +40,14 @@
   "downloadUrl": "https://apps.apple.com/us/app/logcaliper/id381096276",
   "description": "A calculator for log management and SIEM capacity planning: converts data sizes and rates, estimates volume, storage and cost from a list of sources, and compares data sizes.",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "image": "https://logcaliper.app/images/brand/logo-512.png",
   "author": { "@type": "Person", "name": "Christophe Briguet" }
 }
 </script>
 
 <style>
 :root {
-  --navy:      #335071;
+  --navy:      #334F71;
   --navy-deep: #22374e;
   --navy-ink:  #16242f;
   --accent:    #1fa2e8;
@@ -118,7 +120,7 @@ section { padding-block: clamp(3.5rem, 9vw, 6.5rem); }
 }
 .nav .wrap { display: flex; align-items: center; gap: 1.5rem; min-height: 58px; }
 .brand { display: flex; align-items: center; gap: .55rem; font-weight: 650; color: var(--text); text-decoration: none; letter-spacing: -.02em; }
-.brand svg { width: 26px; height: 26px; flex: none; }
+.brand img { width: 26px; height: 26px; flex: none; border-radius: 6px; }
 .nav ul { display: flex; gap: 1.4rem; list-style: none; margin: 0 0 0 auto; padding: 0; font-size: .9375rem; }
 .nav a:not(.brand) { color: var(--text-dim); text-decoration: none; }
 .nav a:not(.brand):hover { color: var(--text); }
@@ -226,7 +228,7 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
 <nav class="nav">
   <div class="wrap">
     <a class="brand" href="/">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#335071"/><path d="M16 6 L23 25 M16 6 L9 25 M11.5 19 h9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+      <img src="images/brand/favicon-64.png" alt="" width="26" height="26">
       Logcaliper
     </a>
     <ul>
