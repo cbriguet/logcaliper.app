@@ -34,7 +34,7 @@
   "@context": "https://schema.org",
   "@type": "MobileApplication",
   "name": "Logcaliper",
-  "operatingSystem": "iOS 15.0 or later",
+  "operatingSystem": "iOS 18.0 or later",
   "applicationCategory": "UtilitiesApplication",
   "url": "https://logcaliper.app/",
   "downloadUrl": "https://apps.apple.com/us/app/logcaliper/id381096276",
@@ -220,6 +220,21 @@ footer {
 footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; }
 footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; padding: 0; }
 </style>
+
+<!-- Analytics: GoatCounter, cookieless and no personal data.
+     Inert until GC_CODE below is replaced with the site code from
+     https://<code>.goatcounter.com — until then no request is made at all. -->
+<script>
+(function () {
+  var GC_CODE = "GC_CODE";              // <- paste the GoatCounter site code here
+  if (GC_CODE === "GC" + "_CODE") return;   // not configured yet: do nothing
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://gc.zgo.at/count.js";
+  s.setAttribute("data-goatcounter", "https://" + GC_CODE + ".goatcounter.com/count");
+  document.head.appendChild(s);
+})();
+</script>
 </head>
 <body>
 
@@ -248,7 +263,9 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
       <h1>Size your log deployment before you buy it.</h1>
       <p class="lede">Logcaliper turns a list of sources into the numbers you have to plan for: events per second, gigabytes per day, storage at retention, and what it costs.</p>
       <div class="cta">
-        <a class="badge" href="https://apps.apple.com/us/app/logcaliper/id381096276">
+        <a class="badge" href="https://apps.apple.com/us/app/logcaliper/id381096276"
+           data-goatcounter-click="appstore-hero"
+           data-goatcounter-title="App Store (hero badge)">
           <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&releaseDate=1279065600" alt="Download Logcaliper on the App Store" width="190" height="63" loading="eager">
         </a>
         <span class="free">Free. No account required.</span>
@@ -355,7 +372,9 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
   <div class="wrap">
     <span>&copy; 2026 Christophe Briguet</span>
     <ul>
-      <li><a href="https://apps.apple.com/us/app/logcaliper/id381096276">App Store</a></li>
+      <li><a href="https://apps.apple.com/us/app/logcaliper/id381096276"
+             data-goatcounter-click="appstore-footer"
+             data-goatcounter-title="App Store (footer)">App Store</a></li>
       <li><a href="https://www.linkedin.com/in/cbriguet/">LinkedIn</a></li>
       <li><a href="https://x.com/cbriguet" rel="me">@cbriguet</a></li>
     </ul>
