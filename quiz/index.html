@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>How good is your sense of data size? — Logcaliper</title>
+<meta name="description" content="Ten questions. Which holds more data — Wikipedia or Fortnite? A gram of DNA or the Internet Archive? Most people are off by orders of magnitude.">
+<link rel="canonical" href="https://logcaliper.app/quiz/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://logcaliper.app/quiz/">
+<meta property="og:site_name" content="Logcaliper">
+<meta property="og:title" content="How good is your sense of data size?">
+<meta property="og:description" content="Ten questions. Which holds more — Wikipedia or Fortnite? Most people are off by orders of magnitude.">
+<meta property="og:image" content="https://logcaliper.app/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How good is your sense of data size?">
+<meta name="twitter:description" content="Ten questions. Which holds more — Wikipedia or Fortnite? Most people are off by orders of magnitude.">
+<meta name="twitter:image" content="https://logcaliper.app/images/og.png">
+<meta name="twitter:creator" content="@cbriguet">
+
+<meta name="theme-color" content="#334F71">
+<link rel="icon" type="image/png" sizes="32x32" href="../images/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../images/brand/favicon-64.png">
+<link rel="apple-touch-icon" href="../images/brand/apple-touch-icon.png">
+
+<script>
+(function () {
+  var GC_CODE = "logcaliper";           // https://logcaliper.goatcounter.com
+  if (GC_CODE === "GC" + "_CODE") return;
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://gc.zgo.at/count.js";
+  s.setAttribute("data-goatcounter", "https://" + GC_CODE + ".goatcounter.com/count");
+  document.head.appendChild(s);
+})();
+</script>
+
+<style>
+:root {
+  --navy:      #334F71;
+  --navy-deep: #22374e;
+  --navy-ink:  #16242f;
+  --accent:    #0b6f9e;
+  --right:     #1d7a4c;
+  --wrong:     #a8332b;
+
+  --bg:        #ffffff;
+  --bg-alt:    #f4f6f9;
+  --surface:   #ffffff;
+  --text:      #16242f;
+  --text-dim:  #566373;
+  --rule:      #dfe4ea;
+  --field:     #767f8a;
+
+  --maxw: 760px;
+  --pad: clamp(1.25rem, 4vw, 2.5rem);
+  --radius: 14px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:       #10181f;
+    --bg-alt:   #16222c;
+    --surface:  #1a2731;
+    --text:     #e7edf3;
+    --text-dim: #9aa9b8;
+    --rule:     #2a3a48;
+    --field:    #6b7a88;
+    --accent:   #1fa2e8;
+    --right:    #4ec98a;
+    --wrong:    #ef6b62;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; font-family: var(--font); font-size: 17px; line-height: 1.6;
+  color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--accent); text-underline-offset: 2px; }
+h1, h2 { line-height: 1.2; letter-spacing: -0.02em; margin: 0 0 .5em; font-weight: 650; }
+h1 { font-size: clamp(1.75rem, 5vw, 2.5rem); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.wrap {
+  max-width: var(--maxw); margin-inline: auto;
+  padding-left: max(var(--pad), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--pad), env(safe-area-inset-right, 0px));
+}
+
+.skip { position: absolute; left: -9999px; top: 0; z-index: 100;
+        background: var(--navy); color: #fff; padding: .75rem 1.25rem; border-radius: 0 0 8px 0; }
+.skip:focus { left: 0; }
+
+.nav { border-bottom: 1px solid var(--rule); padding-top: env(safe-area-inset-top, 0px); }
+.nav .wrap { display: flex; align-items: center; gap: .75rem; min-height: 58px; }
+.brand { display: flex; align-items: center; gap: .55rem; font-weight: 650;
+         color: var(--text); text-decoration: none; letter-spacing: -.02em; }
+.brand img { width: 26px; height: 26px; border-radius: 6px; }
+.nav .app { margin-left: auto; font-size: .9375rem; }
+
+main { padding-block: clamp(2rem, 6vw, 3.5rem); }
+
+/* ---- progress ---- */
+.meter { display: flex; gap: .3rem; margin-bottom: 1.75rem; }
+.meter i {
+  height: 5px; flex: 1; border-radius: 3px; background: var(--rule);
+  transition: background .25s;
+}
+.meter i.hit   { background: var(--right); }
+.meter i.miss  { background: var(--wrong); }
+.meter i.here  { background: var(--accent); }
+
+.count { font: 600 .8125rem/1 var(--mono); letter-spacing: .06em;
+         color: var(--text-dim); text-transform: uppercase; margin-bottom: .75rem; }
+
+/* ---- the question ---- */
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.75rem 0; }
+@media (max-width: 560px) { .choices { grid-template-columns: 1fr; } }
+
+.choice {
+  font: inherit; font-weight: 600; text-align: left; cursor: pointer;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--field); border-radius: var(--radius);
+  padding: 1.35rem 1.25rem; min-height: 120px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: .75rem;
+}
+.choice:hover:not(:disabled) { border-color: var(--accent); }
+.choice:disabled { cursor: default; }
+.choice .val {
+  font: 400 .9375rem/1 var(--mono); color: var(--text-dim);
+  font-variant-numeric: tabular-nums; opacity: 0; transition: opacity .3s;
+}
+.choice.shown .val { opacity: 1; }
+.choice.correct { border-color: var(--right); border-width: 2px; }
+.choice.picked-wrong { border-color: var(--wrong); border-width: 2px; }
+
+/* ---- the reveal ---- */
+.reveal { background: var(--bg-alt); border: 1px solid var(--rule);
+          border-radius: var(--radius); padding: 1.25rem 1.35rem; margin-top: .5rem; }
+.reveal .verdict { font-weight: 650; margin-bottom: .35rem; }
+.reveal .verdict.yes { color: var(--right); }
+.reveal .verdict.no  { color: var(--wrong); }
+.reveal p { margin: 0; color: var(--text-dim); font-size: .9688rem; }
+.reveal .ratio { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--text); }
+
+button.go {
+  font: inherit; font-weight: 600; cursor: pointer; margin-top: 1.5rem;
+  background: var(--navy); color: #fff; border: 0; border-radius: 9px; padding: .8rem 1.8rem;
+}
+button.go:hover { background: var(--navy-deep); }
+@media (prefers-color-scheme: dark) {
+  button.go { background: var(--accent); color: #06141d; }
+  button.go:hover { background: #4fb8ee; }
+}
+
+/* ---- result ---- */
+.score { font-size: clamp(3rem, 12vw, 4.5rem); font-weight: 700; letter-spacing: -.04em; line-height: 1; }
+.score span { font-size: .4em; color: var(--text-dim); font-weight: 500; }
+.verdict-line { font-size: 1.1875rem; margin: .75rem 0 1.5rem; }
+.missed { border-top: 1px solid var(--rule); margin-top: 2rem; padding-top: 1.5rem; }
+.missed h2 { font-size: 1.0625rem; }
+.missed ul { list-style: none; margin: 0; padding: 0; }
+.missed li { padding: .6rem 0; border-bottom: 1px solid var(--rule); font-size: .9688rem; color: var(--text-dim); }
+.missed li:last-child { border-bottom: 0; }
+.missed b { color: var(--text); font-weight: 600; }
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+.plug { margin-top: 2.5rem; padding: 1.35rem; background: var(--bg-alt);
+        border: 1px solid var(--rule); border-radius: var(--radius); font-size: .9688rem; }
+.plug p { margin: 0 0 .5rem; }
+.plug p:last-child { margin: 0; }
+
+footer { border-top: 1px solid var(--rule); padding-block: 2rem;
+         padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+         color: var(--text-dim); font-size: .875rem; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="../images/brand/favicon-64.png" alt="">Logcaliper</a>
+    <a class="app" href="/">← logcaliper.app</a>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+  <div class="wrap">
+
+    <!-- intro -->
+    <section id="intro">
+      <h1>How good is your sense of data size?</h1>
+      <p class="lede">Ten questions, one minute. Each asks which of two things holds more data.
+         The gaps are usually far wider than they feel.</p>
+      <button class="go" id="start" disabled>Loading…</button>
+    </section>
+
+    <!-- question -->
+    <section id="game" hidden>
+      <div class="meter" id="meter" aria-hidden="true"></div>
+      <p class="count" id="tally"></p>
+      <p class="count" id="count"></p>
+      <h1 id="prompt">Which holds more data?</h1>
+      <div class="choices">
+        <button class="choice" id="a" type="button"><span class="name"></span><span class="val"></span></button>
+        <button class="choice" id="b" type="button"><span class="name"></span><span class="val"></span></button>
+      </div>
+      <div class="reveal" id="reveal" hidden>
+        <p class="verdict" id="verdict"></p>
+        <p id="explain"></p>
+      </div>
+      <button class="go" id="next" hidden>Next</button>
+      <p aria-live="polite" class="sr" id="live" style="position:absolute;left:-9999px"></p>
+    </section>
+
+    <!-- result -->
+    <section id="result" hidden tabindex="-1">
+      <p class="count">Your score</p>
+      <p class="score"><span id="final">0</span><span> / 10</span></p>
+      <p class="verdict-line" id="grade"></p>
+      <div class="actions">
+        <button class="go" id="again" style="margin-top:0">Play again</button>
+        <button class="go" id="copy" style="margin-top:0;background:transparent;color:var(--accent);border:1px solid var(--field)">Copy result</button>
+      </div>
+      <div class="missed" id="missed" hidden>
+        <h2>What you missed</h2>
+        <ul id="missedList"></ul>
+      </div>
+      <div class="plug">
+        <p><b>Why this exists.</b> Sizing a log or SIEM deployment means holding these magnitudes in your head,
+           and almost nobody does it accurately.</p>
+        <p><a href="/">Logcaliper</a> is a free iOS calculator that does the arithmetic instead — 39 vendor
+           event sizes built in.</p>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">Figures from Logcaliper's own comparison catalogue. &copy; 2026 Christophe Briguet</div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var UNITS = [], Q = [], i = 0, score = 0, answered = false, missed = [];
+  var TOTAL = 10, ready = false;
+
+  var el = function (id) { return document.getElementById(id); };
+  var intro = el("intro"), game = el("game"), result = el("result");
+  var A = el("a"), B = el("b"), reveal = el("reveal");
+
+  function human(b) {
+    var u = ["B", "KB", "MB", "GB", "TB", "PB", "EB"], n = 0;
+    while (b >= 1000 && n < u.length - 1) { b /= 1000; n++; }
+    var s = b >= 100 ? b.toFixed(0) : b >= 10 ? b.toFixed(1) : b.toFixed(2);
+    // Only trim zeros sitting after a decimal point. The old pattern made the
+    // dot optional, so it also ate the zeros off integers: "700" became "7",
+    // "150" became "15". Four reference points rendered 10x or 100x too small
+    // while the ratio beside them, computed from raw bytes, stayed correct.
+    if (s.indexOf(".") >= 0) s = s.replace(/\.?0+$/, "");
+    return s + " " + u[n];
+  }
+
+  function times(hi, lo) {
+    var r = hi / lo;
+    if (r >= 1000) return Math.round(r).toLocaleString() + "×";
+    if (r >= 10) return r.toFixed(0) + "×";
+    return r.toFixed(1) + "×";
+  }
+
+  // Lower-case only labels that open with an article; the rest are proper
+  // nouns and "google Earth" reads as a typo.
+  function midSentence(label) {
+    return /^(A |An |The )/.test(label)
+      ? label.charAt(0).toLowerCase() + label.slice(1) : label;
+  }
+
+  function shuffle(a) {
+    for (var j = a.length - 1; j > 0; j--) {
+      var k = Math.floor(Math.random() * (j + 1));
+      var t = a[j]; a[j] = a[k]; a[k] = t;
+    }
+    return a;
+  }
+
+  // Pairs close enough to require thought, far enough to have a real answer.
+  // Below about 1.3x it is a coin flip and teaches nothing.
+  function buildQuestions() {
+    var pairs = [];
+    for (var x = 0; x < UNITS.length; x++) {
+      for (var y = x + 1; y < UNITS.length; y++) {
+        var hi = Math.max(UNITS[x].bytes, UNITS[y].bytes);
+        var lo = Math.min(UNITS[x].bytes, UNITS[y].bytes);
+        var r = hi / lo;
+        if (r >= 1.3 && r <= 400) pairs.push([UNITS[x], UNITS[y], r]);
+      }
+    }
+    shuffle(pairs);
+    // Spread the questions over as many different units as possible.
+    var used = {}, picked = [];
+    for (var pass = 1; pass <= 3 && picked.length < TOTAL; pass++) {
+      for (var p = 0; p < pairs.length && picked.length < TOTAL; p++) {
+        var a = pairs[p][0], b = pairs[p][1];
+        if ((used[a.id] || 0) >= pass || (used[b.id] || 0) >= pass) continue;
+        used[a.id] = (used[a.id] || 0) + 1;
+        used[b.id] = (used[b.id] || 0) + 1;
+        picked.push(pairs[p]);
+        pairs.splice(p, 1); p--;
+      }
+    }
+    return picked.slice(0, TOTAL);
+  }
+
+  function drawMeter() {
+    var m = el("meter"); m.innerHTML = "";
+    for (var n = 0; n < TOTAL; n++) {
+      var s = document.createElement("i");
+      if (n < i) s.className = Q[n].__right ? "hit" : "miss";
+      else if (n === i) s.className = "here";
+      m.appendChild(s);
+    }
+  }
+
+  function render() {
+    answered = false;
+    var q = Q[i], pair = shuffle([q[0], q[1]]);
+    q.__left = pair[0]; q.__rightU = pair[1];
+    drawMeter();
+    el("count").textContent = "Question " + (i + 1) + " of " + TOTAL;
+    el("tally").textContent = i ? score + " right so far" : "";
+    [[A, pair[0]], [B, pair[1]]].forEach(function (z) {
+      z[0].querySelector(".name").textContent = z[1].label;
+      // Empty until answered. opacity:0 hides it from eyes but not from a
+      // screen reader, which would read both sizes aloud with the question.
+      z[0].querySelector(".val").textContent = "";
+      z[0].className = "choice";
+      z[0].disabled = false;
+    });
+    reveal.hidden = true;
+    el("next").hidden = true;
+  }
+
+  function answer(btn, unit) {
+    if (answered) return;
+    answered = true;
+    var q = Q[i], other = (unit === q[0]) ? q[1] : q[0];
+    var right = unit.bytes > other.bytes;
+    var bigger = right ? unit : other;
+    var smaller = right ? other : unit;
+    q.__right = right;
+    if (right) score++; else missed.push(q);
+
+    A.disabled = B.disabled = true;
+    A.querySelector(".val").textContent = human(q.__left.bytes);
+    B.querySelector(".val").textContent = human(q.__rightU.bytes);
+    A.classList.add("shown"); B.classList.add("shown");
+    [[A, A === btn], [B, B === btn]].forEach(function (z) {
+      var u = (z[0] === A) ? q.__left : q.__rightU;
+      if (u === bigger) z[0].classList.add("correct");
+      else if (z[1]) z[0].classList.add("picked-wrong");
+    });
+
+    el("verdict").textContent = right ? "Correct" : "Not quite";
+    el("verdict").className = "verdict " + (right ? "yes" : "no");
+    el("explain").innerHTML =
+      "<b>" + bigger.label + "</b> holds <span class='ratio'>" + times(bigger.bytes, smaller.bytes) +
+      "</span> more than " + midSentence(smaller.label) + ". " + (bigger.note || "");
+    reveal.hidden = false;
+    el("next").hidden = false;
+    el("next").textContent = (i === TOTAL - 1) ? "See your score" : "Next";
+    el("next").focus();
+    // Announce the whole reveal, not just the verdict: the ratio and the note
+    // are the part worth hearing.
+    el("live").textContent = (right ? "Correct. " : "Not quite. ") + el("explain").textContent;
+  }
+
+  function finish() {
+    game.hidden = true; result.hidden = false;
+    el("final").textContent = score;
+    var g = score >= 9 ? "You have a real feel for these magnitudes."
+          : score >= 7 ? "The order of magnitude is mostly there."
+          : score >= 5 ? "Half of them. The gaps are wider than they look."
+          : "Worth a second run — the numbers below are the surprising ones.";
+    el("grade").textContent = g;
+
+    var list = el("missedList");
+    list.innerHTML = "";
+    missed.slice(0, 5).forEach(function (q) {
+      var hi = q[0].bytes > q[1].bytes ? q[0] : q[1];
+      var lo = q[0].bytes > q[1].bytes ? q[1] : q[0];
+      var li = document.createElement("li");
+      li.innerHTML = "<b>" + hi.label + "</b> (" + human(hi.bytes) + ") beats " +
+                     midSentence(lo.label) + " (" + human(lo.bytes) + ")";
+      list.appendChild(li);
+    });
+    el("missed").hidden = missed.length === 0;
+    count("quiz-complete-" + score);
+    result.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Move focus into the result so it is announced and so the keyboard does
+    // not fall back to the top of the document.
+    el("result").focus();
+  }
+
+  // GoatCounter events, so we learn whether anyone finishes.
+  function count(path) {
+    try {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({ path: path, title: "Quiz: " + path, event: true });
+      }
+    } catch (e) { /* analytics must never break the page */ }
+  }
+
+  function start() {
+    if (!ready) return;
+    TOTAL = 10;                      // reset, so one short round cannot stick
+    Q = buildQuestions();
+    if (Q.length < TOTAL) TOTAL = Q.length;
+    i = 0; score = 0; missed = [];
+    intro.hidden = true; result.hidden = true; game.hidden = false;
+    render();
+    count("quiz-start");
+  }
+
+  A.addEventListener("click", function () { answer(A, Q[i].__left); });
+  B.addEventListener("click", function () { answer(B, Q[i].__rightU); });
+  el("next").addEventListener("click", function () {
+    i++;
+    if (i >= TOTAL) finish(); else render();
+  });
+  el("start").addEventListener("click", start);
+  el("again").addEventListener("click", function () { start(); window.scrollTo({ top: 0 }); });
+  el("copy").addEventListener("click", function () {
+    var txt = "I scored " + score + "/" + TOTAL + " on the Logcaliper data-size quiz. " +
+              "How good is your sense of scale? https://logcaliper.app/quiz/";
+    var say = function (msg) {
+      el("copy").textContent = msg;
+      setTimeout(function () { el("copy").textContent = "Copy result"; }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () { say("Copied"); },
+                                             function () { say("Copy failed"); });
+    } else {
+      say("Copy failed");           // do not claim success when nothing happened
+    }
+    count("quiz-share");
+  });
+
+  fetch("units.json")
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      UNITS = d.units;
+      ready = true;
+      el("start").disabled = false;
+      el("start").textContent = "Start";
+    })
+    .catch(function () {
+      el("intro").innerHTML = "<h1>The quiz could not load</h1><p>Its data file did not arrive. " +
+                              "<a href='/'>Back to Logcaliper</a>.</p>";
+    });
+})();
+</script>
+
+</body>
+</html>
