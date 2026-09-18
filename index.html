@@ -50,14 +50,17 @@
   --navy:      #334F71;
   --navy-deep: #22374e;
   --navy-ink:  #16242f;
-  --accent:    #1fa2e8;
+  /* Light value chosen for 4.5:1 on both --bg (#fff, 5.5:1) and --bg-alt
+     (#f4f6f9, 5.1:1); the brighter #1fa2e8 lives in the dark block below. */
+  --accent:    #0b6f9e;
 
   --bg:        #ffffff;
   --bg-alt:    #f4f6f9;
   --surface:   #ffffff;
   --text:      #16242f;
   --text-dim:  #566373;
-  --rule:      #dfe4ea;
+  --rule:      #dfe4ea;   /* hairline dividers: decorative, exempt from 3:1 */
+  --field:     #767f8a;   /* form control boundaries: must hit 3:1 */
 
   --maxw: 1080px;
   --pad: clamp(1.25rem, 4vw, 2.5rem);
@@ -73,6 +76,8 @@
     --text:     #e7edf3;
     --text-dim: #9aa9b8;
     --rule:     #2a3a48;
+    --accent:   #1fa2e8;
+    --field:    #6b7a88;
   }
 }
 
@@ -99,7 +104,11 @@ h3 { font-size: 1.0625rem; }
 p  { margin: 0 0 1.1em; }
 .lede { font-size: clamp(1.0625rem, 2.2vw, 1.3125rem); color: var(--text-dim); }
 
-.wrap { max-width: var(--maxw); margin-inline: auto; padding-inline: var(--pad); }
+.wrap {
+  max-width: var(--maxw); margin-inline: auto;
+  padding-left: max(var(--pad), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--pad), env(safe-area-inset-right, 0px));
+}
 section { padding-block: clamp(3.5rem, 9vw, 6.5rem); }
 .alt { background: var(--bg-alt); }
 
@@ -113,7 +122,9 @@ section { padding-block: clamp(3.5rem, 9vw, 6.5rem); }
 /* ---- nav ---- */
 .nav {
   position: sticky; top: 0; z-index: 50;
+  background: var(--bg);
   background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
   backdrop-filter: saturate(180%) blur(12px);
   border-bottom: 1px solid var(--rule);
   padding-top: env(safe-area-inset-top, 0px);
@@ -184,20 +195,21 @@ td.cat { color: var(--text-dim); }
 /* ---- mentions ---- */
 .mentions { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-top: 2.5rem; }
 .mention {
-  display: block; border: 1px solid var(--rule); border-radius: var(--radius);
-  overflow: hidden; background: var(--surface); text-decoration: none; color: inherit;
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--surface); padding: 1.5rem;
 }
-.mention img { aspect-ratio: 440 / 276; object-fit: cover; }
-.mention span { display: block; padding: 1rem 1.25rem; font-size: .9375rem; font-weight: 550; }
+.mention h3 { font-size: 1rem; margin-bottom: .4rem; }
+.mention p  { color: var(--text-dim); font-size: .9375rem; margin: 0; }
 
 /* ---- form ---- */
 form { display: grid; gap: 1rem; max-width: 620px; margin-top: 2rem; }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
 label { font-size: .875rem; font-weight: 550; display: block; margin-bottom: .35rem; }
+.req { font-weight: 400; color: var(--text-dim); }
 input, textarea {
   width: 100%; font: inherit; font-size: 1rem; color: var(--text);
-  background: var(--surface); border: 1px solid var(--rule); border-radius: 9px; padding: .7rem .85rem;
+  background: var(--surface); border: 1px solid var(--field); border-radius: 9px; padding: .7rem .85rem;
 }
 input:focus-visible, textarea:focus-visible, a:focus-visible, button:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 2px;
@@ -209,7 +221,12 @@ button {
   padding: .75rem 1.6rem; justify-self: start;
 }
 button:hover { background: var(--navy-deep); }
-@media (prefers-color-scheme: dark) { button { background: var(--accent); color: #06141d; } button:hover { filter: brightness(1.1); } }
+@media (prefers-color-scheme: dark) {
+  button { background: var(--accent); color: #06141d; }
+  /* An explicit hover colour, not filter: brightness() — the filter washed the
+     dark label out to 1.65:1 against the lightened fill. */
+  button:hover { background: #4fb8ee; }
+}
 
 /* ---- footer ---- */
 footer {
@@ -240,6 +257,8 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
   </div>
 </nav>
 
+<main id="main" tabindex="-1">
+
 <header class="hero">
   <div class="wrap hero-grid">
     <div>
@@ -249,7 +268,7 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
         <a class="badge" href="https://apps.apple.com/us/app/logcaliper/id381096276">
           <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&releaseDate=1279065600" alt="Download Logcaliper on the App Store" width="190" height="63" loading="eager">
         </a>
-        <span class="free">Free. No account, no tracking of your figures.</span>
+        <span class="free">Free. No account required.</span>
       </div>
     </div>
     <div class="hero-shot">
@@ -257,8 +276,6 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
     </div>
   </div>
 </header>
-
-<main id="main">
 
 <section id="modes">
   <div class="wrap">
@@ -293,7 +310,7 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
       <div class="stat"><div class="v">10M+</div><div class="k">logs analysed</div></div>
     </div>
 
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Built-in source catalogue">
       <table>
         <caption>A sample of the built-in catalogue. Average bytes per event.</caption>
         <thead>
@@ -327,14 +344,14 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
     <h2>Mentions</h2>
     <p class="lede" style="max-width:54ch">Logcaliper is free because it is useful to people, and that is the whole return. Engineers have put it to work in their own write-ups:</p>
     <div class="mentions">
-      <a class="mention" href="images/fulls/01.jpg">
-        <img src="images/thumbs/01.jpg" alt="" width="440" height="276" loading="lazy">
-        <span>Sizing and scoping your QRadar SIEM</span>
-      </a>
-      <a class="mention" href="images/fulls/02.jpg">
-        <img src="images/thumbs/02.jpg" alt="" width="440" height="276" loading="lazy">
-        <span>What size should my Splunk license be?</span>
-      </a>
+      <article class="mention">
+        <h3>Sizing and Scoping your IBM Security QRadar SIEM Deployment</h3>
+        <p>IBM, Think 2018. Logcaliper cited as a sizing aid for QRadar capacity planning.</p>
+      </article>
+      <article class="mention">
+        <h3>What size should my Splunk license be?</h3>
+        <p>A practitioner write-up using Logcaliper to estimate daily indexing volume.</p>
+      </article>
     </div>
   </div>
 </section>
@@ -350,12 +367,12 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
           <input id="name" type="text" name="name" autocomplete="name">
         </div>
         <div>
-          <label for="email">Email</label>
+          <label for="email">Email <span class="req">(required)</span></label>
           <input id="email" type="email" name="email" autocomplete="email" required>
         </div>
       </div>
       <div>
-        <label for="message">Message</label>
+        <label for="message">Message <span class="req">(required)</span></label>
         <textarea id="message" name="message" rows="6" required></textarea>
       </div>
       <button type="submit">Send</button>
