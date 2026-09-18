@@ -1,161 +1,379 @@
-<!DOCTYPE HTML>
-<!--
-	Big Picture by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-	<head>
-		<title>Logcaliper.app</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="assets/css/main.css" />
-		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
-	</head>
-	<body class="is-preload">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-		<!-- Header -->
-			<header id="header">
-				<h1>Logcaliper: Your go-to app for data unit conversion and sizing</h1>
-				<nav>
-					<ul>
-						<!-- <li><a href="#intro">Intro</a></li> -->
-						<li><a href="#one">Conversion</a></li>
-						<li><a href="#two">Estimation</a></li>
-						<li><a href="#three">Comparison</a></li>
-						<li><a href="#four">Vendors</a></li>
-						<li><a href="#work">Mentions</a></li>
-						<li><a href="#contact">Feedback</a></li>
-					</ul>
-				</nav>
-			</header>
+<title>Logcaliper — size your log management and SIEM deployment</title>
+<meta name="description" content="A free iOS calculator for log and SIEM capacity planning. Pick your sources, get the volume, storage and cost. 31 vendor event sizes built in.">
+<link rel="canonical" href="https://logcaliper.app/">
 
-		<!-- Intro -->
-			<section id="intro" class="main style1 dark fullscreen">
-				<div class="content">
-					<header>
-						<h2>Logcaliper</h2>
-					</header>
-					<p>An App to accurately estimate </br>the <strong>size and scope </strong> <br />of your data management solution</br>available for free on the App Store</a><br/></p>
-					<a href="https://apps.apple.com/us/app/logcaliper/id381096276?itsct=apps_box_badge&amp;itscg=30200" style="display: inline-block; overflow: hidden; border-radius: 13px; width: 250px; height: 83px;"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1279065600&h=bfd6125975e8129ed5957e205d862582" alt="Download on the App Store" style="border-radius: 13px; width: 250px; height: 83px;"></a>
-					<footer>
-						<a href="#one" class="button style2 down">More</a>
-					</footer>
-				</div>
-			</section>
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://logcaliper.app/">
+<meta property="og:site_name" content="Logcaliper">
+<meta property="og:title" content="Logcaliper — size your log management and SIEM deployment">
+<meta property="og:description" content="Pick your sources, get the volume, storage and cost. 31 vendor event sizes built in. Free on the App Store.">
+<meta property="og:image" content="https://logcaliper.app/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Logcaliper running on an iPhone, showing a data size comparison.">
 
-		<!-- One -->
-			<section id="one" class="main style2 right fullscreen">
-				<div class="content box style2">
-					<header>
-						<h2>Convert various data sizes and units</h2>
-					</header>
-					<p>Are you tired of trying to wrap your head around confusing data size and rate units? Well, fear not! This app is here to save the day (or at least make your life a little easier). With its ability to easily convert between various units (like message rates per second, hour, day, month, or year, and bits and bytes), it's the superhero your data needs. Plus, it's got the added bonus of supporting both decimal and binary calculations. So go ahead, impress your friends and coworkers with your newfound data conversion skills!</p>
-				</div>
-				<a href="#two" class="button style2 down anchored">Next</a>
-			</section>
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Logcaliper — size your log management and SIEM deployment">
+<meta name="twitter:description" content="Pick your sources, get the volume, storage and cost. 31 vendor event sizes built in. Free on the App Store.">
+<meta name="twitter:image" content="https://logcaliper.app/images/og.png">
+<meta name="twitter:creator" content="@cbriguet">
 
-		<!-- Two -->
-			<section id="two" class="main style2 left fullscreen">
-				<div class="content box style2">
-					<header>
-						<h2>Sizing and scoping of log management and SIEM solutions</h2>
-					</header>
-					<p>Have you ever felt overwhelmed by the sheer volume of log data and security-related events? Well, there's no need to feel that way anymore! This app is here to help you determine the perfect size and scope for your log management and SIEM system. No more guessing how much data to collect or how many devices to monitor - we've got you covered. Just relax and let it handle the task of figuring out the resources you need to effectively manage and store all that valuable data. So go ahead, take a load off and let it take care of the hard work for you!</p>
-				</div>
-				<a href="#three" class="button style2 down anchored">Next</a>
-			</section>
+<meta name="theme-color" content="#335071">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23335071'/%3E%3Cpath d='M16 6 L23 25 M16 6 L9 25 M11.5 19 h9' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="images/app/compare-light.png">
 
-		<!-- Three -->
-			<section id="three" class="main style2 right fullscreen">
-				<div class="content box style2">
-					<header>
-						<h2>Data size comparison</h2>
-					</header>
-					<p>Did you know that a single gram of DNA can store the equivalent of an astonishing 9 million Blu-ray discs? Imagine fitting 4,702 years of 4K YouTube videos into such a minuscule space, or storing the entire content of Wikipedia 10 million times over. Whether you're a student or simply curious, the Logcaliper Compare mode makes learning about data sizes fun and intuitive. Compare anything from a simple Word document to the massive storage potential of DNA! From comparing everyday items like photos and songs to exploring futuristic storage solutions like DNA data storage, this feature illuminates the fascinating world of data.</p>
-				</div>
-				<a href="#four" class="button style2 down anchored">Next</a>
-			</section>
-		
-		<!-- Four -->
-		<section id="four" class="main style2 right fullscreen">
-			<div class="content box style2">
-				<header>
-					<h2>Predefined average event size</h2>
-				</header>
-				<p>The average size of each event is important to consider when determining the appropriate size for your log management and SIEM solutions. The format and length of the text message generated by each event can vary greatly, ranging from 200 bytes for a status message from a Linux server to 1,800 bytes for an advanced security log entry on a Windows Domain Controller and 3,000 bytes for a greeting from a Checkpoint system. Logcaliper contains average event sizes for a wide range of security-related vendors. So whether you're dealing with Windows Active Directory or managed switches, you'll be able to accurately size your log management and SIEM solutions.</p>
-			</div>
-			<a href="#work" class="button style2 down anchored">Next</a>
-		</section>
-		<!-- Work -->
-			<section id="work" class="main style3 primary">
-				<div class="content">
-					<header>
-						<h2>Mentions</h2>
-						<p>I am offering this app for free to the community as a way to give back. My reward is the satisfaction of knowing that it is useful to people. IT professionals from all around the globe have been utilizing Logcaliper. Here are a few notable mentions:</p>
-					</header>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Logcaliper",
+  "operatingSystem": "iOS 15.0 or later",
+  "applicationCategory": "UtilitiesApplication",
+  "url": "https://logcaliper.app/",
+  "downloadUrl": "https://apps.apple.com/us/app/logcaliper/id381096276",
+  "description": "A calculator for log management and SIEM capacity planning: converts data sizes and rates, estimates volume, storage and cost from a list of sources, and compares data sizes.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Christophe Briguet" }
+}
+</script>
 
-					<!-- Gallery  -->
-						<div class="gallery">
-							<article class="from-left">
-								<a href="images/fulls/01.jpg" class="image fit"><img src="images/thumbs/01.jpg" title="Sizing and Scoping your QRadar SIEM" alt="" /></a>
-							</article>
-							<article class="from-right">
-								<a href="images/fulls/02.jpg" class="image fit"><img src="images/thumbs/02.jpg" title="What size should my Splunk license be?" alt="" /></a>
-							</article>
-						</div>
+<style>
+:root {
+  --navy:      #335071;
+  --navy-deep: #22374e;
+  --navy-ink:  #16242f;
+  --accent:    #1fa2e8;
 
-				</div>
-			</section>
+  --bg:        #ffffff;
+  --bg-alt:    #f4f6f9;
+  --surface:   #ffffff;
+  --text:      #16242f;
+  --text-dim:  #566373;
+  --rule:      #dfe4ea;
 
-		<!-- Contact -->
-			<section id="contact" class="main style3 secondary">
-				<div class="content">
-					<header>
-						<h2>Any suggestion?</h2>
-						<p>I encourage you to share your feedback with me so I can improve it. Please use the form below to share your thoughts and ideas.</p>
-					</header>
-					<div class="box">
-						<form method="post" action="https://formspree.io/f/mwkjeojk">
-							<div class="fields">
-								<div class="field half"><input type="text" name="name" placeholder="Name" /></div>
-								<div class="field half"><input type="email" name="email" placeholder="Email" /></div>
-								<div class="field"><textarea name="message" placeholder="Message" rows="6"></textarea></div>
-							</div>
-							<ul class="actions special">
-								<li><input type="submit" value="Send Message" /></li>
-							</ul>
-						</form>
-					</div>
-				</div>
-			</section>
+  --maxw: 1080px;
+  --pad: clamp(1.25rem, 4vw, 2.5rem);
+  --radius: 14px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:       #10181f;
+    --bg-alt:   #16222c;
+    --surface:  #1a2731;
+    --text:     #e7edf3;
+    --text-dim: #9aa9b8;
+    --rule:     #2a3a48;
+  }
+}
 
-		<!-- Footer -->
-			<footer id="footer">
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
-				<!-- Icons -->
-					<ul class="icons">
-						<li><a href="https://twitter.com/cbriguet" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
-						<li><a href="https://www.linkedin.com/in/cbriguet/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
-						
-					</ul>
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
 
-				<!-- Menu -->
-					<ul class="menu">
-						<li>&copy; Logcaliper</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
-					</ul>
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+h1, h2, h3 { line-height: 1.2; letter-spacing: -0.02em; margin: 0 0 .5em; font-weight: 650; }
+h1 { font-size: clamp(2rem, 5.5vw, 3.25rem); }
+h2 { font-size: clamp(1.5rem, 3.4vw, 2.125rem); }
+h3 { font-size: 1.0625rem; }
+p  { margin: 0 0 1.1em; }
+.lede { font-size: clamp(1.0625rem, 2.2vw, 1.3125rem); color: var(--text-dim); }
 
-			</footer>
+.wrap { max-width: var(--maxw); margin-inline: auto; padding-inline: var(--pad); }
+section { padding-block: clamp(3.5rem, 9vw, 6.5rem); }
+.alt { background: var(--bg-alt); }
 
-		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.poptrox.min.js"></script>
-			<script src="assets/js/jquery.scrolly.min.js"></script>
-			<script src="assets/js/jquery.scrollex.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
+/* ---- skip link ---- */
+.skip {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--navy); color: #fff; padding: .75rem 1.25rem; border-radius: 0 0 8px 0;
+}
+.skip:focus { left: 0; }
 
-	</body>
+/* ---- nav ---- */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--rule);
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.nav .wrap { display: flex; align-items: center; gap: 1.5rem; min-height: 58px; }
+.brand { display: flex; align-items: center; gap: .55rem; font-weight: 650; color: var(--text); text-decoration: none; letter-spacing: -.02em; }
+.brand svg { width: 26px; height: 26px; flex: none; }
+.nav ul { display: flex; gap: 1.4rem; list-style: none; margin: 0 0 0 auto; padding: 0; font-size: .9375rem; }
+.nav a:not(.brand) { color: var(--text-dim); text-decoration: none; }
+.nav a:not(.brand):hover { color: var(--text); }
+@media (max-width: 720px) { .nav ul { display: none; } }
+
+/* ---- hero ---- */
+.hero {
+  background: linear-gradient(165deg, var(--navy) 0%, var(--navy-deep) 55%, var(--navy-ink) 100%);
+  color: #fff;
+  padding-block: clamp(3rem, 8vw, 5.5rem);
+  overflow: hidden;
+}
+.hero h1 { color: #fff; max-width: 15ch; }
+.hero .lede { color: #c3d3e2; max-width: 46ch; }
+.hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+@media (max-width: 860px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-shot { max-width: 260px; margin-inline: auto; }
+  .hero-shot img { max-width: 100%; }
+}
+
+.hero-shot img {
+  border-radius: 34px;
+  box-shadow: 0 30px 60px -12px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.09);
+  margin-inline: auto;
+  width: 100%;
+  max-width: 300px;
+}
+
+.cta { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-top: 1.75rem; }
+.badge img { width: 190px; }
+.free { font-size: .875rem; color: #9fb6cb; }
+
+/* ---- modes ---- */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem; margin-top: 2.5rem; }
+.card {
+  background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 1.6rem 1.5rem;
+}
+.card h3 { display: flex; align-items: center; gap: .6rem; margin-bottom: .4rem; }
+.card .n {
+  font: 600 .75rem/1 var(--mono); letter-spacing: .06em;
+  color: var(--accent); border: 1px solid currentColor; border-radius: 5px; padding: .3rem .4rem;
+}
+.card p { color: var(--text-dim); margin: 0; font-size: .9688rem; }
+
+/* ---- table ---- */
+.table-wrap { overflow-x: auto; margin-top: 2rem; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .9375rem; }
+caption { text-align: left; padding: 1rem 1.25rem; color: var(--text-dim); font-size: .875rem; border-bottom: 1px solid var(--rule); }
+th, td { text-align: left; padding: .7rem 1.25rem; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+th { font-weight: 600; font-size: .8125rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-dim); }
+td.num { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+td.cat { color: var(--text-dim); }
+
+.stats { display: flex; flex-wrap: wrap; gap: 2.5rem; margin-top: 2.5rem; }
+.stat .v { font-size: 2.25rem; font-weight: 650; letter-spacing: -.03em; line-height: 1; }
+.stat .k { color: var(--text-dim); font-size: .875rem; margin-top: .35rem; }
+
+/* ---- mentions ---- */
+.mentions { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-top: 2.5rem; }
+.mention {
+  display: block; border: 1px solid var(--rule); border-radius: var(--radius);
+  overflow: hidden; background: var(--surface); text-decoration: none; color: inherit;
+}
+.mention img { aspect-ratio: 440 / 276; object-fit: cover; }
+.mention span { display: block; padding: 1rem 1.25rem; font-size: .9375rem; font-weight: 550; }
+
+/* ---- form ---- */
+form { display: grid; gap: 1rem; max-width: 620px; margin-top: 2rem; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
+label { font-size: .875rem; font-weight: 550; display: block; margin-bottom: .35rem; }
+input, textarea {
+  width: 100%; font: inherit; font-size: 1rem; color: var(--text);
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 9px; padding: .7rem .85rem;
+}
+input:focus-visible, textarea:focus-visible, a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+textarea { resize: vertical; min-height: 130px; }
+button {
+  font: inherit; font-weight: 600; cursor: pointer;
+  background: var(--navy); color: #fff; border: 0; border-radius: 9px;
+  padding: .75rem 1.6rem; justify-self: start;
+}
+button:hover { background: var(--navy-deep); }
+@media (prefers-color-scheme: dark) { button { background: var(--accent); color: #06141d; } button:hover { filter: brightness(1.1); } }
+
+/* ---- footer ---- */
+footer {
+  border-top: 1px solid var(--rule); padding-block: 2.5rem;
+  padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
+  color: var(--text-dim); font-size: .875rem;
+}
+footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; }
+footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; padding: 0; }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="/">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#335071"/><path d="M16 6 L23 25 M16 6 L9 25 M11.5 19 h9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+      Logcaliper
+    </a>
+    <ul>
+      <li><a href="#modes">What it does</a></li>
+      <li><a href="#sources">Sources</a></li>
+      <li><a href="#mentions">Mentions</a></li>
+      <li><a href="#feedback">Feedback</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1>Size your log deployment before you buy it.</h1>
+      <p class="lede">Logcaliper turns a list of sources into the numbers you have to plan for: events per second, gigabytes per day, storage at retention, and what it costs.</p>
+      <div class="cta">
+        <a class="badge" href="https://apps.apple.com/us/app/logcaliper/id381096276">
+          <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&releaseDate=1279065600" alt="Download Logcaliper on the App Store" width="190" height="63" loading="eager">
+        </a>
+        <span class="free">Free. No account, no tracking of your figures.</span>
+      </div>
+    </div>
+    <div class="hero-shot">
+      <picture>
+        <source srcset="images/app/compare-dark.png" media="(prefers-color-scheme: dark)">
+        <img src="images/app/compare-light.png" alt="Logcaliper on iPhone, comparing one page of text against another unit of data." width="300" height="650">
+      </picture>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<section id="modes">
+  <div class="wrap">
+    <h2>Three calculators, one tool</h2>
+    <p class="lede" style="max-width:56ch">Capacity planning is arithmetic done under pressure, usually in a meeting. Logcaliper does the arithmetic so the conversation can be about the answer.</p>
+
+    <div class="cards">
+      <article class="card">
+        <h3><span class="n">01</span> Conversion</h3>
+        <p>Move between message rates and volumes — per second, hour, day, month or year; bits and bytes; decimal and binary. The unit confusion that causes sizing errors, removed.</p>
+      </article>
+      <article class="card">
+        <h3><span class="n">02</span> Estimation</h3>
+        <p>Build a list of the sources you will actually collect from, set compression, indexing and retention, and get the daily volume, the storage it needs and the cost.</p>
+      </article>
+      <article class="card">
+        <h3><span class="n">03</span> Comparison</h3>
+        <p>Put a number in human terms. A gram of DNA holds about nine million Blu-rays; a petabyte is so many years of 4K video. Useful for the slide, and for intuition.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="sources" class="alt">
+  <div class="wrap">
+    <h2>Event sizes that come from the field</h2>
+    <p class="lede" style="max-width:58ch">The average event size is what sizing lives or dies on, and it varies by more than a factor of ten between sources. Logcaliper ships measured averages so you are not guessing.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="v">31</div><div class="k">sources built in</div></div>
+      <div class="stat"><div class="v">15</div><div class="k">categories</div></div>
+      <div class="stat"><div class="v">10M+</div><div class="k">logs analysed</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <caption>A sample of the built-in catalogue. Average bytes per event.</caption>
+        <thead>
+          <tr><th scope="col">Source</th><th scope="col">Category</th><th scope="col" style="text-align:right">Avg bytes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Apache Kafka</td><td class="cat">Application</td><td class="num">2,000</td></tr>
+          <tr><td>Oracle Database</td><td class="cat">Database</td><td class="num">1,030</td></tr>
+          <tr><td>Stellar Cyber Interflow</td><td class="cat">SIEM</td><td class="num">1,000</td></tr>
+          <tr><td>Cisco ISE</td><td class="cat">Servers</td><td class="num">970</td></tr>
+          <tr><td>Cisco Netflow v9</td><td class="cat">Network flows</td><td class="num">814</td></tr>
+          <tr><td>Windows Server 2016</td><td class="cat">Windows servers</td><td class="num">800</td></tr>
+          <tr><td>Crowdstrike</td><td class="cat">Managed endpoint</td><td class="num">540</td></tr>
+          <tr><td>Active Directory</td><td class="cat">Application</td><td class="num">300</td></tr>
+          <tr><td>Apache Hadoop</td><td class="cat">Distributed system</td><td class="num">192</td></tr>
+          <tr><td>Android</td><td class="cat">Mobile OS</td><td class="num">138</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:1.5rem;color:var(--text-dim);font-size:.9375rem">
+      Collecting from something that is not in the list? <a href="#feedback">Send a sample</a> and it can go in the next release.
+    </p>
+  </div>
+</section>
+
+<section id="mentions">
+  <div class="wrap">
+    <h2>Mentions</h2>
+    <p class="lede" style="max-width:54ch">Logcaliper is free because it is useful to people, and that is the whole return. Engineers have put it to work in their own write-ups:</p>
+    <div class="mentions">
+      <a class="mention" href="images/fulls/01.jpg">
+        <img src="images/thumbs/01.jpg" alt="" width="440" height="276" loading="lazy">
+        <span>Sizing and scoping your QRadar SIEM</span>
+      </a>
+      <a class="mention" href="images/fulls/02.jpg">
+        <img src="images/thumbs/02.jpg" alt="" width="440" height="276" loading="lazy">
+        <span>What size should my Splunk license be?</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="feedback" class="alt">
+  <div class="wrap">
+    <h2>Tell me what is missing</h2>
+    <p class="lede" style="max-width:52ch">A source you collect from that is not in the catalogue, a number that does not match what you measure, a mode that should exist. All of it is welcome.</p>
+    <form method="post" action="https://formspree.io/f/mwkjeojk">
+      <div class="row">
+        <div>
+          <label for="name">Name</label>
+          <input id="name" type="text" name="name" autocomplete="name">
+        </div>
+        <div>
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" autocomplete="email" required>
+        </div>
+      </div>
+      <div>
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="6" required></textarea>
+      </div>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; 2026 Christophe Briguet</span>
+    <ul>
+      <li><a href="https://apps.apple.com/us/app/logcaliper/id381096276">App Store</a></li>
+      <li><a href="https://www.linkedin.com/in/cbriguet/">LinkedIn</a></li>
+      <li><a href="https://twitter.com/cbriguet">X</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
 </html>
