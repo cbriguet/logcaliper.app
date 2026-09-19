@@ -363,6 +363,22 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     return Math.floor((utc - EPOCH) / 86400000) + 1;
   }
 
+  // Everyone gets the same ten on the same UTC day, which is the only way a
+  // shared "#262 — 7/10" means anything. The cost is that the changeover is
+  // midnight UTC, not midnight where you are: in California that is five in
+  // the afternoon, so the same number covers yesterday evening and this
+  // morning. Saying "midnight UTC" leaves the reader to do that sum. Say it
+  // in their own clock instead.
+  function nextRolloverLocal() {
+    var now = new Date();
+    var next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+    try {
+      return next.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    } catch (e) {
+      return null;
+    }
+  }
+
   // mulberry32: small, fast, and deterministic, so everyone playing on the
   // same day is handed the same ten questions in the same order.
   function seeded(seed) {
@@ -784,6 +800,11 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
       // sat on "Loading..." forever once the data had actually arrived.
       el("start").textContent = had ? "See today's result" : "Start";
       el("seen").hidden = !had;
+      if (had) {
+        var at = nextRolloverLocal();
+        el("seen").textContent = "You have already played today. A new ten arrives at " +
+          (at ? at + " your time." : "midnight UTC.");
+      }
       el("start").disabled = false;
     })
     .catch(function () {
