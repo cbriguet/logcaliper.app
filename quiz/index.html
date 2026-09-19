@@ -162,6 +162,25 @@ button.go:hover { background: var(--navy-deep); }
   button.go:hover { background: #4fb8ee; }
 }
 
+/* ---- scale bars: where the two sit on the whole range ---- */
+.scale { margin-top: 1rem; }
+.bar { display: grid; grid-template-columns: 1fr; gap: .3rem; margin-bottom: .7rem; }
+.bar .top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+            font-size: .875rem; }
+.bar .who { font-weight: 600; }
+.bar .amt { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--text-dim); }
+.bar .track { height: 10px; background: var(--rule); border-radius: 5px; overflow: hidden; }
+.bar .fill { height: 100%; width: 0; border-radius: 5px; background: var(--text-dim);
+             transition: width .55s cubic-bezier(.2,.7,.3,1); }
+.bar.win .fill { background: var(--accent); }
+.bar.win .who { color: var(--text); }
+.scale-foot { font-size: .8125rem; color: var(--text-dim); margin: .35rem 0 0; }
+@media (prefers-reduced-motion: reduce) { .bar .fill { transition: none; } }
+
+/* ---- the shareable grid ---- */
+.grid { font-size: 1.5rem; letter-spacing: .12em; line-height: 1.35; margin: 1rem 0 1.5rem;
+        word-break: break-all; }
+
 /* ---- result ---- */
 .score { font-size: clamp(3rem, 12vw, 4.5rem); font-weight: 700; letter-spacing: -.04em; line-height: 1; }
 .score span { font-size: .4em; color: var(--text-dim); font-weight: 500; }
@@ -219,6 +238,11 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
       <div class="reveal" id="reveal" hidden>
         <p class="verdict" id="verdict"></p>
         <p id="explain"></p>
+        <div class="scale" id="scale" aria-hidden="true">
+          <div class="bar" id="barHi"><div class="top"><span class="who"></span><span class="amt"></span></div><div class="track"><div class="fill"></div></div></div>
+          <div class="bar" id="barLo"><div class="top"><span class="who"></span><span class="amt"></span></div><div class="track"><div class="fill"></div></div></div>
+          <p class="scale-foot" id="scaleFoot"></p>
+        </div>
       </div>
       <button class="go" id="next" hidden>Next</button>
       <p aria-live="polite" class="sr" id="live" style="position:absolute;left:-9999px"></p>
@@ -229,9 +253,10 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
       <p class="count">Your score</p>
       <p class="score"><span id="final">0</span><span> / 10</span></p>
       <p class="verdict-line" id="grade"></p>
+      <p class="grid" id="grid" aria-hidden="true"></p>
       <div class="actions">
         <button class="go" id="again" style="margin-top:0">Play again</button>
-        <button class="go" id="copy" style="margin-top:0;background:transparent;color:var(--accent);border:1px solid var(--field)">Copy result</button>
+        <button class="go" id="copy" style="margin-top:0;background:transparent;color:var(--accent);border:1px solid var(--field)">Share result</button>
       </div>
       <div class="missed" id="missed" hidden>
         <h2>What you missed</h2>
@@ -285,7 +310,7 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
   // Lower-case only labels that open with an article; the rest are proper
   // nouns and "google Earth" reads as a typo.
   function midSentence(label) {
-    return /^(A |An |The )/.test(label)
+    return /^(A |An |The |One )/.test(label)
       ? label.charAt(0).toLowerCase() + label.slice(1) : label;
   }
 
@@ -323,6 +348,27 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
       }
     }
     return picked.slice(0, TOTAL);
+  }
+
+  // The bars show the two against EACH OTHER, linearly: the winner fills the
+  // track, the loser takes its true fraction. A first attempt placed them
+  // logarithmically on the catalogue's whole range, which was useless here --
+  // across seventeen orders of magnitude a 2.2x gap came out as 53% vs 50.6%,
+  // two bars that looked the same. Linear makes a 300x gap a sliver, which is
+  // exactly the thing worth feeling.
+  function drawScale(bigger, smaller) {
+    var frac = smaller.bytes / bigger.bytes;
+    [[el("barHi"), bigger, 1, true], [el("barLo"), smaller, Math.max(frac, 0.006), false]].forEach(function (z) {
+      var bar = z[0], u = z[1];
+      bar.className = "bar" + (z[3] ? " win" : "");
+      bar.querySelector(".who").textContent = u.label;
+      bar.querySelector(".amt").textContent = human(u.bytes);
+      var fill = bar.querySelector(".fill");
+      fill.style.width = "0";
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { fill.style.width = (z[2] * 100).toFixed(2) + "%"; });
+      });
+    });
   }
 
   function drawMeter() {
@@ -379,6 +425,12 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     el("explain").innerHTML =
       "<b>" + bigger.label + "</b> holds <span class='ratio'>" + times(bigger.bytes, smaller.bytes) +
       "</span> more than " + midSentence(smaller.label) + ". " + (bigger.note || "");
+    drawScale(bigger, smaller);
+    el("scaleFoot").textContent = "To scale: " + midSentence(smaller.label) + " is " +
+      (smaller.bytes / bigger.bytes < 0.01
+        ? "under a hundredth"
+        : "about " + Math.round(100 * smaller.bytes / bigger.bytes) + "%") +
+      " of " + midSentence(bigger.label) + ".";
     reveal.hidden = false;
     el("next").hidden = false;
     el("next").textContent = (i === TOTAL - 1) ? "See your score" : "Next";
@@ -407,6 +459,11 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
                      midSentence(lo.label) + " (" + human(lo.bytes) + ")";
       list.appendChild(li);
     });
+    // The grid is what people actually paste: a score you can read at a glance
+    // without spoiling a single question.
+    var grid = Q.slice(0, TOTAL).map(function (q) { return q.__right ? "\uD83D\uDFE9" : "\uD83D\uDFE5"; });
+    el("grid").textContent = grid.join("");
+
     el("missed").hidden = missed.length === 0;
     count("quiz-complete-" + score);
     result.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -444,19 +501,27 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
   el("start").addEventListener("click", start);
   el("again").addEventListener("click", function () { start(); window.scrollTo({ top: 0 }); });
   el("copy").addEventListener("click", function () {
-    var txt = "I scored " + score + "/" + TOTAL + " on the Logcaliper data-size quiz. " +
+    var txt = "Data size quiz \u2014 " + score + "/" + TOTAL + "\n" +
+              el("grid").textContent + "\n" +
               "How good is your sense of scale? https://logcaliper.app/quiz/";
     var say = function (msg) {
       el("copy").textContent = msg;
-      setTimeout(function () { el("copy").textContent = "Copy result"; }, 1800);
+      setTimeout(function () { el("copy").textContent = "Share result"; }, 1800);
     };
+    count("quiz-share");
+    // A real share sheet on mobile, clipboard everywhere else. A cancelled
+    // share is not a failure, so it says nothing.
+    if (navigator.share) {
+      navigator.share({ text: txt }).then(function () { say("Shared"); },
+                                          function () { /* dismissed */ });
+      return;
+    }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(txt).then(function () { say("Copied"); },
-                                             function () { say("Copy failed"); });
+                                              function () { say("Copy failed"); });
     } else {
-      say("Copy failed");           // do not claim success when nothing happened
+      say("Copy failed");
     }
-    count("quiz-share");
   });
 
   fetch("units.json")
