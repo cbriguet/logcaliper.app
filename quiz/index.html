@@ -487,7 +487,11 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     el("live").textContent = (right ? "Correct. " : "Not quite. ") + el("explain").textContent;
   }
 
-  var SHARE_URL = "https://logcaliper.app/quiz/";
+  // Shares point at a per-score page, not the quiz itself: Open Graph is read
+  // by crawlers before any JavaScript runs, so a query string cannot change the
+  // preview card but a separate page can. LinkedIn in particular ignores
+  // prefilled text entirely and renders whatever the URL's card says.
+  function shareURL() { return "https://logcaliper.app/quiz/s/" + score + "/"; }
 
   function shareText() {
     return "Data size quiz \u2014 " + score + "/" + TOTAL + "\n" +
@@ -524,9 +528,9 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     // Prefill the social links now that the score exists. X takes text; LinkedIn
     // strips it and renders the page's Open Graph card, so it only gets the URL.
     el("onX").href = "https://x.com/intent/tweet?text=" +
-      encodeURIComponent(shareText() + "\n" + SHARE_URL);
+      encodeURIComponent(shareText() + "\n" + shareURL());
     el("onLi").href = "https://www.linkedin.com/sharing/share-offsite/?url=" +
-      encodeURIComponent(SHARE_URL);
+      encodeURIComponent(shareURL());
 
     el("missed").hidden = missed.length === 0;
     count("quiz-complete-" + score);
@@ -567,7 +571,7 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
   el("start").addEventListener("click", start);
   el("again").addEventListener("click", function () { start(); window.scrollTo({ top: 0 }); });
   el("copy").addEventListener("click", function () {
-    var txt = shareText() + " " + SHARE_URL;
+    var txt = shareText() + " " + shareURL();
     var say = function (msg) {
       el("copy").textContent = msg;
       setTimeout(function () { el("copy").textContent = "Share result"; }, 1800);
