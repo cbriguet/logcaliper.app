@@ -133,15 +133,16 @@ main { padding-block: clamp(2rem, 6vw, 3.5rem); }
   padding: 1.35rem 1.25rem; min-height: 120px;
   display: flex; flex-direction: column; justify-content: space-between; gap: .75rem;
 }
-/* The source art is mostly black line work on a white ground. Keying the
-   ground out removes the stray square, but then the art disappears against a
-   dark theme — so the tile comes back only where it is needed, as a rounded
-   chip rather than a raw rectangle. */
+/* The source art is mostly black line work on a keyed-out ground. On a dark
+   theme it would vanish, and backing it with a pale tile only traded the stray
+   square for a rounded one. Inverting the art instead makes it white line work
+   on the card itself, so there is no tile at all. The hue-rotate keeps the few
+   coloured marks near their own hue rather than flipping them to a complement. */
 .choice .pic { width: 52px; height: 52px; object-fit: contain; flex: none;
                border-radius: 10px; padding: 4px; background: transparent; }
 @media (prefers-color-scheme: dark) {
-  .choice .pic { background: #eef2f6; }
-  .bar .who img { background: #eef2f6; }
+  .choice .pic,
+  .bar .who img { filter: invert(1) hue-rotate(180deg); }
 }
 .choice .head { display: flex; align-items: center; gap: .85rem; }
 .choice:hover:not(:disabled) { border-color: var(--accent); }
