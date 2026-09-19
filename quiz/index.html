@@ -133,6 +133,8 @@ main { padding-block: clamp(2rem, 6vw, 3.5rem); }
   padding: 1.35rem 1.25rem; min-height: 120px;
   display: flex; flex-direction: column; justify-content: space-between; gap: .75rem;
 }
+.choice .pic { width: 52px; height: 52px; object-fit: contain; margin-bottom: .15rem; }
+.choice .head { display: flex; align-items: center; gap: .85rem; }
 .choice:hover:not(:disabled) { border-color: var(--accent); }
 .choice:disabled { cursor: default; }
 .choice .val {
@@ -167,7 +169,8 @@ button.go:hover { background: var(--navy-deep); }
 .bar { display: grid; grid-template-columns: 1fr; gap: .3rem; margin-bottom: .7rem; }
 .bar .top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
             font-size: .875rem; }
-.bar .who { font-weight: 600; }
+.bar .who { font-weight: 600; display: flex; align-items: center; gap: .5rem; }
+.bar .who img { width: 22px; height: 22px; object-fit: contain; flex: none; }
 .bar .amt { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--text-dim); }
 .bar .track { height: 10px; background: var(--rule); border-radius: 5px; overflow: hidden; }
 .bar .fill { height: 100%; width: 0; border-radius: 5px; background: var(--text-dim);
@@ -232,15 +235,15 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
       <p class="count" id="count"></p>
       <h1 id="prompt">Which holds more data?</h1>
       <div class="choices">
-        <button class="choice" id="a" type="button"><span class="name"></span><span class="val"></span></button>
-        <button class="choice" id="b" type="button"><span class="name"></span><span class="val"></span></button>
+        <button class="choice" id="a" type="button"><span class="head"><img class="pic" alt="" src="" hidden><span class="name"></span></span><span class="val"></span></button>
+        <button class="choice" id="b" type="button"><span class="head"><img class="pic" alt="" src="" hidden><span class="name"></span></span><span class="val"></span></button>
       </div>
       <div class="reveal" id="reveal" hidden>
         <p class="verdict" id="verdict"></p>
         <p id="explain"></p>
         <div class="scale" id="scale" aria-hidden="true">
-          <div class="bar" id="barHi"><div class="top"><span class="who"></span><span class="amt"></span></div><div class="track"><div class="fill"></div></div></div>
-          <div class="bar" id="barLo"><div class="top"><span class="who"></span><span class="amt"></span></div><div class="track"><div class="fill"></div></div></div>
+          <div class="bar" id="barHi"><div class="top"><span class="who"><img alt="" src="" hidden><span></span></span><span class="amt"></span></div><div class="track"><div class="fill"></div></div></div>
+          <div class="bar" id="barLo"><div class="top"><span class="who"><img alt="" src="" hidden><span></span></span><span class="amt"></span></div><div class="track"><div class="fill"></div></div></div>
           <p class="scale-foot" id="scaleFoot"></p>
         </div>
       </div>
@@ -356,12 +359,26 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
   // across seventeen orders of magnitude a 2.2x gap came out as 53% vs 50.6%,
   // two bars that looked the same. Linear makes a 300x gap a sliver, which is
   // exactly the thing worth feeling.
+  // Icons are decorative: the label sits right beside them, so alt stays empty.
+  // A missing file hides the element rather than showing a broken image.
+  function setIcon(img, unit) {
+    if (!img) return;
+    if (!unit || !unit.id) { img.hidden = true; return; }
+    // The element has to stay laid out or it is never fetched: a display:none
+    // image is not loaded, so pre-hiding it and waiting for onload deadlocks.
+    // It is shown optimistically and hidden only if the file is missing.
+    img.onerror = function () { img.hidden = true; };
+    img.hidden = false;
+    img.src = "icons/" + unit.id + ".png";
+  }
+
   function drawScale(bigger, smaller) {
     var frac = smaller.bytes / bigger.bytes;
     [[el("barHi"), bigger, 1, true], [el("barLo"), smaller, Math.max(frac, 0.006), false]].forEach(function (z) {
       var bar = z[0], u = z[1];
       bar.className = "bar" + (z[3] ? " win" : "");
-      bar.querySelector(".who").textContent = u.label;
+      setIcon(bar.querySelector(".who img"), u);
+      bar.querySelector(".who span").textContent = u.label;
       bar.querySelector(".amt").textContent = human(u.bytes);
       var fill = bar.querySelector(".fill");
       fill.style.width = "0";
@@ -390,6 +407,7 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     el("tally").textContent = i ? score + " right so far" : "";
     [[A, pair[0]], [B, pair[1]]].forEach(function (z) {
       z[0].querySelector(".name").textContent = z[1].label;
+      setIcon(z[0].querySelector(".pic"), z[1]);
       // Empty until answered. opacity:0 hides it from eyes but not from a
       // screen reader, which would read both sizes aloud with the question.
       z[0].querySelector(".val").textContent = "";
