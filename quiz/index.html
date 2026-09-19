@@ -181,20 +181,39 @@ button.go:hover { background: var(--navy-deep); }
 @media (prefers-reduced-motion: reduce) { .bar .fill { transition: none; } }
 
 /* ---- the shareable grid ---- */
-.grid { font-size: 1.5rem; letter-spacing: .12em; line-height: 1.35; margin: 1rem 0 1.5rem;
+.grid { font-size: 1.375rem; letter-spacing: .1em; line-height: 1.3; margin: 1.1rem 0 0;
         word-break: break-all; }
 
 /* ---- result ---- */
-.score { font-size: clamp(3rem, 12vw, 4.5rem); font-weight: 700; letter-spacing: -.04em; line-height: 1; }
-.score span { font-size: .4em; color: var(--text-dim); font-weight: 500; }
-.verdict-line { font-size: 1.1875rem; margin: .75rem 0 1.5rem; }
-.missed { border-top: 1px solid var(--rule); margin-top: 2rem; padding-top: 1.5rem; }
+/* The score is a <p>, so it inherited p{margin:0 0 1.1em} and the browser's
+   1em top margin. At 72px that was 144px of dead space around one line. */
+.card {
+  background: var(--bg-alt); border: 1px solid var(--rule);
+  border-radius: var(--radius); padding: 1.75rem; text-align: center;
+}
+.card .count { margin: 0 0 .35rem; }
+.score { font-size: clamp(2.75rem, 11vw, 4rem); font-weight: 700; letter-spacing: -.04em;
+         line-height: 1; margin: 0; }
+/* A bare `.score span` rule also matched the nested one, so "10" came out at
+   0.4em of 0.4em and looked like a subscript. */
+.score .of { font-size: .4em; color: var(--text-dim); font-weight: 500; letter-spacing: 0; }
+.verdict-line { font-size: 1.0625rem; color: var(--text-dim); margin: .6rem auto 0; max-width: 34ch; }
+.missed { margin-top: 2rem; }
 .missed h2 { font-size: 1.0625rem; }
 .missed ul { list-style: none; margin: 0; padding: 0; }
 .missed li { padding: .6rem 0; border-bottom: 1px solid var(--rule); font-size: .9688rem; color: var(--text-dim); }
 .missed li:last-child { border-bottom: 0; }
 .missed b { color: var(--text); font-weight: 600; }
-.actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+.actions { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center;
+           justify-content: center; margin-top: 1.25rem; }
+.mini {
+  font: inherit; font-weight: 600; font-size: .9375rem; cursor: pointer;
+  display: inline-flex; align-items: center; gap: .45rem;
+  background: transparent; color: var(--text); text-decoration: none;
+  border: 1px solid var(--field); border-radius: 9px; padding: .6rem 1rem;
+}
+.mini:hover { border-color: var(--accent); color: var(--accent); }
+.mini svg { width: 15px; height: 15px; fill: currentColor; }
 .plug { margin-top: 2.5rem; padding: 1.35rem; background: var(--bg-alt);
         border: 1px solid var(--rule); border-radius: var(--radius); font-size: .9688rem; }
 .plug p { margin: 0 0 .5rem; }
@@ -253,13 +272,23 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
 
     <!-- result -->
     <section id="result" hidden tabindex="-1">
-      <p class="count">Your score</p>
-      <p class="score"><span id="final">0</span><span> / 10</span></p>
-      <p class="verdict-line" id="grade"></p>
-      <p class="grid" id="grid" aria-hidden="true"></p>
-      <div class="actions">
-        <button class="go" id="again" style="margin-top:0">Play again</button>
-        <button class="go" id="copy" style="margin-top:0;background:transparent;color:var(--accent);border:1px solid var(--field)">Share result</button>
+      <div class="card">
+        <p class="count">Your score</p>
+        <p class="score"><span id="final">0</span><span class="of"> / <span id="outOf">10</span></span></p>
+        <p class="verdict-line" id="grade"></p>
+        <p class="grid" id="grid" aria-hidden="true"></p>
+        <div class="actions">
+          <button class="go" id="again" style="margin-top:0">Play again</button>
+          <button class="mini" id="copy" type="button">Share result</button>
+          <a class="mini" id="onX" href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-7.1 8.1L23.2 22h-6.6l-5.1-6.7L5.6 22H2.5l7.6-8.7L1.2 2h6.8l4.6 6.1zm-1.1 18h1.7L7.3 3.7H5.4z"/></svg>
+            Post on X
+          </a>
+          <a class="mini" id="onLi" href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5 2.5 2.5 0 01.02-5zM3 8.98h4v12H3zM9.5 8.98h3.83v1.64h.05c.53-1 1.84-2.06 3.79-2.06 4.05 0 4.8 2.67 4.8 6.14v6.28h-4v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67h-4z"/></svg>
+            LinkedIn
+          </a>
+        </div>
       </div>
       <div class="missed" id="missed" hidden>
         <h2>What you missed</h2>
@@ -458,6 +487,14 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     el("live").textContent = (right ? "Correct. " : "Not quite. ") + el("explain").textContent;
   }
 
+  var SHARE_URL = "https://logcaliper.app/quiz/";
+
+  function shareText() {
+    return "Data size quiz \u2014 " + score + "/" + TOTAL + "\n" +
+           el("grid").textContent + "\n" +
+           "How good is your sense of scale?";
+  }
+
   function finish() {
     game.hidden = true; result.hidden = false;
     el("final").textContent = score;
@@ -481,6 +518,15 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     // without spoiling a single question.
     var grid = Q.slice(0, TOTAL).map(function (q) { return q.__right ? "\uD83D\uDFE9" : "\uD83D\uDFE5"; });
     el("grid").textContent = grid.join("");
+
+    el("outOf").textContent = TOTAL;
+
+    // Prefill the social links now that the score exists. X takes text; LinkedIn
+    // strips it and renders the page's Open Graph card, so it only gets the URL.
+    el("onX").href = "https://x.com/intent/tweet?text=" +
+      encodeURIComponent(shareText() + "\n" + SHARE_URL);
+    el("onLi").href = "https://www.linkedin.com/sharing/share-offsite/?url=" +
+      encodeURIComponent(SHARE_URL);
 
     el("missed").hidden = missed.length === 0;
     count("quiz-complete-" + score);
@@ -516,17 +562,17 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     i++;
     if (i >= TOTAL) finish(); else render();
   });
+  el("onX").addEventListener("click", function () { count("quiz-share-x"); });
+  el("onLi").addEventListener("click", function () { count("quiz-share-linkedin"); });
   el("start").addEventListener("click", start);
   el("again").addEventListener("click", function () { start(); window.scrollTo({ top: 0 }); });
   el("copy").addEventListener("click", function () {
-    var txt = "Data size quiz \u2014 " + score + "/" + TOTAL + "\n" +
-              el("grid").textContent + "\n" +
-              "How good is your sense of scale? https://logcaliper.app/quiz/";
+    var txt = shareText() + " " + SHARE_URL;
     var say = function (msg) {
       el("copy").textContent = msg;
       setTimeout(function () { el("copy").textContent = "Share result"; }, 1800);
     };
-    count("quiz-share");
+    count("quiz-share-copy");
     // A real share sheet on mobile, clipboard everywhere else. A cancelled
     // share is not a failure, so it says nothing.
     if (navigator.share) {
