@@ -313,6 +313,7 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
           <button class="go" id="again" style="margin-top:0" hidden>Play again</button>
           <button class="mini" id="practice" type="button" hidden>Practice round</button>
           <button class="mini" id="copy" type="button">Share result</button>
+          <button class="mini" id="saveCard" type="button">Save card</button>
           <a class="mini" id="onX" href="#" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-7.1 8.1L23.2 22h-6.6l-5.1-6.7L5.6 22H2.5l7.6-8.7L1.2 2h6.8l4.6 6.1zm-1.1 18h1.7L7.3 3.7H5.4z"/></svg>
             Post on X
@@ -700,19 +701,75 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
       setTimeout(function () { el("copy").textContent = "Share result"; }, 1800);
     };
     count("quiz-share-copy");
-    // A real share sheet on mobile, clipboard everywhere else. A cancelled
-    // share is not a failure, so it says nothing.
-    if (navigator.share) {
-      navigator.share({ text: txt }).then(function () { say("Shared"); },
-                                          function () { /* dismissed */ });
+
+    var toClipboard = function () {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(function () { say("Copied"); },
+                                                function () { say("Copy failed"); });
+      } else {
+        say("Copy failed");
+      }
+    };
+
+    // Only go async where sharing a file is actually on the table. Fetching the
+    // card first and THEN writing to the clipboard would put an await between
+    // the click and the write, and Safari drops the user activation a clipboard
+    // write needs. So browsers that cannot share files take the synchronous
+    // path and keep their activation.
+    if (!(navigator.canShare && navigator.share && typeof File === "function")) {
+      if (navigator.share) {
+        navigator.share({ text: txt }).then(function () { say("Shared"); },
+                                            function () { /* dismissed */ });
+      } else {
+        toClipboard();
+      }
       return;
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(txt).then(function () { say("Copied"); },
-                                              function () { say("Copy failed"); });
-    } else {
-      say("Copy failed");
-    }
+
+    // Prefer the card as a FILE. LinkedIn's endpoint takes a URL and nothing
+    // else — it has ignored prefilled text since the title/summary parameters
+    // went away — so a link post is only ever its Open Graph tags. An image
+    // post carries the score itself. A cancelled share is not a failure.
+    cardFile().then(function (file) {
+      if (file && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], text: txt })
+          .then(function () { say("Shared"); }, function () { /* dismissed */ });
+      } else {
+        navigator.share({ text: txt })
+          .then(function () { say("Shared"); }, function () { /* dismissed */ });
+      }
+    });
+  });
+
+  // The per-score card is already rendered as a 1200x630 PNG for Open Graph
+  // (quiz/build-score-pages.py). Reuse it rather than redrawing on a canvas.
+  function cardFile() {
+    return fetch("s/og/" + score + ".png")
+      .then(function (r) { return r.ok ? r.blob() : null; })
+      .then(function (b) {
+        if (!b || typeof File !== "function") return null;
+        return new File([b], "data-size-quiz-" + score + "-of-" + TOTAL + ".png",
+                        { type: "image/png" });
+      })
+      .catch(function () { return null; });
+  }
+
+  el("saveCard").addEventListener("click", function () {
+    var btn = el("saveCard");
+    var say = function (msg) {
+      btn.textContent = msg;
+      setTimeout(function () { btn.textContent = "Save card"; }, 1800);
+    };
+    count("quiz-save-card");
+    cardFile().then(function (file) {
+      if (!file) { say("Not available"); return; }
+      var url = URL.createObjectURL(file);
+      var a = document.createElement("a");
+      a.href = url; a.download = file.name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      say("Saved");
+    });
   });
 
   fetch("units.json")
