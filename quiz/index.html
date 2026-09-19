@@ -133,7 +133,16 @@ main { padding-block: clamp(2rem, 6vw, 3.5rem); }
   padding: 1.35rem 1.25rem; min-height: 120px;
   display: flex; flex-direction: column; justify-content: space-between; gap: .75rem;
 }
-.choice .pic { width: 52px; height: 52px; object-fit: contain; margin-bottom: .15rem; }
+/* The source art is mostly black line work on a white ground. Keying the
+   ground out removes the stray square, but then the art disappears against a
+   dark theme — so the tile comes back only where it is needed, as a rounded
+   chip rather than a raw rectangle. */
+.choice .pic { width: 52px; height: 52px; object-fit: contain; flex: none;
+               border-radius: 10px; padding: 4px; background: transparent; }
+@media (prefers-color-scheme: dark) {
+  .choice .pic { background: #eef2f6; }
+  .bar .who img { background: #eef2f6; }
+}
 .choice .head { display: flex; align-items: center; gap: .85rem; }
 .choice:hover:not(:disabled) { border-color: var(--accent); }
 .choice:disabled { cursor: default; }
@@ -170,7 +179,8 @@ button.go:hover { background: var(--navy-deep); }
 .bar .top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
             font-size: .875rem; }
 .bar .who { font-weight: 600; display: flex; align-items: center; gap: .5rem; }
-.bar .who img { width: 22px; height: 22px; object-fit: contain; flex: none; }
+.bar .who img { width: 22px; height: 22px; object-fit: contain; flex: none;
+                border-radius: 5px; padding: 2px; }
 .bar .amt { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--text-dim); }
 .bar .track { height: 10px; background: var(--rule); border-radius: 5px; overflow: hidden; }
 .bar .fill { height: 100%; width: 0; border-radius: 5px; background: var(--text-dim);
