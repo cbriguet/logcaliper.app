@@ -72,6 +72,46 @@ def og_image(score, path):
     img.save(path, optimize=True)
 
 
+def quiz_og_image(path):
+    """The card for the quiz itself.
+
+    It used to inherit the site-wide image, which reads "Size your log
+    deployment before you buy it — Free on the App Store". Under a headline
+    asking how good your sense of data size is, that turned every share of
+    the quiz into an advert for the app, saying something the page does not.
+    Same visual family as the score cards above, so a shared quiz and a shared
+    result look like siblings.
+    """
+    W, H = 1200, 630
+    img = Image.new("RGB", (W, H), NAVY)
+    d = ImageDraw.Draw(img)
+    for y in range(H):
+        t = y / H
+        d.line([(0, y), (W, y)], fill=tuple(int(NAVY[i] + (INK[i] - NAVY[i]) * t) for i in range(3)))
+
+    mark = Image.open(ROOT / "images" / "brand" / "logo-512.png").convert("RGB").resize((52, 52), Image.LANCZOS)
+    m = Image.new("L", mark.size, 0)
+    ImageDraw.Draw(m).rounded_rectangle([0, 0, 52, 52], radius=11, fill=255)
+    img.paste(mark, (72, 64), m)
+    d.text((140, 72), "Logcaliper", font=font(34), fill=DIM)
+
+    centred(d, (0, 150, W, 250), "How good is your", font(86), "white")
+    centred(d, (0, 250, W, 350), "sense of data size?", font(86), "white")
+    centred(d, (0, 372, W, 432), "Ten questions. One minute.", font(40, bold=False), DIM)
+
+    # A plausible run rather than a perfect one: the point is that people miss some.
+    pattern = [1, 1, 0, 1, 1, 1, 0, 1, 0, 1]
+    sq, gap = 46, 12
+    total_w = TOTAL * sq + (TOTAL - 1) * gap
+    x = (W - total_w) // 2
+    for hit in pattern:
+        col = (78, 201, 138) if hit else (198, 76, 68)
+        d.rounded_rectangle([x, 500, x + sq, 500 + sq], radius=8, fill=col)
+        x += sq + gap
+
+    img.save(path, optimize=True)
+
+
 PAGE = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -190,4 +230,6 @@ if __name__ == "__main__":
         grid = "\U0001F7E9" * score + "\U0001F7E5" * (TOTAL - score)
         (d / "index.html").write_text(PAGE.format(
             score=score, total=TOTAL, grid=grid, blurb=html.escape(BLURBS[score])))
+    quiz_og_image(ROOT / "images" / "quiz-og.png")
     print(f"built {TOTAL + 1} score pages in {OUT} and {TOTAL + 1} images in {IMGS}")
+    print(f"built the quiz card at {ROOT / 'images' / 'quiz-og.png'}")
