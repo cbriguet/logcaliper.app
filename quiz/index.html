@@ -244,11 +244,14 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
       <h1>How good is your sense of data size?</h1>
       <p class="lede">Ten questions, one minute. Each asks which of two things holds more data.
          The gaps are usually far wider than they feel.</p>
+      <p class="count" id="today"></p>
+      <p class="lede" id="seen" hidden style="font-size:1rem">You have already played today. A new ten arrives at midnight UTC.</p>
       <button class="go" id="start" disabled>Loading…</button>
     </section>
 
     <!-- question -->
     <section id="game" hidden>
+      <p class="count" id="mode"></p>
       <div class="meter" id="meter" aria-hidden="true"></div>
       <p class="count" id="tally"></p>
       <p class="count" id="count"></p>
@@ -273,12 +276,13 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     <!-- result -->
     <section id="result" hidden tabindex="-1">
       <div class="card">
-        <p class="count">Your score</p>
+        <p class="count" id="resultMode">Your score</p>
         <p class="score"><span id="final">0</span><span class="of"> / <span id="outOf">10</span></span></p>
         <p class="verdict-line" id="grade"></p>
         <p class="grid" id="grid" aria-hidden="true"></p>
         <div class="actions">
-          <button class="go" id="again" style="margin-top:0">Play again</button>
+          <button class="go" id="again" style="margin-top:0" hidden>Play again</button>
+          <button class="mini" id="practice" type="button" hidden>Practice round</button>
           <button class="mini" id="copy" type="button">Share result</button>
           <a class="mini" id="onX" href="#" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-7.1 8.1L23.2 22h-6.6l-5.1-6.7L5.6 22H2.5l7.6-8.7L1.2 2h6.8l4.6 6.1zm-1.1 18h1.7L7.3 3.7H5.4z"/></svg>
@@ -315,6 +319,44 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
 
   var UNITS = [], Q = [], i = 0, score = 0, answered = false, missed = [];
   var TOTAL = 10, ready = false;
+  var rng = Math.random, daily = true, day = 0;
+  var EPOCH = Date.UTC(2026, 0, 1);      // quiz #1 was 1 January 2026
+
+  // UTC rather than local time: a score posted at 3pm in London and read at
+  // 10am in New York has to refer to the same ten questions, or comparing them
+  // is meaningless.
+  function dayNumber() {
+    var now = new Date();
+    var utc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    return Math.floor((utc - EPOCH) / 86400000) + 1;
+  }
+
+  // mulberry32: small, fast, and deterministic, so everyone playing on the
+  // same day is handed the same ten questions in the same order.
+  function seeded(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function storeKey() { return "lc-quiz-day-" + day; }
+
+  function remember() {
+    try {
+      localStorage.setItem(storeKey(), JSON.stringify({
+        score: score, grid: el("grid").textContent, total: TOTAL
+      }));
+    } catch (e) { /* private browsing; the quiz still works, it just forgets */ }
+  }
+
+  function recall() {
+    try { return JSON.parse(localStorage.getItem(storeKey())); }
+    catch (e) { return null; }
+  }
 
   var el = function (id) { return document.getElementById(id); };
   var intro = el("intro"), game = el("game"), result = el("result");
@@ -348,7 +390,7 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
 
   function shuffle(a) {
     for (var j = a.length - 1; j > 0; j--) {
-      var k = Math.floor(Math.random() * (j + 1));
+      var k = Math.floor(rng() * (j + 1));
       var t = a[j]; a[j] = a[k]; a[k] = t;
     }
     return a;
@@ -494,19 +536,44 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
   function shareURL() { return "https://logcaliper.app/quiz/s/" + score + "/"; }
 
   function shareText() {
-    return "Data size quiz \u2014 " + score + "/" + TOTAL + "\n" +
+    return (daily ? "Data size quiz #" + day : "Data size quiz") +
+           " \u2014 " + score + "/" + TOTAL + "\n" +
            el("grid").textContent + "\n" +
            "How good is your sense of scale?";
+  }
+
+  // Re-entering on a day already played: show the kept result rather than a
+  // board they could re-roll. The missed list is not kept, so it stays hidden.
+  function showStored(had) {
+    daily = true;
+    score = had.score; TOTAL = had.total || 10;
+    intro.hidden = true; game.hidden = true; result.hidden = false;
+    el("final").textContent = score;
+    el("outOf").textContent = TOTAL;
+    el("resultMode").textContent = "Quiz #" + day;
+    el("grid").textContent = had.grid || "";
+    el("grade").textContent = gradeFor(score);
+    el("missed").hidden = true;
+    el("again").hidden = true;
+    el("practice").hidden = false;
+    el("onX").href = "https://x.com/intent/tweet?text=" +
+      encodeURIComponent(shareText() + "\n" + shareURL());
+    el("onLi").href = "https://www.linkedin.com/sharing/share-offsite/?url=" +
+      encodeURIComponent(shareURL());
+    el("result").focus();
+  }
+
+  function gradeFor(n) {
+    return n >= 9 ? "You have a real feel for these magnitudes."
+         : n >= 7 ? "The order of magnitude is mostly there."
+         : n >= 5 ? "Half of them. The gaps are wider than they look."
+         : "Worth a second run — the numbers below are the surprising ones.";
   }
 
   function finish() {
     game.hidden = true; result.hidden = false;
     el("final").textContent = score;
-    var g = score >= 9 ? "You have a real feel for these magnitudes."
-          : score >= 7 ? "The order of magnitude is mostly there."
-          : score >= 5 ? "Half of them. The gaps are wider than they look."
-          : "Worth a second run — the numbers below are the surprising ones.";
-    el("grade").textContent = g;
+    el("grade").textContent = gradeFor(score);
 
     var list = el("missedList");
     list.innerHTML = "";
@@ -524,6 +591,10 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     el("grid").textContent = grid.join("");
 
     el("outOf").textContent = TOTAL;
+    el("resultMode").textContent = daily ? "Quiz #" + day : "Practice round";
+    el("practice").hidden = !daily;      // offered only after the daily
+    el("again").hidden = daily;          // the daily cannot be replayed
+    if (daily) remember();
 
     // Prefill the social links now that the score exists. X takes text; LinkedIn
     // strips it and renders the page's Open Graph card, so it only gets the URL.
@@ -549,15 +620,21 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     } catch (e) { /* analytics must never break the page */ }
   }
 
-  function start() {
+  function start(practice) {
     if (!ready) return;
-    TOTAL = 10;                      // reset, so one short round cannot stick
+    daily = !practice;
+    day = dayNumber();
+    // A daily puzzle that can be replayed until it comes out perfect is not a
+    // daily puzzle, so the seed is fixed for everyone and the result is kept.
+    rng = daily ? seeded(day * 2654435761) : Math.random;
+    TOTAL = 10;
     Q = buildQuestions();
     if (Q.length < TOTAL) TOTAL = Q.length;
     i = 0; score = 0; missed = [];
     intro.hidden = true; result.hidden = true; game.hidden = false;
+    el("mode").textContent = daily ? "Quiz #" + day + " \u00b7 today's ten" : "Practice round";
     render();
-    count("quiz-start");
+    count(daily ? "quiz-start" : "quiz-start-practice");
   }
 
   A.addEventListener("click", function () { answer(A, Q[i].__left); });
@@ -568,8 +645,13 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
   });
   el("onX").addEventListener("click", function () { count("quiz-share-x"); });
   el("onLi").addEventListener("click", function () { count("quiz-share-linkedin"); });
-  el("start").addEventListener("click", start);
-  el("again").addEventListener("click", function () { start(); window.scrollTo({ top: 0 }); });
+  el("start").addEventListener("click", function () {
+    var had = recall();
+    if (had) { showStored(had); return; }
+    start(false);
+  });
+  el("practice").addEventListener("click", function () { start(true); window.scrollTo({ top: 0 }); });
+  el("again").addEventListener("click", function () { start(true); window.scrollTo({ top: 0 }); });
   el("copy").addEventListener("click", function () {
     var txt = shareText() + " " + shareURL();
     var say = function (msg) {
@@ -597,8 +679,14 @@ footer { border-top: 1px solid var(--rule); padding-block: 2rem;
     .then(function (d) {
       UNITS = d.units;
       ready = true;
+      day = dayNumber();
+      el("today").textContent = "Quiz #" + day;
+      var had = recall();
+      // Set in both branches: an earlier edit dropped the else and the button
+      // sat on "Loading..." forever once the data had actually arrived.
+      el("start").textContent = had ? "See today's result" : "Start";
+      el("seen").hidden = !had;
       el("start").disabled = false;
-      el("start").textContent = "Start";
     })
     .catch(function () {
       el("intro").innerHTML = "<h1>The quiz could not load</h1><p>Its data file did not arrive. " +
