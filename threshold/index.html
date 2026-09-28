@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>Threshold — is it bigger than a Blu-ray? — Logcaliper</title>
+<meta name="description" content="Data sizes fall from the top. Sort each one against the line before it hits the floor: a day of firewall logs, a gram of DNA, an hour of Netflix. Three lives, ten thresholds.">
+<link rel="canonical" href="https://logcaliper.app/threshold/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://logcaliper.app/threshold/">
+<meta property="og:site_name" content="Logcaliper">
+<meta property="og:title" content="Threshold — is it bigger than a Blu-ray?">
+<meta property="og:description" content="Data sizes fall from the top. Sort each one against the line before it hits the floor. A day of firewall logs, a gram of DNA, an hour of Netflix. Three lives.">
+<meta property="og:image" content="https://logcaliper.app/images/threshold-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Threshold — is it bigger than a Blu-ray?">
+<meta name="twitter:description" content="Data sizes fall from the top. Sort each one against the line before it hits the floor. Three lives, ten thresholds.">
+<meta name="twitter:image" content="https://logcaliper.app/images/threshold-og.png">
+<meta name="twitter:creator" content="@cbriguet">
+
+<meta name="theme-color" content="#334F71">
+<link rel="icon" type="image/png" sizes="32x32" href="../images/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../images/brand/favicon-64.png">
+<link rel="apple-touch-icon" href="../images/brand/apple-touch-icon.png">
+
+<script>
+(function () {
+  var GC_CODE = "logcaliper";           // https://logcaliper.goatcounter.com
+  if (GC_CODE === "GC" + "_CODE") return;
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://gc.zgo.at/count.js";
+  s.setAttribute("data-goatcounter", "https://" + GC_CODE + ".goatcounter.com/count");
+  document.head.appendChild(s);
+})();
+</script>
+
+<style>
+:root {
+  --navy:      #334F71;
+  --navy-ink:  #16242f;
+  --accent:    #0b6f9e;
+  --bg:        #ffffff;
+  --bg-alt:    #f4f6f9;
+  --text:      #16242f;
+  --text-dim:  #566373;
+  --rule:      #dfe4ea;
+  --chalk:     #F3EEE5;
+  --good:      #1f8a4c;
+  --bad:       #c73e3e;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent:   #1fa2e8;
+    --bg:       #10181f;
+    --bg-alt:   #1a2731;
+    --text:     #e7edf3;
+    --text-dim: #9aa9b8;
+    --rule:     #2a3a48;
+    --good:     #4cc47e;
+    --bad:      #ff7070;
+  }
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 var(--font); padding-inline: 16px; padding-block: 0; }
+.wrap { max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; padding-block: 14px 32px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: .9375rem; }
+.top .brand { display: inline-flex; align-items: center; gap: .5rem; color: var(--text); text-decoration: none; font-weight: 600; }
+.top .brand img { width: 22px; height: 22px; }
+.top a.quiz { color: var(--accent); text-decoration: none; }
+.top a.quiz:hover { text-decoration: underline; }
+header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-top: 4px; }
+h1 { margin: 0; font-size: 1.75rem; line-height: 1.1; font-weight: 700; letter-spacing: -.01em; }
+.tag { margin: 4px 0 0; color: var(--text-dim); font-size: .875rem; }
+.hud { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.stat { background: var(--bg-alt); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.stat .k { font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); }
+.stat .v { font: 600 1.1875rem/1.25 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lives { display: flex; gap: 5px; margin-top: 7px; }
+.lives i { width: 14px; height: 14px; border-radius: 3px; background: var(--accent); display: block; }
+.lives i.lost { background: transparent; border: 1.5px solid var(--rule); }
+.rule { background: var(--bg-alt); border-radius: 10px; padding: 10px 14px; text-align: center; font-size: .9375rem; line-height: 1.35; }
+.rule b { font: 600 1.25rem/1.2 var(--mono); font-variant-numeric: tabular-nums; }
+.rule .sub { display: block; color: var(--text-dim); font-size: .78rem; margin-top: 2px; }
+.stage { position: relative; height: min(56vh, 500px); min-height: 340px; background: var(--navy); border-radius: 12px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+.floor { position: absolute; left: 0; right: 0; bottom: 64px; border-top: 1px dashed rgba(255,255,255,.22); }
+.side { position: absolute; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,.55); font: 600 .75rem var(--font); letter-spacing: .06em; text-transform: uppercase; }
+.side.l { left: 12px; } .side.r { right: 12px; }
+.item { position: absolute; left: 50%; top: 0; width: 76%; transform: translate(-50%, var(--y, 0px)); background: var(--chalk); color: #16242f; border-radius: 12px; padding: 12px 14px 13px; box-shadow: 0 8px 22px rgba(0,0,0,.28); display: flex; flex-direction: column; gap: 4px; will-change: transform; }
+.item .kind { font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; color: #0b6f9e; }
+.item .label { font: 500 1.0625rem/1.25 var(--font); text-wrap: balance; }
+.item.fly { transition: transform 240ms ease-in, opacity 240ms ease-in; opacity: 0; }
+.item.fly.l { transform: translate(-170%, var(--y, 0px)) rotate(-8deg); }
+.item.fly.r { transform: translate(70%, var(--y, 0px)) rotate(8deg); }
+.reveal { position: absolute; left: 50%; bottom: 76px; transform: translateX(-50%); width: 76%; text-align: center; color: #fff; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
+.reveal .size { font: 600 1.75rem/1.1 var(--mono); font-variant-numeric: tabular-nums; }
+.reveal .verdict { font: 500 .875rem/1.3 var(--font); }
+.reveal.good .size { color: #7ee0a3; } .reveal.bad .size { color: #ff9a9a; }
+.banner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #fff; text-align: center; padding: 16px; pointer-events: none; }
+.banner .big { font: 600 1.375rem/1.2 var(--font); }
+.banner .small { font: 400 .875rem/1.4 var(--font); color: rgba(255,255,255,.8); }
+.banner .num { font: 600 1.875rem/1.1 var(--mono); }
+.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button { font: 600 1rem var(--font); color: var(--text); background: var(--bg-alt); border: 1px solid var(--rule); border-radius: 10px; padding: 14px; cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 14px; background: rgba(22,36,47,.66); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.card { background: var(--bg); color: var(--text); border-radius: 12px; padding: 18px; width: 100%; max-width: 360px; max-height: 100%; overflow: auto; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.28); }
+.card .eyebrow { font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); }
+.card .big { font: 600 2.125rem/1 var(--mono); font-variant-numeric: tabular-nums; }
+.card p { margin: 0; font-size: .875rem; line-height: 1.5; }
+.miss { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--rule); padding-top: 8px; }
+.miss .h { font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); }
+.miss .m { font-size: .84rem; line-height: 1.4; }
+.miss .m b { font-family: var(--mono); font-weight: 500; white-space: nowrap; }
+.card .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.card .actions button { font-size: .875rem; padding: 9px 14px; font-weight: 500; }
+.card .plug { font-size: .8125rem; color: var(--text-dim); border-top: 1px solid var(--rule); padding-top: 8px; }
+.card .plug a { color: var(--accent); }
+.hint { margin: 0; color: var(--text-dim); font-size: .8125rem; text-align: center; }
+.copyfield { position: absolute; left: -9999px; top: 0; opacity: 0; }
+footer { color: var(--text-dim); font-size: .78rem; line-height: 1.5; border-top: 1px solid var(--rule); padding-top: 12px; }
+footer a { color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .item.fly { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="/"><img src="../images/brand/favicon-64.png" alt="" width="22" height="22">Logcaliper</a>
+    <a class="quiz" href="/quiz/">The quiz</a>
+  </div>
+
+  <header>
+    <div>
+      <h1>Threshold</h1>
+      <p class="tag">Smaller goes left. Bigger goes right. Before it hits the floor.</p>
+    </div>
+  </header>
+
+  <div class="hud">
+    <div class="stat"><div class="k">Score</div><div class="v" id="score">0</div></div>
+    <div class="stat"><div class="k">Best</div><div class="v" id="best">0</div></div>
+    <div class="stat"><div class="k">Lives</div><div class="lives" id="lives"><i></i><i></i><i></i></div></div>
+  </div>
+
+  <div class="rule" id="rule">More than <b id="ruleB">1 GB</b>?<span class="sub" id="ruleSub">Level 1</span></div>
+
+  <div class="stage" id="stage">
+    <div class="side l">&#9664; smaller</div>
+    <div class="side r">bigger &#9654;</div>
+    <div class="floor"></div>
+  </div>
+
+  <div class="controls">
+    <button type="button" id="btnL">&#9664; Smaller</button>
+    <button type="button" id="btnR">Bigger &#9654;</button>
+  </div>
+  <p class="hint">Swipe or tap a side, press &#8592; &#8594;, or use the buttons.</p>
+
+  <footer>
+    Everyday sizes are the ones from <a href="/quiz/">the quiz</a>; log volumes are computed the way <a href="/">Logcaliper</a> computes them, from typical event rates and sizes. Decimal units: 1 GB is 1,000,000,000 bytes.
+  </footer>
+</div>
+<input class="copyfield" id="copyfield" type="text" readonly aria-hidden="true" tabindex="-1">
+
+<script>
+(function(){
+  'use strict';
+  var WORLD = [
+    ['page','A page of text',2000],['ebook','A 500-page eBook',1e6],['photo','A high-resolution photo',5e6],['proraw','One ProRAW photo',25e6],
+    ['spotify','An hour of Spotify',72e6],['cdrom','A CD-ROM',700e6],['netflix','An hour of Netflix in HD',3e9],['dvd','A DVD',4.7e9],
+    ['yt4k','An hour of YouTube in 4K',5.6e9],['wikipedia','English Wikipedia’s article text',22.14e9],['bluray','A Blu-ray disc',25e9],
+    ['fortnite','Fortnite on PC',26e9],['aimodel','A large open-weights AI model',45e9],['telescope','A day of James Webb data',57e9],
+    ['prores','An hour of ProRes video',100e9],['iphone','An iPhone’s storage',128e9],['cloud','A typical cloud drive',150e9],
+    ['ps5','A PlayStation 5’s drive',1e12],['loctext','The text of the Library of Congress',15e12],['brain','A human brain',2.5e15],
+    ['social','A day at one social network',4e15],['gearth','Google Earth',20e15],['archive','The Internet Archive',99e15],['dna','One gram of DNA',215e15]
+  ];
+  // Computed the way the app computes them: typical events per second x
+  // average event size x the period, decimal bytes throughout.
+  var LOGS = [
+    ['ws_day','A day of one Windows laptop’s logs',302400000],['linux_day','A day of one Linux host’s logs',388800000],
+    ['ids_day','A day of one IDS sensor’s alerts',3456000000],['fw_hour','One hour of one firewall’s logs, at its busiest',7927200000],
+    ['db_day','A day of one database’s audit logs',8899200000],['ad_day','A day of one domain controller’s logs',12960000000],
+    ['proxy_day','A day of one web proxy’s logs',15552000000],['o365_day','A day of one Office 365 tenant’s audit logs',16917120000],
+    ['fw_day','A day of one firewall’s logs',38050560000],['flow_day','A day of unsampled NetFlow from one core router',140659200000],
+    ['ws_1000','A day of logs from 1,000 Windows laptops',302400000000],['edr_day','A day of EDR telemetry from 1,000 endpoints',466560000000],
+    ['fw_pci','90 days of one firewall’s logs',3424550400000],['fw_year','A year of one firewall’s logs',13888454400000],
+    ['ad_hipaa','8 years of one domain controller’s logs',37843200000000]
+  ];
+  var DECK = WORLD.map(function(a){ return { id:a[0], label:a[1], bytes:a[2], kind:'Everyday' }; })
+    .concat(LOGS.map(function(a){ return { id:a[0], label:a[1], bytes:a[2], kind:'Logs' }; }));
+
+  // Each level is one question. Absolute thresholds first, then thresholds
+  // that are themselves things, which is where the two decks start to talk.
+  var LEVELS = [
+    { text:'1 GB', bytes:1e9 }, { text:'10 GB', bytes:1e10 }, { text:'100 GB', bytes:1e11 },
+    { text:'a Blu-ray disc', bytes:25e9, ref:'bluray', hint:'25 GB' },
+    { text:'1 TB', bytes:1e12 },
+    { text:'a day of one firewall’s logs', bytes:38050560000, ref:'fw_day', hint:'38 GB' },
+    { text:'10 TB', bytes:1e13 },
+    { text:'the text of the Library of Congress', bytes:15e12, ref:'loctext', hint:'15 TB' },
+    { text:'1 PB', bytes:1e15 },
+    { text:'a year of one firewall’s logs', bytes:13888454400000, ref:'fw_year', hint:'14 TB' }
+  ];
+  var PER_LEVEL = 8, LIVES = 3;
+  var APPSTORE = 'https://apps.apple.com/us/app/logcaliper/id381096276';
+
+  var UNITS = ['B','kB','MB','GB','TB','PB'];
+  function fmtBytes(n){ var p=0,v=n; while (v>=1000 && p<UNITS.length-1){ v/=1000; p++; } var s = p===0 ? Math.round(v).toLocaleString() : (v<10 ? v.toFixed(1).replace(/\.0$/,'') : Math.round(v).toLocaleString()); return s+' '+UNITS[p]; }
+  function shuffle(a, rng){ for (var i=a.length-1;i>0;i--){ var j=Math.floor(rng()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+  // Items for a level: nothing within 15% of the line (that is a coin flip,
+  // not a question), never the reference item itself, and as close to half
+  // bigger / half smaller as the deck allows.
+  function itemsFor(level, rng){
+    var pool = DECK.filter(function(i){ if (level.ref && i.id === level.ref) return false; var r = i.bytes / level.bytes; return r > 1.15 || r < 1/1.15; });
+    var big = shuffle(pool.filter(function(i){ return i.bytes > level.bytes; }), rng);
+    var small = shuffle(pool.filter(function(i){ return i.bytes < level.bytes; }), rng);
+    var out = [], want = PER_LEVEL / 2;
+    out = out.concat(big.slice(0, want), small.slice(0, want));
+    var rest = shuffle(big.slice(want).concat(small.slice(want)), rng);
+    while (out.length < PER_LEVEL && rest.length) out.push(rest.shift());
+    return shuffle(out, rng);
+  }
+
+  var stage = document.getElementById('stage');
+  var scoreEl = document.getElementById('score'), bestEl = document.getElementById('best'), livesEl = document.getElementById('lives');
+  var ruleB = document.getElementById('ruleB'), ruleSub = document.getElementById('ruleSub');
+  var btnL = document.getElementById('btnL'), btnR = document.getElementById('btnR'), copyfield = document.getElementById('copyfield');
+
+  var g, best = 0, itemEl = null, revealEl = null, bannerEl = null, overlay = null, timer = null;
+  function loadBest(){ try { best = parseInt(localStorage.getItem('threshold.best')||'0',10)||0; } catch(e){} }
+  function saveBest(){ try { localStorage.setItem('threshold.best', String(best)); } catch(e){} }
+  function count(name){ if (window.goatcounter && window.goatcounter.count) try { window.goatcounter.count({ path: 'threshold-' + name, title: 'Threshold: ' + name, event: true }); } catch (e) {} }
+
+  function fresh(){ return { level:0, idx:0, items:[], score:0, combo:0, lives:LIVES, wrong:[], phase:'idle', cur:null, t0:0, fallMs:3200, over:false, answered:0 }; }
+
+  function setRule(){
+    var L = LEVELS[g.level];
+    ruleB.textContent = L.text;
+    ruleSub.textContent = 'Level ' + (g.level+1) + (L.hint ? ' · ' + L.hint : '');
+  }
+  function hud(){
+    scoreEl.textContent = g.score; bestEl.textContent = best;
+    var is = livesEl.querySelectorAll('i'); for (var i=0;i<is.length;i++) is[i].className = i < g.lives ? '' : 'lost';
+  }
+
+  function banner(big, small, num, ms, then){
+    clearBanner();
+    bannerEl = document.createElement('div'); bannerEl.className = 'banner';
+    bannerEl.innerHTML = '<div class="big"></div><div class="num"></div><div class="small"></div>';
+    bannerEl.querySelector('.big').textContent = big; bannerEl.querySelector('.num').textContent = num || ''; bannerEl.querySelector('.small').textContent = small || '';
+    stage.appendChild(bannerEl);
+    if (ms) timer = setTimeout(function(){ clearBanner(); then && then(); }, ms);
+  }
+  function clearBanner(){ if (bannerEl){ bannerEl.remove(); bannerEl = null; } }
+
+  function startLevel(){
+    var L = LEVELS[g.level]; g.idx = 0;
+    g.items = itemsFor(L, Math.random);
+    setRule();
+    banner('Level ' + (g.level+1), (L.hint ? L.hint + ' — ' : '') + 'left if smaller, right if bigger', 'More than ' + L.text + '?', 1500, spawn);
+  }
+
+  function spawn(){
+    if (g.over) return;
+    if (g.idx >= g.items.length){
+      g.level = (g.level + 1) % LEVELS.length;
+      g.fallMs = Math.max(1200, g.fallMs - 220);
+      startLevel(); return;
+    }
+    g.cur = g.items[g.idx++];
+    if (itemEl) itemEl.remove();
+    itemEl = document.createElement('div'); itemEl.className = 'item';
+    itemEl.innerHTML = '<div class="kind"></div><div class="label"></div>';
+    itemEl.querySelector('.kind').textContent = g.cur.kind;
+    itemEl.querySelector('.label').textContent = g.cur.label;
+    itemEl.style.setProperty('--y', '-80px');
+    stage.appendChild(itemEl);
+    g.t0 = performance.now(); g.phase = 'fall';
+    requestAnimationFrame(fall);
+  }
+
+  function floorY(){ return stage.clientHeight - 64 - (itemEl ? itemEl.offsetHeight : 60); }
+  function fall(now){
+    if (g.phase !== 'fall' || !itemEl) return;
+    var k = Math.min(1, (now - g.t0) / g.fallMs);
+    var e = k * k * 0.7 + k * 0.3;   // starts slow, then hurries
+    itemEl.style.setProperty('--y', (-80 + (floorY() + 80) * e) + 'px');
+    if (k >= 1){ answer(null); return; }
+    requestAnimationFrame(fall);
+  }
+
+  function answer(dir){
+    if (g.phase !== 'fall' || g.over) return;
+    g.phase = 'reveal'; g.answered++;
+    var L = LEVELS[g.level], it = g.cur, isBigger = it.bytes > L.bytes;
+    var right = dir !== null && ((dir === 'r') === isBigger);
+    if (itemEl && dir){ itemEl.classList.add('fly', dir); }
+    if (right){ g.combo = Math.min(5, g.combo + 1); g.score += 10 * g.combo; }
+    else { g.combo = 0; g.lives--; g.wrong.push({ it:it, L:L, said:dir, isBigger:isBigger }); }
+    if (g.score > best){ best = g.score; saveBest(); }
+    hud();
+
+    if (revealEl) revealEl.remove();
+    revealEl = document.createElement('div'); revealEl.className = 'reveal ' + (right ? 'good' : 'bad');
+    revealEl.innerHTML = '<div class="size"></div><div class="verdict"></div>';
+    revealEl.querySelector('.size').textContent = fmtBytes(it.bytes);
+    var v = (isBigger ? 'bigger' : 'smaller') + ' than ' + L.text;
+    revealEl.querySelector('.verdict').textContent = dir === null ? 'Too slow — ' + v : (right ? '✓ ' + v + (g.combo > 1 ? ' · combo ×' + g.combo : '') : '✗ ' + v);
+    stage.appendChild(revealEl);
+
+    timer = setTimeout(function(){
+      if (revealEl){ revealEl.remove(); revealEl = null; }
+      if (itemEl){ itemEl.remove(); itemEl = null; }
+      if (g.lives <= 0) end(); else spawn();
+    }, right ? 650 : 1100);
+  }
+
+  function end(){
+    g.over = true; g.phase = 'over';
+    count('over');
+    var L = LEVELS[g.level];
+    var card = document.createElement('div'); card.className = 'card'; card.setAttribute('role','dialog'); card.setAttribute('aria-modal','true');
+    card.innerHTML = '<div class="eyebrow"></div><div class="big"></div><p class="sum"></p><div class="miss"><div class="h">Where it went wrong</div></div>' +
+      '<div class="actions"><button type="button" class="primary again">Play again</button><button type="button" class="copy">Copy to share</button></div>' +
+      '<p class="plug">The log volumes come from <a href="' + APPSTORE + '" rel="noopener">Logcaliper</a>, a free iOS calculator for sizing log management and SIEM deployments.</p>';
+    card.querySelector('.eyebrow').textContent = 'Out of lives on level ' + (g.level+1);
+    card.querySelector('.big').textContent = g.score + ' points';
+    card.querySelector('.sum').textContent = g.answered + ' answered, ' + g.wrong.length + ' wrong. ' + (g.score >= best && g.score > 0 ? 'That is your best.' : 'Your best is ' + best + '.');
+    var miss = card.querySelector('.miss');
+    g.wrong.slice(-6).forEach(function(w){
+      var m = document.createElement('div'); m.className = 'm';
+      var said = w.said === null ? 'no answer in time' : 'you said ' + (w.said === 'r' ? 'bigger' : 'smaller');
+      m.innerHTML = '<span class="lab"></span> — <b></b>, ' + (w.isBigger ? 'bigger' : 'smaller') + ' than ' + w.L.text + (w.L.hint ? ' (' + w.L.hint + ')' : '') + '. <span class="said"></span>';
+      m.querySelector('.lab').textContent = w.it.label; m.querySelector('b').textContent = fmtBytes(w.it.bytes); m.querySelector('.said').textContent = said.charAt(0).toUpperCase() + said.slice(1) + '.';
+      miss.appendChild(m);
+    });
+    var share = 'Threshold: ' + g.score + ' points, out on level ' + (g.level+1) + ' (more than ' + L.text + '?). Which is bigger, a Blu-ray or a day of firewall logs? https://logcaliper.app/threshold/';
+    card.querySelector('.again').addEventListener('click', function(){ newGame(true); });
+    card.querySelector('.copy').addEventListener('click', function(){ count('share'); copyText(share, card.querySelector('.copy')); });
+    overlay = document.createElement('div'); overlay.className = 'overlay'; overlay.appendChild(card); stage.appendChild(overlay);
+    card.querySelector('.again').focus();
+  }
+
+  function copyText(text, btn){
+    var done = function(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy to share'; }, 1600); };
+    var fallback = function(){ copyfield.value = text; copyfield.style.left = '0'; copyfield.style.opacity = '1'; copyfield.focus(); copyfield.select(); var ok=false; try{ ok = document.execCommand('copy'); }catch(e){} copyfield.style.left='-9999px'; copyfield.style.opacity='0'; if (ok) done(); else btn.textContent = 'Select the text and copy'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(fallback); else fallback();
+  }
+
+  function newGame(autostart){
+    clearTimeout(timer); clearBanner();
+    if (overlay){ overlay.remove(); overlay = null; }
+    if (itemEl){ itemEl.remove(); itemEl = null; }
+    if (revealEl){ revealEl.remove(); revealEl = null; }
+    g = fresh(); setRule(); hud();
+    if (autostart) startLevel();
+    else banner('Tap to start', 'Each thing that falls: is it more than the line, or less?', 'More than ' + LEVELS[0].text + '?');
+  }
+  function begin(){ if (g.phase === 'idle'){ count('start'); startLevel(); return true; } return false; }
+
+  // ---- input ------------------------------------------------------------
+  var px = null;
+  stage.addEventListener('pointerdown', function(ev){ if (overlay) return; if (begin()) return; px = ev.clientX; });
+  stage.addEventListener('pointerup', function(ev){
+    if (overlay || px === null) return;
+    var dx = ev.clientX - px; px = null;
+    if (Math.abs(dx) >= 24){ answer(dx > 0 ? 'r' : 'l'); return; }
+    var r = stage.getBoundingClientRect();
+    answer(ev.clientX - r.left < r.width / 2 ? 'l' : 'r');
+  });
+  stage.addEventListener('pointercancel', function(){ px = null; });
+  btnL.addEventListener('click', function(){ if (!begin()) answer('l'); });
+  btnR.addEventListener('click', function(){ if (!begin()) answer('r'); });
+  document.addEventListener('keydown', function(ev){
+    if (ev.metaKey || ev.ctrlKey || ev.altKey || overlay) return;
+    if (ev.key === 'ArrowLeft' || ev.key === 'a' || ev.key === 'A'){ ev.preventDefault(); if (!begin()) answer('l'); }
+    else if (ev.key === 'ArrowRight' || ev.key === 'd' || ev.key === 'D'){ ev.preventDefault(); if (!begin()) answer('r'); }
+    else if (ev.key === ' ' || ev.key === 'Enter'){ ev.preventDefault(); begin(); }
+  });
+  // Coming back to a hidden tab should not deliver a wall of misses: restart the fall clock.
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden && g && g.phase === 'fall'){ g.t0 = performance.now(); } });
+
+  loadBest(); newGame(false);
+})();
+</script>
+</body>
+</html>
