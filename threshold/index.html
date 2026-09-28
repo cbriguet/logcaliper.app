@@ -94,6 +94,10 @@ h1 { margin: 0; font-size: 1.75rem; line-height: 1.1; font-weight: 700; letter-s
 .floor { position: absolute; left: 0; right: 0; bottom: 64px; border-top: 1px dashed rgba(255,255,255,.22); }
 .side { position: absolute; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,.55); font: 600 .75rem var(--font); letter-spacing: .06em; text-transform: uppercase; }
 .side.l { left: 12px; } .side.r { right: 12px; }
+/* The side hints share the stage's midline with the level banner; while a
+   banner is up they step aside rather than sit under its headline. */
+.stage.banner-on .side { opacity: 0; }
+.side { transition: opacity 200ms; }
 .item { position: absolute; left: 50%; top: 0; width: 76%; transform: translate(-50%, var(--y, 0px)); background: var(--chalk); color: #16242f; border-radius: 12px; padding: 12px 14px 13px; box-shadow: 0 8px 22px rgba(0,0,0,.28); display: flex; flex-direction: column; gap: 4px; will-change: transform; }
 .item .kind { font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; color: #0b6f9e; }
 .item .label { font: 500 1.0625rem/1.25 var(--font); text-wrap: balance; }
@@ -260,10 +264,10 @@ footer a { color: var(--accent); }
     bannerEl = document.createElement('div'); bannerEl.className = 'banner';
     bannerEl.innerHTML = '<div class="big"></div><div class="num"></div><div class="small"></div>';
     bannerEl.querySelector('.big').textContent = big; bannerEl.querySelector('.num').textContent = num || ''; bannerEl.querySelector('.small').textContent = small || '';
-    stage.appendChild(bannerEl);
+    stage.appendChild(bannerEl); stage.classList.add('banner-on');
     if (ms) timer = setTimeout(function(){ clearBanner(); then && then(); }, ms);
   }
-  function clearBanner(){ if (bannerEl){ bannerEl.remove(); bannerEl = null; } }
+  function clearBanner(){ if (bannerEl){ bannerEl.remove(); bannerEl = null; } stage.classList.remove('banner-on'); }
 
   function startLevel(){
     var L = LEVELS[g.level]; g.idx = 0;
