@@ -138,7 +138,29 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .copyfield { position: absolute; left: -9999px; top: 0; opacity: 0; }
 footer { color: var(--text-dim); font-size: .78rem; line-height: 1.5; border-top: 1px solid var(--rule); padding-top: 12px; }
 footer a { color: var(--accent); }
-@media (prefers-reduced-motion: reduce) { .item.fly { transition: none; } }
+/* ---- arcade feel: flashes, shake, floaters, pulses -------------------- */
+.stage::after { content: ''; position: absolute; inset: 0; border-radius: 12px; pointer-events: none; box-shadow: inset 0 0 0 0 transparent; transition: box-shadow 240ms ease-out; }
+.stage.good::after { box-shadow: inset 0 0 0 4px #4cc47e, inset 0 0 44px rgba(76,196,126,.38); transition: none; }
+.stage.bad::after  { box-shadow: inset 0 0 0 4px #ff7070, inset 0 0 44px rgba(255,112,112,.42); transition: none; }
+.stage.shake { animation: shake 320ms ease-in-out; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
+.floor { transition: border-color 150ms, box-shadow 150ms; }
+.floor.hot { border-top-color: rgba(255,154,154,.95); box-shadow: 0 -10px 28px rgba(255,112,112,.35); }
+.floater { position: absolute; left: 50%; transform: translate(-50%, 0); font: 700 1.5rem var(--mono); color: #7ee0a3; text-shadow: 0 2px 10px rgba(0,0,0,.45); pointer-events: none; animation: rise 700ms ease-out forwards; }
+@keyframes rise { to { transform: translate(-50%, -70px); opacity: 0; } }
+.stat { position: relative; }
+.combo { position: absolute; right: 8px; top: 8px; font: 700 .8125rem var(--mono); color: #fff; background: var(--accent); border-radius: 999px; padding: 2px 8px; animation: pop 220ms cubic-bezier(.2,1.4,.4,1); }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } }
+.stat .v.bump { animation: bump 320ms cubic-bezier(.2,1.4,.4,1); }
+@keyframes bump { 30% { transform: scale(1.22); color: var(--accent); } }
+.hud.danger .lives i:not(.lost) { animation: pulse 800ms ease-in-out infinite; }
+@keyframes pulse { 50% { background: var(--bad); transform: scale(1.15); } }
+.banner .big.blink { animation: blink 1s steps(2, start) infinite; }
+@keyframes blink { to { visibility: hidden; } }
+.banner .num.slam { animation: slam 520ms cubic-bezier(.2,1.5,.4,1); }
+@keyframes slam { from { transform: scale(2.6); opacity: 0; } 60% { opacity: 1; } }
+.mute { font-size: .78rem; font-weight: 500; padding: 5px 10px; border-radius: 999px; }
+@media (prefers-reduced-motion: reduce) { .item.fly { transition: none; } .stage.shake, .floater, .banner .big.blink, .banner .num.slam, .stat .v.bump, .hud.danger .lives i { animation: none; } }
 </style>
 </head>
 <body>
@@ -157,7 +179,7 @@ footer a { color: var(--accent); }
   </header>
 
   <div class="hud">
-    <div class="stat"><div class="k">Score</div><div class="v" id="score">0</div></div>
+    <div class="stat"><div class="k">Score</div><div class="v" id="score">0</div><span class="combo" id="combo" hidden></span></div>
     <div class="stat"><div class="k">Best</div><div class="v" id="best">0</div></div>
     <div class="stat"><div class="k">Lives</div><div class="lives" id="lives"><i></i><i></i><i></i></div></div>
   </div>
@@ -176,6 +198,8 @@ footer a { color: var(--accent); }
   </div>
   <p class="hint">Swipe or tap a side, press &#8592; &#8594;, or use the buttons.</p>
 
+  <p class="hint"><button type="button" class="mute" id="mute">Sound: on</button></p>
+
   <footer>
     Everyday sizes are the ones from <a href="/quiz/">the quiz</a>; log volumes are computed the way <a href="/">Logcaliper</a> computes them, from typical event rates and sizes. Decimal units: 1 GB is 1,000,000,000 bytes.
   </footer>
@@ -185,6 +209,50 @@ footer a { color: var(--accent); }
 <script>
 (function(){
   'use strict';
+
+  // ---- arcade feel ---------------------------------------------------------
+  // Sound is synthesised, so nothing loads; it can only start after a tap, so
+  // the first tap unlocks it. Shake, floaters and pulses stand down under
+  // prefers-reduced-motion; the edge flashes stay, since they carry the verdict.
+  var FX = (function(){
+    var ctx = null, muted = false, shown = 0, scoreTimer = null;
+    try { muted = localStorage.getItem('threshold.mute') === '1'; } catch (e) {}
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var stageEl = document.getElementById('stage'), floorEl = document.querySelector('.floor'), muteBtn = document.getElementById('mute');
+    function label(){ if (muteBtn) muteBtn.textContent = muted ? 'Sound: off' : 'Sound: on'; }
+    function unlock(){ if (!ctx){ try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { ctx = null; } } if (ctx && ctx.state === 'suspended') ctx.resume(); }
+    function tone(freq, dur, type, vol, at){
+      if (muted || !ctx) return;
+      var t = ctx.currentTime + (at || 0), o = ctx.createOscillator(), gn = ctx.createGain();
+      o.type = type || 'square'; o.frequency.setValueAtTime(freq, t);
+      gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(vol || 0.08, t + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(gn); gn.connect(ctx.destination); o.start(t); o.stop(t + dur + 0.02);
+    }
+    // The app turns these into haptics; a browser has no handler and ignores them.
+    function haptic(kind){ try { if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.lc) window.webkit.messageHandlers.lc.postMessage({ event:'haptic', kind:kind }); } catch (e) {} }
+    function flash(kind){ stageEl.classList.remove('good','bad'); void stageEl.offsetWidth; stageEl.classList.add(kind); setTimeout(function(){ stageEl.classList.remove(kind); }, 260); }
+    function shake(){ if (reduce) return; stageEl.classList.remove('shake'); void stageEl.offsetWidth; stageEl.classList.add('shake'); setTimeout(function(){ stageEl.classList.remove('shake'); }, 340); }
+    function floater(text, y){ if (reduce) return; var f = document.createElement('div'); f.className = 'floater'; f.textContent = text; f.style.top = y + 'px'; stageEl.appendChild(f); setTimeout(function(){ f.remove(); }, 720); }
+    if (muteBtn) muteBtn.addEventListener('click', function(){ muted = !muted; try { localStorage.setItem('threshold.mute', muted ? '1' : '0'); } catch (e) {} label(); if (!muted){ unlock(); tone(880, 0.06, 'square', 0.05); } });
+    label();
+    return {
+      unlock: unlock,
+      start: function(){ tone(523, 0.07); tone(784, 0.09, 'square', 0.08, 0.08); },
+      hit: function(combo, y){ var k = Math.min(5, combo), up = Math.pow(1.06, k); tone(660 * up, 0.06); tone(990 * up, 0.09, 'square', 0.08, 0.07); flash('good'); floater('+' + (10 * k), y); haptic('hit'); },
+      miss: function(){ tone(150, 0.16, 'sawtooth', 0.09); tone(110, 0.22, 'sawtooth', 0.09, 0.14); flash('bad'); shake(); haptic('miss'); },
+      tick: function(){ tone(1400, 0.03, 'square', 0.04); },
+      level: function(){ [523, 659, 784, 1047].forEach(function(f, i){ tone(f, 0.09, 'square', 0.07, i * 0.08); }); haptic('level'); },
+      over: function(){ [392, 311, 262].forEach(function(f, i){ tone(f, 0.18, 'sawtooth', 0.08, i * 0.16); }); haptic('over'); },
+      floor: function(hot){ if (floorEl) floorEl.classList.toggle('hot', !!hot); },
+      // The score counts up to its new value rather than jumping to it.
+      score: function(target){
+        if (reduce || target === shown){ scoreEl.textContent = target; shown = target; return; }
+        cancelAnimationFrame(scoreTimer); var from = shown, t0 = null;
+        scoreEl.classList.remove('bump'); void scoreEl.offsetWidth; scoreEl.classList.add('bump');
+        (function step(ts){ if (!t0) t0 = ts; var k = Math.min(1, (ts - t0) / 320); shown = Math.round(from + (target - from) * (1 - Math.pow(1 - k, 3))); scoreEl.textContent = shown; if (k < 1) scoreTimer = requestAnimationFrame(step); })(performance.now());
+      }
+    };
+  })();
   var WORLD = [
     ['page','A page of text',2000],['ebook','A 500-page eBook',1e6],['photo','A high-resolution photo',5e6],['proraw','One ProRAW photo',25e6],
     ['spotify','An hour of Spotify',72e6],['cdrom','A CD-ROM',700e6],['netflix','An hour of Netflix in HD',3e9],['dvd','A DVD',4.7e9],
@@ -248,6 +316,7 @@ footer a { color: var(--accent); }
   var btnL = document.getElementById('btnL'), btnR = document.getElementById('btnR'), copyfield = document.getElementById('copyfield');
 
   var g, best = 0, itemEl = null, revealEl = null, bannerEl = null, overlay = null, timer = null;
+  var hudEl = document.querySelector('.hud'), comboEl = document.getElementById('combo');
   function loadBest(){ try { best = parseInt(localStorage.getItem('threshold.best')||'0',10)||0; } catch(e){} }
   function saveBest(){ try { localStorage.setItem('threshold.best', String(best)); } catch(e){} }
   function count(name){ if (window.goatcounter && window.goatcounter.count) try { window.goatcounter.count({ path: 'threshold-' + name, title: 'Threshold: ' + name, event: true }); } catch (e) {} }
@@ -260,7 +329,7 @@ footer a { color: var(--accent); }
     ruleSub.textContent = 'Level ' + (g.level+1) + (L.hint ? ' · ' + L.hint : '');
   }
   function hud(){
-    scoreEl.textContent = g.score; bestEl.textContent = best;
+    FX.score(g.score); bestEl.textContent = best; hudEl.classList.toggle('danger', g.lives === 1);
     var is = livesEl.querySelectorAll('i'); for (var i=0;i<is.length;i++) is[i].className = i < g.lives ? '' : 'lost';
   }
 
@@ -278,7 +347,9 @@ footer a { color: var(--accent); }
     var L = LEVELS[g.level]; g.idx = 0;
     g.items = itemsFor(L, Math.random);
     setRule();
+    if (g.answered === 0){ FX.unlock(); FX.start(); } else { FX.level(); }
     banner('Level ' + (g.level+1), (L.hint ? L.hint + ' — ' : '') + 'left if smaller, right if bigger', 'More than ' + L.text + '?', 1500, spawn);
+    if (bannerEl) bannerEl.querySelector('.num').classList.add('slam');
   }
 
   function spawn(){
@@ -296,7 +367,7 @@ footer a { color: var(--accent); }
     itemEl.querySelector('.label').textContent = g.cur.label;
     itemEl.style.setProperty('--y', '-80px');
     stage.appendChild(itemEl);
-    g.t0 = performance.now(); g.phase = 'fall';
+    g.ticked = false; FX.floor(false); g.t0 = performance.now(); g.phase = 'fall';
     requestAnimationFrame(fall);
   }
 
@@ -306,6 +377,7 @@ footer a { color: var(--accent); }
     var k = Math.min(1, (now - g.t0) / g.fallMs);
     var e = k * k * 0.7 + k * 0.3;   // starts slow, then hurries
     itemEl.style.setProperty('--y', (-80 + (floorY() + 80) * e) + 'px');
+    if (k > 0.7 && !g.ticked){ g.ticked = true; FX.tick(); FX.floor(true); }
     if (k >= 1){ answer(null); return; }
     requestAnimationFrame(fall);
   }
@@ -320,6 +392,10 @@ footer a { color: var(--accent); }
     else { g.combo = 0; g.lives--; g.wrong.push({ it:it, L:L, said:dir, isBigger:isBigger }); }
     if (g.score > best){ best = g.score; saveBest(); }
     hud();
+    var fy = itemEl ? (parseFloat(itemEl.style.getPropertyValue('--y')) || 40) : 40;
+    FX.floor(false);
+    if (right) FX.hit(g.combo, fy); else FX.miss();
+    comboEl.hidden = true; if (g.combo >= 2){ comboEl.textContent = '\u00d7' + g.combo; void comboEl.offsetWidth; comboEl.hidden = false; }
 
     if (revealEl) revealEl.remove();
     revealEl = document.createElement('div'); revealEl.className = 'reveal ' + (right ? 'good' : 'bad');
@@ -338,13 +414,14 @@ footer a { color: var(--accent); }
 
   function end(){
     g.over = true; g.phase = 'over';
+    FX.over(); FX.floor(false);
     count('over');
     var L = LEVELS[g.level];
     var card = document.createElement('div'); card.className = 'card'; card.setAttribute('role','dialog'); card.setAttribute('aria-modal','true');
     card.innerHTML = '<div class="eyebrow"></div><div class="big"></div><p class="sum"></p><div class="miss"><div class="h">Where it went wrong</div></div>' +
       '<div class="actions"><button type="button" class="primary again">Play again</button><button type="button" class="copy">Copy to share</button></div>' +
       '<p class="plug">The log volumes come from <a href="' + APPSTORE + '" rel="noopener">Logcaliper</a>, a free iOS calculator for sizing log management and SIEM deployments.</p>';
-    card.querySelector('.eyebrow').textContent = 'Out of lives on level ' + (g.level+1);
+    card.querySelector('.eyebrow').textContent = (g.score > 0 && g.score >= best ? 'New best \u00b7 ' : '') + 'Out of lives on level ' + (g.level+1);
     card.querySelector('.big').textContent = g.score + ' points';
     card.querySelector('.sum').textContent = g.answered + ' answered, ' + g.wrong.length + ' wrong. ' + (g.score >= best && g.score > 0 ? 'That is your best.' : 'Your best is ' + best + '.');
     var miss = card.querySelector('.miss');
@@ -376,6 +453,7 @@ footer a { color: var(--accent); }
     g = fresh(); setRule(); hud();
     if (autostart) startLevel();
     else banner('Tap to start', 'Each thing that falls: is it more than the line, or less?', 'More than ' + LEVELS[0].text + '?');
+    if (bannerEl) bannerEl.querySelector('.big').classList.add('blink');
   }
   function begin(){ if (g.phase === 'idle'){ count('start'); startLevel(); return true; } return false; }
 
