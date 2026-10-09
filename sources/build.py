@@ -6,7 +6,9 @@
 
 One page per measured event size (sources/<slug>/), one per source category
 with a typical rate (eps/<slug>/), the index with the whole table and the
-CSV (sources/), and sitemap.xml with every page in it. The pages are
+CSV (sources/), sitemap.xml with every page in it, and, with --store, the
+home page's structured data from Apple's public lookup (rating, version,
+dates) and the citations in sources/data/mentions.json. The pages are
 written, not served: GitHub Pages has no build step, so this runs by hand
 and the output is committed, the way quiz/build-score-pages.py does it.
 
@@ -522,12 +524,77 @@ def write_sitemap(paths):
     (ROOT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n')
 
 
+MENTIONS_FILE = ROOT / "sources" / "data" / "mentions.json"
+
+
+def store_facts():
+    """The listing's own figures from Apple's public lookup, for the home
+    page's structured data: rating, count, version, dates, size. Kept in
+    sources/data/store.json so the page can be rebuilt without the network."""
+    import urllib.request
+    url = f"https://itunes.apple.com/lookup?country=us&id={APP_ID}"
+    with urllib.request.urlopen(url, timeout=30) as r:
+        res = json.load(r)["results"][0]
+    facts = {"version": res["version"], "rating": res.get("averageUserRating"), "ratingCount": res.get("userRatingCount"),
+             "released": res["releaseDate"][:10], "updated": res["currentVersionReleaseDate"][:10],
+             "fileSizeBytes": int(res.get("fileSizeBytes", 0)), "minimumOs": res.get("minimumOsVersion")}
+    (DATA / "store.json").write_text(json.dumps(facts, indent=1) + "\n")
+    return facts
+
+
+def home_jsonld():
+    """Rewrite the home page's JSON-LD from sources/data/store.json and
+    sources/data/mentions.json. Google's software-app result wants name,
+    operating system, category, an offer and an aggregate rating; the rest
+    is what a careful reader of the markup would expect to find true."""
+    facts = json.loads((DATA / "store.json").read_text())
+    mentions = json.loads(MENTIONS_FILE.read_text()) if MENTIONS_FILE.exists() else []
+    ld = {
+        "@context": "https://schema.org",
+        "@type": "MobileApplication",
+        "name": "Logcaliper",
+        "operatingSystem": f"iOS {facts['minimumOs']} or later",
+        "applicationCategory": "UtilitiesApplication",
+        "url": SITE + "/",
+        "downloadUrl": f"https://apps.apple.com/us/app/logcaliper/id{APP_ID}",
+        "description": ("A calculator for log management and SIEM capacity planning: converts data sizes and rates, "
+                        "estimates volume, storage and cluster size from a list of sources, and compares data sizes."),
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+        "image": SITE + "/images/brand/logo-512.png",
+        "screenshot": SITE + "/images/app/convert.png",
+        "softwareVersion": facts["version"],
+        "datePublished": facts["released"],
+        "dateModified": facts["updated"],
+        "fileSize": f"{facts['fileSizeBytes'] / 1e6:.1f} MB",
+        "author": {"@type": "Person", "name": "Christophe Briguet", "url": SITE + "/"},
+    }
+    if facts.get("rating") and facts.get("ratingCount"):
+        ld["aggregateRating"] = {"@type": "AggregateRating", "ratingValue": facts["rating"], "ratingCount": facts["ratingCount"],
+                                 "bestRating": 5, "worstRating": 1}
+    if mentions:
+        ld["citation"] = [{"@type": "CreativeWork", "name": m["title"], "url": m["url"], "author": m.get("author", "")} for m in mentions if m.get("url")]
+    page = ROOT / "index.html"
+    s = page.read_text()
+    start = s.index('<script type="application/ld+json">')
+    end = s.index("</script>", start) + len("</script>")
+    s = s[:start] + '<script type="application/ld+json">\n' + json.dumps(ld, indent=2, ensure_ascii=False) + "\n</script>" + s[end:]
+    page.write_text(s)
+    return ld
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--from", dest="app_repo", help="path to the app repo, to refresh sources/data/ first")
+    ap.add_argument("--store", action="store_true", help="also ask Apple's public lookup for the listing's rating, version and dates")
     args = ap.parse_args()
     if args.app_repo:
         refresh(args.app_repo)
+    if args.store:
+        f = store_facts()
+        print(f"store: version {f['version']}, rating {f['rating']} from {f['ratingCount']}, updated {f['updated']}")
+    if (DATA / "store.json").exists():
+        ld = home_jsonld()
+        print(f"home page: structured data rebuilt ({len(ld)} fields" + (", with citations" if "citation" in ld else "") + ")")
     sources, rates, units = load()
     paths = []
     for s in sources:

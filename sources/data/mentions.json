@@ -1,0 +1,16 @@
+[
+ {
+  "title": "Sizing and Scoping Your IBM Security QRadar SIEM Deployment",
+  "url": "https://www.ibm.com/support/pages/system/files/support/swg/swgdocs.nsf/0/d9bed769493ae09d8525823b00798501/$FILE/2018.03.21.Think2018.Sizing.and.scoping.your.QRadar.deployment-8947.pdf",
+  "author": "Adam Frank and Robert McGinley, IBM Security",
+  "venue": "IBM Think 2018, Open Mic LIVE, 21 March 2018, slide 11",
+  "quote": "Estimator from internets: Logcaliper Estimation Tool, with the App Store link"
+ },
+ {
+  "title": "What size should my Splunk license be?",
+  "url": "https://www.splunk.com/en_us/blog/tips-and-tricks/what-size-should-my-splunk-license-be.html",
+  "author": "Vishal Nakra, Splunk",
+  "venue": "Splunk Blogs, Tips & Tricks, 6 May 2016",
+  "quote": "These samples can come from ... mobile apps like LogCaliper, or from vendors of the data sources themselves."
+ }
+]
