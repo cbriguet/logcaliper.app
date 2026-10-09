@@ -296,7 +296,7 @@ def page(*, title, description, path, body, nav_current=None, jsonld=None):
 <footer>
   <div class="wrap">
     <p>Event sizes are averages measured from more than ten million log events, the figures Logcaliper ships. Typical rates are informed estimates, not measurements, and each page says what drives them. Decimal units: 1 GB is 1,000,000,000 bytes.</p>
-    <p>&copy; {YEAR} Christophe Briguet · <a href="/sources/">All sources</a> · <a href="/profiler/">Profiler</a> · <a href="https://apps.apple.com/us/app/logcaliper/id{APP_ID}?ct=sources-footer&amp;mt=8" data-goatcounter-click="appstore-from-sources-footer">The app</a></p>
+    <p>&copy; {YEAR} Christophe Briguet · <a href="/sources/">All sources</a> · <a href="/profiler/">Profiler</a> · <a href="https://apps.apple.com/us/app/logcaliper/id{APP_ID}?ct=sources-footer&amp;mt=8" data-goatcounter-click="appstore-from-sources-footer">The app</a> · <a href="/privacy/">Privacy</a></p>
   </div>
 </footer>
 {CALC_JS}
@@ -516,7 +516,7 @@ def write_sitemap(paths):
                                capture_output=True, text=True, timeout=10).stdout.strip() or datetime.date.today().isoformat()
     except Exception:
         stamp = datetime.date.today().isoformat()
-    fixed = ["/", "/quiz/", "/threshold/", "/profiler/", "/fun/"]
+    fixed = ["/", "/quiz/", "/threshold/", "/profiler/", "/fun/", "/privacy/"]
     urls = "".join(f"  <url><loc>{SITE}{p}</loc></url>\n" for p in fixed)
     urls += "".join(f"  <url><loc>{SITE}{p}</loc><lastmod>{stamp}</lastmod></url>\n" for p in paths)
     (ROOT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n')

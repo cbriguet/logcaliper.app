@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-itunes-app" content="app-id=381096276">
+
+<title>Privacy: what Logcaliper sends, and what it does not — Logcaliper</title>
+<meta name="description" content="Every event the Logcaliper app sends, by name, with what it carries; what the website counts and how; what stays in your browser. No account, no tracking, nothing sold.">
+<link rel="canonical" href="https://logcaliper.app/privacy/">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://logcaliper.app/privacy/">
+<meta property="og:site_name" content="Logcaliper">
+<meta property="og:title" content="Privacy: what Logcaliper sends, and what it does not">
+<meta property="og:description" content="Every event the app sends, by name, with what it carries; what the website counts and how; what stays in your browser.">
+<meta property="og:image" content="https://logcaliper.app/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Privacy: what Logcaliper sends, and what it does not">
+<meta name="twitter:description" content="Every event the app sends, by name, with what it carries; what the website counts and how; what stays in your browser.">
+<meta name="twitter:image" content="https://logcaliper.app/images/og.png">
+<meta name="twitter:creator" content="@cbriguet">
+
+<meta name="theme-color" content="#334F71">
+<link rel="icon" type="image/png" sizes="32x32" href="../images/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../images/brand/favicon-64.png">
+<link rel="apple-touch-icon" href="../images/brand/apple-touch-icon.png">
+
+<script>
+(function () {
+  var GC_CODE = "logcaliper";           // https://logcaliper.goatcounter.com
+  if (GC_CODE === "GC" + "_CODE") return;
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://gc.zgo.at/count.js";
+  s.setAttribute("data-goatcounter", "https://" + GC_CODE + ".goatcounter.com/count");
+  document.head.appendChild(s);
+})();
+</script>
+
+<style>
+:root { --navy:#334F71; --accent:#0b6f9e; --bg:#fff; --bg-alt:#f4f6f9; --surface:#fff; --text:#16242f; --text-dim:#566373; --rule:#dfe4ea;
+  --maxw:760px; --pad:clamp(1.25rem,4vw,2.5rem); --radius:14px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace; }
+@media (prefers-color-scheme: dark) { :root { --bg:#10181f; --bg-alt:#16222c; --surface:#1a2731; --text:#e7edf3; --text-dim:#9aa9b8; --rule:#2a3a48; --accent:#1fa2e8; } }
+*,*::before,*::after { box-sizing:border-box; } html { -webkit-text-size-adjust:100%; }
+body { margin:0; font-family:var(--font); font-size:17px; line-height:1.6; color:var(--text); background:var(--bg); -webkit-font-smoothing:antialiased; }
+img { max-width:100%; height:auto; display:block; } a { color:var(--accent); text-underline-offset:2px; }
+h1,h2,h3 { line-height:1.2; letter-spacing:-.02em; margin:0 0 .5em; font-weight:650; } h1 { font-size:clamp(1.75rem,5vw,2.5rem); } h2 { font-size:1.35rem; margin-top:2.25rem; } h3 { font-size:1.05rem; margin-top:1.5rem; }
+p, ul { margin:0 0 1.1em; } li { margin-bottom:.35em; } code { font-family:var(--mono); font-size:.9em; }
+:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.wrap { max-width:var(--maxw); margin-inline:auto; padding-left:max(var(--pad),env(safe-area-inset-left,0px)); padding-right:max(var(--pad),env(safe-area-inset-right,0px)); }
+.skip { position:absolute; left:-9999px; top:0; z-index:100; background:var(--navy); color:#fff; padding:.75rem 1.25rem; border-radius:0 0 8px 0; } .skip:focus { left:0; }
+.nav { border-bottom:1px solid var(--rule); padding-top:env(safe-area-inset-top,0px); }
+.nav .wrap { display:flex; align-items:center; gap:1rem; min-height:58px; }
+.brand { display:flex; align-items:center; gap:.55rem; font-weight:650; color:var(--text); text-decoration:none; letter-spacing:-.02em; } .brand img { width:26px; height:26px; border-radius:6px; }
+.nav ul { display:flex; gap:1rem; list-style:none; margin:0 0 0 auto; padding:0; font-size:.9375rem; }
+.nav ul a { color:var(--text-dim); text-decoration:none; } .nav ul a:hover { color:var(--text); }
+main { padding-block:clamp(2rem,6vw,3.5rem); }
+.count { font:600 .8125rem/1 var(--mono); letter-spacing:.06em; color:var(--text-dim); text-transform:uppercase; margin-bottom:.75rem; }
+.lede { font-size:1.0625rem; color:var(--text-dim); max-width:60ch; }
+.short { background:var(--bg-alt); border:1px solid var(--rule); border-radius:var(--radius); padding:1.25rem 1.5rem; margin:1.5rem 0; }
+.short ul { margin:0; padding-left:1.2em; }
+.table-wrap { overflow-x:auto; margin:1rem 0 1.5rem; border:1px solid var(--rule); border-radius:var(--radius); background:var(--surface); }
+table { border-collapse:collapse; width:100%; font-size:.9375rem; }
+th,td { text-align:left; padding:.6rem 1rem; border-bottom:1px solid var(--rule); vertical-align:top; } tr:last-child td { border-bottom:0; }
+th { font-weight:600; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim); white-space:nowrap; }
+td:first-child { white-space:nowrap; font-weight:600; } td.dim { color:var(--text-dim); }
+footer { border-top:1px solid var(--rule); padding-block:2rem; padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px)); color:var(--text-dim); font-size:.875rem; }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="../images/brand/favicon-64.png" alt="" width="26" height="26">Logcaliper</a>
+    <ul>
+      <li><a href="/sources/">Sources</a></li>
+      <li><a href="/profiler/">Profiler</a></li>
+      <li><a href="/fun/">Fun</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+  <div class="wrap">
+    <p class="count">Privacy · 9 October 2026</p>
+    <h1>What Logcaliper sends, and what it does not</h1>
+    <p class="lede">The app and this site are made by one person for engineers who read privacy pages. So this one names the actual events, every property they carry, and the one identifier. The page lives in the site's public repository, so its history is public too.</p>
+
+    <div class="short">
+      <ul>
+        <li>No account, no sign-in, nothing to register, no permissions asked for.</li>
+        <li>The app sends usage events to Amplitude: which screen, which conversion, a game score. They are listed below, with everything they carry.</li>
+        <li>No name, no email, no contacts, no location. One event carries two numbers you can set by hand; it is named below.</li>
+        <li>The website counts visits with GoatCounter, without cookies. The profiler page sends nothing at all.</li>
+        <li>Nothing is sold, shared or used for advertising, and nothing is joined with data from other apps or sites. The app's privacy manifest says no tracking; the App Store label says <i>Data Not Linked to You</i>.</li>
+      </ul>
+    </div>
+
+    <h2>The app</h2>
+    <p>Logcaliper for iOS uses the Amplitude analytics SDK. Every event it sends is in this table, with the properties attached to it. A debug build, the kind that runs from Xcode, sends none of them, the SDK's own session events included, from version 3.1.1; in 3.1.0 a debug build still sent those two.</p>
+
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Every event the app sends">
+    <table>
+      <thead><tr><th scope="col">Event</th><th scope="col">When</th><th scope="col">What it carries</th></tr></thead>
+      <tbody>
+        <tr><td>Session started</td><td class="dim">the app launches (a cold start, not each return to the front)</td><td><code>app_version</code>; <code>units_mode</code>, decimal or binary; <code>mode</code>, conversion or comparison. Until 3.1.1 the last two were always their defaults, because the event went out before the saved settings were read.</td></tr>
+        <tr><td>session_start, session_end</td><td class="dim">the SDK's own: session_start when a session begins, at a launch or a return to the front after more than five minutes away, and session_end for the previous session at that same moment, stamped with the time the app last left</td><td>no properties of their own, only the device fields listed below, like every event</td></tr>
+        <tr><td>Conversion</td><td class="dim">a conversion is computed</td><td><code>unit_source</code> and <code>unit_target</code>, the units; <code>units_mode</code>; <code>vendor</code> and <code>category</code> if a source is picked; <code>payload_bps</code>, which decade the resulting bit rate falls in, from under 1 kbit/s to over 100 Gbit/s. Not the number you typed.</td></tr>
+        <tr><td>Comparison</td><td class="dim">a comparison is shown</td><td><code>unit_source</code>, <code>unit_target</code></td></tr>
+        <tr><td>Estimate</td><td class="dim">the Storage screen computes</td><td><code>source_count</code>; <code>compression</code> and <code>distributed_storage</code>, on or off; <code>retention</code>, the period as shown; <code>result_unit</code>, the unit the total is shown in; <code>units_mode</code></td></tr>
+        <tr><td>Share button clicked</td><td class="dim">the share sheet opens</td><td><code>source_count</code>; <code>result_unit</code></td></tr>
+        <tr><td>Device added to list</td><td class="dim">a source joins your list</td><td><code>vendor</code>, the source's name from the catalogue; <code>logsize</code>, the event size, the catalogue's figure unless you changed it; and <code>rate</code>, the number you typed converted to events per second. These are the two numbers you can set by hand that leave the app.</td></tr>
+        <tr><td>Change units, Change mode, Change compression ratio</td><td class="dim">a setting changes</td><td>the new setting</td></tr>
+        <tr><td>About page selected</td><td class="dim">About opens</td><td><code>app_version</code></td></tr>
+        <tr><td>Asked for a review</td><td class="dim">the Log tab appears</td><td><code>launch_count</code>, the appearance count the review prompt is keyed to</td></tr>
+        <tr><td>Game opened, Game started, Game over, Game shared</td><td class="dim">Threshold, in the app</td><td><code>from</code>, where it was opened; <code>score</code>, <code>level</code>, <code>answered</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>What the SDK adds on its own</h3>
+    <p>A device identifier, which is Apple's identifier for vendor: a value specific to Logcaliper's developer on your device, which Apple resets once every app from that developer is gone. It is not the advertising identifier, which the app never reads. With it, on every event: the app version, the OS name and version, the device model and maker, the platform, the language, the carrier's name, the SDK's own name and version, a session id, a timestamp and a per-event id. Amplitude derives a country, a region and a city from the address the request arrives from; the app sends no location. Events are queued on the device and go to Amplitude's servers in the United States in batches: every thirty seconds or thirty events while the app is open, once more as it goes to the background, and anything still queued the next time it opens. Amplitude keeps them under its own terms.</p>
+
+    <h3>What I keep</h3>
+    <p>A small script pulls daily totals out of Amplitude onto a private dashboard: how many events of each kind on each day, how many active devices, and how many devices per country per day. No individual event is copied, and the dashboard has no way to see one. The same dashboard reads what Apple reports about the listing: views, downloads, updates and deletions by country and device, which is Apple's data under Apple's policy, with nothing in it that names a person.</p>
+
+    <h3>What the app does not do</h3>
+    <ul>
+      <li>It asks for no permission: no contacts, photos, location, microphone or notifications.</li>
+      <li>Share, on the Storage screen, opens the system share sheet with the estimate as text, a picture and a link to logcaliper.app; whichever app you pick sends it, and the app sends nothing itself. Feedback, in Settings, opens Mail with a message addressed to me and sends no event.</li>
+      <li>The review prompt is Apple's, shown on Apple's terms. The game is a page bundled inside the app; it loads nothing and links nowhere, keeps your best score and whether the sound is on in the app's own storage on the device, and reports only what the table above says.</li>
+      <li>There is no advertising, no advertising SDK, and no tracking across apps or sites.</li>
+      <li>There is no switch in the app to turn the events off. That is a fair thing to want; if you want it, say so.</li>
+    </ul>
+
+    <h2>The website</h2>
+    <p>These pages count visits with <a href="https://www.goatcounter.com/">GoatCounter</a>: the home page, Sources and its pages, the rate pages under /eps/, Fun, the quiz and its score pages, the game, and this page. Only the profiler does not. On each, the browser sends GoatCounter the page's address (its path and any query string), its title, the referrer, the screen width and a flag saying whether the browser looks automated. Some links are counted when tapped, such as the App Store badge and the links between these pages: the count carries the link's name and its label. The quiz also counts when a round starts, daily or practice, when it ends, with your score out of ten as the name of the event, and when a result is shared or the card is saved. The game counts a start, a game over, a share and a tap on its App Store link; the score is not sent.</p>
+    <p>GoatCounter keeps hourly totals by path and by referrer, and daily totals by browser and operating system (read from the request headers), country (from the address), language and screen width, on servers in Finland and Germany, with backups kept for up to thirty days. Its option to record individual page views is off for this site. The address and the full browser signature are not stored with the totals: to count a visit once rather than every reload, GoatCounter keeps the site id, your browser's User-Agent string and your address together as a key in memory, matched to a random id, and only the random id reaches the database; the key is dropped eight hours after the last page it saw from you. No cookie is set. I pull the per-day totals onto the same private dashboard.</p>
+    <p>The <a href="/profiler/">profiler</a> has no counter at all and loads nothing from anywhere but this site: its two scripts and the site's icons, which its Content-Security-Policy pins to logcaliper.app. The file you give it is read in your browser and never leaves it. Its own test refuses any outside address in the page and any use of browser storage.</p>
+
+    <h3>What stays in your browser</h3>
+    <p>The quiz remembers that you played a given day's ten, one entry for each day you played, kept until you clear it. The game keeps your best score and whether the sound is on. Both sit in your browser's local storage, which you can clear; no page on the site reads them except the one that wrote them. The counter script reads one local-storage flag of its own on every counted page, which exists only if you opt out of it yourself (open any counted page with <code>#toggle-goatcounter</code> on the end of its address). The profiler stores nothing. There are no cookies on the site.</p>
+
+    <h3>Apple and GitHub</h3>
+    <p>On an iPhone or iPad, Safari draws its own banner for the app above these pages, the profiler included; to do that Safari asks Apple for the listing, and the page sends nothing. The home page's App Store badge is a picture served by Apple: opening the home page fetches it from Apple's server once, then from cache for a week, with your address, browser and this site's name, as any image request carries. Nothing else on the site loads from Apple. Links to the App Store carry a campaign tag naming the page they sit on; Apple's campaign reports also need a provider token, which these links do not carry yet, so Apple reports nothing to me per page today, and what Apple does with the tag is under Apple's policy. The site is served by GitHub Pages, whose request logs are under <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>.</p>
+
+    <h2>Your choices</h2>
+    <p>Deleting the app ends its events. There is no account, so there is nothing to look up, export or delete by name: the events are keyed to the device identifier above, which neither you nor I can read off a device, and which Apple resets when the developer's apps are gone. Questions, or something on this page that does not match what you see on the wire: <a href="https://x.com/cbriguet" rel="me">@cbriguet</a>, or an issue on <a href="https://github.com/cbriguet/logcaliper.app">the site's repository</a>.</p>
+
+    <h2>Changes</h2>
+    <p><b>9 October 2026.</b> This page replaces a generated policy. The app's About screen links here from version 3.1.1, and the App Store listing points here from the same release.</p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">&copy; 2026 Christophe Briguet · <a href="/">logcaliper.app</a></div>
+</footer>
+
+</body>
+</html>

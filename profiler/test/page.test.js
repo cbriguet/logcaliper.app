@@ -60,7 +60,7 @@ const privacy = "Your browser reads the file here. Nothing about it is sent anyw
 ok(page.includes(">" + privacy + "<"), "privacy line verbatim and alone in its element");
 ok(/<label class="go[^"]*"[^>]*>.*<input type="file" id="file" class="vh"/.test(page), "label.go wraps the visually hidden file input");
 ok(page.includes("Files of 50 to 500 MB are the normal case."), "size note");
-ok(/<footer>\s*<div class="wrap">Nothing leaves your browser\. &copy; 2026 Christophe Briguet<\/div>\s*<\/footer>/.test(page), "footer exact");
+ok(/<footer>\s*<div class="wrap">Nothing leaves your browser\. &copy; 2026 Christophe Briguet · <a href="\/privacy\/">Privacy<\/a><\/div>\s*<\/footer>/.test(page), "footer exact");
 ok(/aria-live="polite"/.test(page), "aria-live region");
 ok(/role="progressbar"/.test(page), "progressbar role");
 for (const id of ["empty", "running", "refused", "error", "result"]) ok(new RegExp(`<section id="${id}"`).test(page), `state section #${id}`);
