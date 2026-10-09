@@ -1,0 +1,236 @@
+[
+ {
+  "name": "Active Directory",
+  "icon": "activedirectory.png",
+  "averageEventSizeBytes": 300,
+  "category": "AD/Domain controller"
+ },
+ {
+  "name": "Android",
+  "icon": "android.png",
+  "averageEventSizeBytes": 138,
+  "category": "Mobile OS"
+ },
+ {
+  "name": "Apache Flink",
+  "icon": "flink.png",
+  "averageEventSizeBytes": 2000,
+  "category": "Application"
+ },
+ {
+  "name": "Apache Hadoop",
+  "icon": "hadoop.png",
+  "averageEventSizeBytes": 192,
+  "category": "Distributed system"
+ },
+ {
+  "name": "Apache HTTP Server",
+  "icon": "apache.png",
+  "averageEventSizeBytes": 300,
+  "category": "Application"
+ },
+ {
+  "name": "Apache Kafka",
+  "icon": "kafka.png",
+  "averageEventSizeBytes": 2000,
+  "category": "Application"
+ },
+ {
+  "name": "Apache Spark",
+  "icon": "spark.png",
+  "averageEventSizeBytes": 97,
+  "category": "Distributed system"
+ },
+ {
+  "name": "Apache Zookeeper",
+  "icon": "zookeeper.png",
+  "averageEventSizeBytes": 139,
+  "category": "Distributed system"
+ },
+ {
+  "name": "Aruba Networks",
+  "icon": "aruba.png",
+  "averageEventSizeBytes": 138,
+  "category": "Router"
+ },
+ {
+  "name": "Bluecoat",
+  "icon": "bluecoat.png",
+  "averageEventSizeBytes": 300,
+  "category": "Proxy"
+ },
+ {
+  "name": "CarbonBlack",
+  "icon": "carbonblack.png",
+  "averageEventSizeBytes": 500,
+  "category": "Managed endpoint"
+ },
+ {
+  "name": "Checkpoint FW",
+  "icon": "checkpoint.png",
+  "averageEventSizeBytes": 200,
+  "category": "Firewall"
+ },
+ {
+  "name": "Cisco ISE",
+  "icon": "ciscoise.png",
+  "averageEventSizeBytes": 970,
+  "category": "Servers"
+ },
+ {
+  "name": "Cisco Netflow v5",
+  "icon": "cisconetflow5.png",
+  "averageEventSizeBytes": 830,
+  "category": "Network flows"
+ },
+ {
+  "name": "Cisco Netflow v9",
+  "icon": "cisconetflow9.png",
+  "averageEventSizeBytes": 814,
+  "category": "Network flows"
+ },
+ {
+  "name": "Crowdstrike",
+  "icon": "crowdstrike.png",
+  "averageEventSizeBytes": 540,
+  "category": "Managed endpoint"
+ },
+ {
+  "name": "Forcepoint Firewall",
+  "icon": "forcepoint",
+  "averageEventSizeBytes": 561,
+  "category": "Firewall"
+ },
+ {
+  "name": "Google Audit",
+  "icon": "google.png",
+  "averageEventSizeBytes": 400,
+  "category": "Application"
+ },
+ {
+  "name": "Infoblox",
+  "icon": "infoblox.png",
+  "averageEventSizeBytes": 200,
+  "category": "Linux/Unix host"
+ },
+ {
+  "name": "Mac OS",
+  "icon": "macos.png",
+  "averageEventSizeBytes": 145,
+  "category": "Managed endpoint"
+ },
+ {
+  "name": "Netskope Alert",
+  "icon": "netskope",
+  "averageEventSizeBytes": 2591,
+  "category": "Proxy"
+ },
+ {
+  "name": "Office 365",
+  "icon": "office365",
+  "averageEventSizeBytes": 1958,
+  "category": "Application"
+ },
+ {
+  "name": "Open SSH",
+  "icon": "openssh.png",
+  "averageEventSizeBytes": 111,
+  "category": "Application"
+ },
+ {
+  "name": "Open Stack",
+  "icon": "openstack.png",
+  "averageEventSizeBytes": 297,
+  "category": "Distributed system"
+ },
+ {
+  "name": "Oracle Database",
+  "icon": "oracledb.png",
+  "averageEventSizeBytes": 1030,
+  "category": "Database"
+ },
+ {
+  "name": "Palo Alto Firewall",
+  "icon": "panos.png",
+  "averageEventSizeBytes": 734,
+  "category": "Firewall"
+ },
+ {
+  "name": "PaloAlto Networks OS",
+  "icon": "panos.png",
+  "averageEventSizeBytes": 348,
+  "category": "Firewall"
+ },
+ {
+  "name": "Redhat Linux",
+  "icon": "redhat.png",
+  "averageEventSizeBytes": 150,
+  "category": "Linux/Unix host"
+ },
+ {
+  "name": "Snort",
+  "icon": "snort.png",
+  "averageEventSizeBytes": 200,
+  "category": "IDS/IPS"
+ },
+ {
+  "name": "Stellar Cyber Interflow",
+  "icon": "stellarcyber.png",
+  "averageEventSizeBytes": 1000,
+  "category": "SIEM"
+ },
+ {
+  "name": "Tanium",
+  "icon": "tanium.png",
+  "averageEventSizeBytes": 500,
+  "category": "Managed endpoint"
+ },
+ {
+  "name": "Twitter message",
+  "icon": "twitter.png",
+  "averageEventSizeBytes": 140,
+  "category": "Application"
+ },
+ {
+  "name": "Unified Data Model",
+  "icon": "udm",
+  "averageEventSizeBytes": 1236,
+  "category": "SIEM"
+ },
+ {
+  "name": "VMware ESX",
+  "icon": "vmware.png",
+  "averageEventSizeBytes": 80,
+  "category": "Servers"
+ },
+ {
+  "name": "Windows 10",
+  "icon": "windows10.png",
+  "averageEventSizeBytes": 700,
+  "category": "Windows workstation"
+ },
+ {
+  "name": "Windows DNS",
+  "icon": "windowsdns",
+  "averageEventSizeBytes": 1066,
+  "category": "Windows servers"
+ },
+ {
+  "name": "Windows Event Log",
+  "icon": "winevtlog",
+  "averageEventSizeBytes": 2413,
+  "category": "Windows servers"
+ },
+ {
+  "name": "Windows Server 2016",
+  "icon": "windows2016.png",
+  "averageEventSizeBytes": 800,
+  "category": "Windows servers"
+ },
+ {
+  "name": "Zeek IDS",
+  "icon": "zeek.png",
+  "averageEventSizeBytes": 150,
+  "category": "IDS/IPS"
+ }
+]

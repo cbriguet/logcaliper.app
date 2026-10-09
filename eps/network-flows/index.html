@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-itunes-app" content="app-id=381096276">
+
+<title>Network flows log rate: 2,000 events/s per device — Logcaliper</title>
+<meta name="description" content="A network flow source typically sends 2,000 events per second per device and bursts to 10,000: unsampled; 1:1000 sampling is 1000x lower.">
+<link rel="canonical" href="https://logcaliper.app/eps/network-flows/">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://logcaliper.app/eps/network-flows/">
+<meta property="og:site_name" content="Logcaliper">
+<meta property="og:title" content="Network flows log rate: 2,000 events/s per device">
+<meta property="og:description" content="A network flow source typically sends 2,000 events per second per device and bursts to 10,000: unsampled; 1:1000 sampling is 1000x lower.">
+<meta property="og:image" content="https://logcaliper.app/images/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Network flows log rate: 2,000 events/s per device">
+<meta name="twitter:description" content="A network flow source typically sends 2,000 events per second per device and bursts to 10,000: unsampled; 1:1000 sampling is 1000x lower.">
+<meta name="twitter:image" content="https://logcaliper.app/images/og.png">
+<meta name="twitter:creator" content="@cbriguet">
+
+<meta name="theme-color" content="#334F71">
+<link rel="icon" type="image/png" sizes="32x32" href="/images/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/images/brand/favicon-64.png">
+<link rel="apple-touch-icon" href="/images/brand/apple-touch-icon.png">
+
+<script>
+(function () {
+  var GC_CODE = "logcaliper";           // https://logcaliper.goatcounter.com
+  if (GC_CODE === "GC" + "_CODE") return;
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://gc.zgo.at/count.js";
+  s.setAttribute("data-goatcounter", "https://" + GC_CODE + ".goatcounter.com/count");
+  document.head.appendChild(s);
+})();
+</script>
+
+<style>
+:root { --navy:#334F71; --navy-deep:#22374e; --accent:#0b6f9e; --bg:#fff; --bg-alt:#f4f6f9; --surface:#fff;
+  --text:#16242f; --text-dim:#566373; --rule:#dfe4ea; --field:#767f8a; --maxw:760px;
+  --pad:clamp(1.25rem,4vw,2.5rem); --radius:14px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace; }
+@media (prefers-color-scheme: dark) { :root { --bg:#10181f; --bg-alt:#16222c; --surface:#1a2731; --text:#e7edf3;
+  --text-dim:#9aa9b8; --rule:#2a3a48; --field:#6b7a88; --accent:#1fa2e8; } }
+*,*::before,*::after { box-sizing:border-box; } html { -webkit-text-size-adjust:100%; }
+body { margin:0; font-family:var(--font); font-size:17px; line-height:1.6; color:var(--text); background:var(--bg); -webkit-font-smoothing:antialiased; }
+img { max-width:100%; height:auto; display:block; } a { color:var(--accent); text-underline-offset:2px; }
+h1,h2 { line-height:1.2; letter-spacing:-.02em; margin:0 0 .5em; font-weight:650; }
+h1 { font-size:clamp(1.6rem,4.6vw,2.3rem); } h2 { font-size:1.25rem; margin-top:2.25rem; }
+p { margin:0 0 1.1em; } :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.wrap { max-width:var(--maxw); margin-inline:auto; padding-left:max(var(--pad),env(safe-area-inset-left,0px)); padding-right:max(var(--pad),env(safe-area-inset-right,0px)); }
+.skip { position:absolute; left:-9999px; top:0; z-index:100; background:var(--navy); color:#fff; padding:.75rem 1.25rem; border-radius:0 0 8px 0; } .skip:focus { left:0; }
+.nav { border-bottom:1px solid var(--rule); padding-top:env(safe-area-inset-top,0px); }
+.nav .wrap { display:flex; align-items:center; gap:1rem; min-height:58px; }
+.brand { display:flex; align-items:center; gap:.55rem; font-weight:650; color:var(--text); text-decoration:none; letter-spacing:-.02em; }
+.brand img { width:26px; height:26px; border-radius:6px; }
+.nav ul { display:flex; gap:1rem; list-style:none; margin:0 0 0 auto; padding:0; font-size:.9375rem; }
+.nav ul a { color:var(--text-dim); text-decoration:none; } .nav ul a:hover, .nav ul a[aria-current] { color:var(--text); }
+main { padding-block:clamp(2rem,6vw,3.5rem); }
+.count { font:600 .8125rem/1 var(--mono); letter-spacing:.06em; color:var(--text-dim); text-transform:uppercase; margin-bottom:.75rem; }
+.lede { font-size:1.0625rem; color:var(--text-dim); max-width:60ch; }
+.stats { display:flex; flex-wrap:wrap; gap:1.75rem 2.5rem; margin:1.75rem 0 .5rem; }
+.stat .v { font-size:1.75rem; font-weight:650; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; }
+.stat .k { color:var(--text-dim); font-size:.8125rem; margin-top:.35rem; }
+.table-wrap { overflow-x:auto; margin-top:1rem; border:1px solid var(--rule); border-radius:var(--radius); background:var(--surface); }
+table { border-collapse:collapse; width:100%; font-size:.9375rem; }
+caption { text-align:left; padding:.9rem 1.1rem; color:var(--text-dim); font-size:.875rem; border-bottom:1px solid var(--rule); }
+th,td { text-align:left; padding:.6rem 1.1rem; border-bottom:1px solid var(--rule); white-space:nowrap; } tr:last-child td { border-bottom:0; }
+th { font-weight:600; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim); }
+td.num, th.num { font-family:var(--mono); text-align:right; font-variant-numeric:tabular-nums; } td.cat { color:var(--text-dim); }
+.calc { background:var(--bg-alt); border:1px solid var(--rule); border-radius:var(--radius); padding:1.25rem; margin-top:1rem; }
+.calc .fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; }
+.calc label { display:block; font-size:.8125rem; color:var(--text-dim); }
+.calc input { width:100%; margin-top:.3rem; font:inherit; font-variant-numeric:tabular-nums; padding:.5rem .6rem; border:1px solid var(--field); border-radius:8px; background:var(--surface); color:var(--text); }
+.calc .out { display:flex; flex-wrap:wrap; gap:1.5rem 2.5rem; margin-top:1.25rem; }
+.calc .out .v { font-size:1.6rem; font-weight:650; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; }
+.calc .out .k { color:var(--text-dim); font-size:.8125rem; margin-top:.3rem; }
+.note { font-size:.875rem; color:var(--text-dim); margin-top:1rem; }
+.plug { margin-top:2.5rem; padding:1.35rem; background:var(--bg-alt); border:1px solid var(--rule); border-radius:var(--radius); font-size:.9688rem; }
+.plug p { margin:0 0 .5rem; } .plug p:last-child { margin:0; }
+.more { list-style:none; margin:0; padding:0; } .more li { padding:.45rem 0; border-bottom:1px solid var(--rule); display:flex; justify-content:space-between; gap:1rem; }
+.more li:last-child { border-bottom:0; } .more .num { font-family:var(--mono); color:var(--text-dim); font-variant-numeric:tabular-nums; }
+footer { border-top:1px solid var(--rule); padding-block:2rem; padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px)); color:var(--text-dim); font-size:.875rem; }
+footer p { margin:0 0 .5rem; max-width:70ch; }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/images/brand/favicon-64.png" alt="" width="26" height="26">Logcaliper</a>
+    <ul><li><a href="/sources/" aria-current="page">Sources</a></li><li><a href="/profiler/">Profiler</a></li><li><a href="/fun/">Fun</a></li></ul>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+  <div class="wrap">
+<p class="count">Typical event rate · category</p>
+<h1>Network flows log rate: 2,000 events/s per device</h1>
+<p class="lede">A network flow source typically produces 2,000 events per second per device, bursting to 10,000: unsampled; 1:1000 sampling is 1000x lower. The rate is an informed estimate, a starting point for a sizing, not a measurement; the event sizes below are measured.</p>
+<div class="stats">
+  <div class="stat"><div class="v">2,000</div><div class="k">events per second, typical</div></div>
+  <div class="stat"><div class="v">10,000</div><div class="k">at the burst</div></div>
+  <div class="stat"><div class="v">822 B</div><div class="k">median event size, 2 sources</div></div>
+  <div class="stat"><div class="v">142 GB</div><div class="k">per device per day</div></div>
+</div>
+<h2>Measured sources in this category</h2>
+<p class="note">Average bytes per event, measured, and one device's volume at the typical 2,000 events per second.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Sources in this category">
+<table>
+<thead><tr><th scope="col">Source</th><th scope="col" class="num">Bytes per event</th><th scope="col" class="num">A day</th><th scope="col" class="num">A year</th></tr></thead>
+<tbody><tr><td><a href="/sources/cisco-netflow-v5/">Cisco Netflow v5</a></td><td class="num">830</td><td class="num">143 GB</td><td class="num">52.3 TB</td></tr><tr><td><a href="/sources/cisco-netflow-v9/">Cisco Netflow v9</a></td><td class="num">814</td><td class="num">141 GB</td><td class="num">51.3 TB</td></tr></tbody></table></div>
+<p style="margin-top:1rem">At the median size, a day from one device, 142 GB, is about the size of a 70B model’s weights.</p>
+<h2>Size a fleet</h2>
+<form class="calc" id="calc" onsubmit="return false">
+  <div class="fields">
+    <label>Devices<input id="devices" type="number" min="0" step="1" value="10" inputmode="numeric"></label>
+    <label>Events per second, per device<input id="eps" type="number" min="0" step="1" value="2000" inputmode="numeric"></label>
+    <label>Bytes per event (the median here)<input id="bytes" type="number" min="0" step="1" value="822" inputmode="numeric"></label>
+    <label>Retention, days<input id="days" type="number" min="0" step="1" value="90" inputmode="numeric"></label>
+  </div>
+  <div class="out">
+    <div><div class="v" id="outEps">20,000</div><div class="k">events per second</div></div>
+    <div><div class="v" id="outDay">1.4 TB</div><div class="k">per day</div></div>
+    <div><div class="v" id="outRet">128 TB</div><div class="k">at retention</div></div>
+  </div>
+</form>
+<p class="note">Raw bytes, before compression, indexing overhead and replication.</p>
+<h2>Measure a sample of your own</h2>
+<p>The figure above is an average; yours will differ, and for network flow logs what moves it most is this: unsampled; 1:1000 sampling is 1000x lower. The <a href="/profiler/">profiler</a> reads a sample from network flow logs in your browser, line by line, one event per line, and reports the bytes per line to set against it. Nothing is uploaded.</p>
+<div class="plug">
+  <p><a href="https://apps.apple.com/us/app/logcaliper/id381096276?ct=eps-network-flows&amp;mt=8" data-goatcounter-click="appstore-from-eps-network-flows">Logcaliper</a>, free on iOS, has these sizes and rates built in and sizes a whole list of sources at retention: storage, cluster capacity, nodes.</p>
+</div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Event sizes are averages measured from more than ten million log events, the figures Logcaliper ships. Typical rates are informed estimates, not measurements, and each page says what drives them. Decimal units: 1 GB is 1,000,000,000 bytes.</p>
+    <p>&copy; 2026 Christophe Briguet · <a href="/sources/">All sources</a> · <a href="/profiler/">Profiler</a> · <a href="https://apps.apple.com/us/app/logcaliper/id381096276?ct=sources-footer&amp;mt=8" data-goatcounter-click="appstore-from-sources-footer">The app</a></p>
+  </div>
+</footer>
+<script>
+(function () {
+  var f = document.getElementById('calc'); if (!f) return;
+  var q = function (id) { return document.getElementById(id); };
+  function fmt(b) {
+    var u = [['PB',1e15],['TB',1e12],['GB',1e9],['MB',1e6],['kB',1e3]];
+    for (var i = 0; i < u.length; i++) if (b >= u[i][1]) { var v = b / u[i][1]; if (v >= 999.5 && i > 0) continue; return (v >= 100 ? v.toFixed(0) : v.toFixed(1).replace(/\.0$/, '')) + ' ' + u[i][0]; }
+    return Math.round(b) + ' B';
+  }
+  function run() {
+    var devices = +q('devices').value || 0, eps = +q('eps').value || 0, bytes = +q('bytes').value || 0, days = +q('days').value || 0;
+    var perDay = devices * eps * bytes * 86400;
+    q('outDay').textContent = fmt(perDay);
+    q('outRet').textContent = fmt(perDay * days);
+    q('outEps').textContent = Math.round(devices * eps).toLocaleString('en-US');
+  }
+  f.addEventListener('input', run); run();
+})();
+</script>
+</body>
+</html>

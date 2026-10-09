@@ -135,9 +135,8 @@ section { padding-block: clamp(3.5rem, 9vw, 6.5rem); }
 .nav ul { display: flex; gap: 1.4rem; list-style: none; margin: 0 0 0 auto; padding: 0; font-size: .9375rem; }
 .nav a:not(.brand) { color: var(--text-dim); text-decoration: none; }
 .nav a:not(.brand):hover { color: var(--text); }
-/* On a phone the in-page anchors fold away and the three tools stay: a
-   visitor from a post arrives on a phone, and Game, Quiz and Profiler are
-   what the post was about. */
+/* On a phone the in-page anchors fold away and the three destinations
+   stay: Sources and Profiler are the tools, Fun is the game and the quiz. */
 @media (max-width: 720px) {
   .nav ul { gap: 1rem; font-size: .9rem; }
   .nav li:not(.tool) { display: none; }
@@ -259,10 +258,9 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
     </a>
     <ul>
       <li><a href="#modes">What it does</a></li>
-      <li><a href="#sources">Sources</a></li>
-      <li class="tool"><a href="/threshold/" data-goatcounter-click="threshold-from-nav">Game</a></li>
-      <li class="tool"><a href="/quiz/" data-goatcounter-click="quiz-from-nav">Quiz</a></li>
+      <li class="tool"><a href="/sources/" data-goatcounter-click="sources-from-nav">Sources</a></li>
       <li class="tool"><a href="/profiler/" data-goatcounter-click="profiler-from-nav">Profiler</a></li>
+      <li class="tool"><a href="/fun/" data-goatcounter-click="fun-from-nav">Fun</a></li>
       <li><a href="#mentions">Mentions</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
@@ -328,6 +326,7 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
       <div class="stat"><div class="v">10M+</div><div class="k">logs analysed</div></div>
     </div>
 
+    <p style="margin-top:1.5rem"><a href="/sources/" data-goatcounter-click="sources-from-table">All 39 measured sizes, with the typical rates and a page each →</a></p>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Built-in source catalogue">
       <table>
         <caption>A sample of the built-in catalogue. Average bytes per event.</caption>
@@ -352,6 +351,7 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
     </div>
 
     <p style="margin-top:1.5rem;color:var(--text-dim);font-size:.9375rem">
+      The whole catalogue, with a page per source, is at <a href="/sources/" data-goatcounter-click="sources-from-section">logcaliper.app/sources</a>, free to take under CC BY.
       Collecting from something that is not in the list? <a href="#contact">tell me</a> and it can go in the next release.
     </p>
   </div>

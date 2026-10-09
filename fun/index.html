@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-itunes-app" content="app-id=381096276">
+
+<title>Fun with data sizes: a game and a quiz — Logcaliper</title>
+<meta name="description" content="Two ways to learn the scale of data: Threshold, where sizes fall and you sort them before they hit the floor, and a ten-question quiz. Both use Logcaliper's own numbers.">
+<link rel="canonical" href="https://logcaliper.app/fun/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://logcaliper.app/fun/">
+<meta property="og:site_name" content="Logcaliper">
+<meta property="og:title" content="Fun with data sizes: a game and a quiz">
+<meta property="og:description" content="Threshold, where sizes fall and you sort them before they hit the floor, and a ten-question quiz. Logcaliper's own numbers.">
+<meta property="og:image" content="https://logcaliper.app/images/threshold-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Fun with data sizes: a game and a quiz">
+<meta name="twitter:description" content="Threshold, where sizes fall and you sort them before they hit the floor, and a ten-question quiz. Logcaliper's own numbers.">
+<meta name="twitter:image" content="https://logcaliper.app/images/threshold-og.png">
+<meta name="twitter:creator" content="@cbriguet">
+
+<meta name="theme-color" content="#334F71">
+<link rel="icon" type="image/png" sizes="32x32" href="../images/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../images/brand/favicon-64.png">
+<link rel="apple-touch-icon" href="../images/brand/apple-touch-icon.png">
+
+<script>
+(function () {
+  var GC_CODE = "logcaliper";           // https://logcaliper.goatcounter.com
+  if (GC_CODE === "GC" + "_CODE") return;
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://gc.zgo.at/count.js";
+  s.setAttribute("data-goatcounter", "https://" + GC_CODE + ".goatcounter.com/count");
+  document.head.appendChild(s);
+})();
+</script>
+
+<style>
+:root { --navy:#334F71; --accent:#0b6f9e; --bg:#fff; --bg-alt:#f4f6f9; --text:#16242f; --text-dim:#566373; --rule:#dfe4ea;
+  --maxw:760px; --pad:clamp(1.25rem,4vw,2.5rem); --radius:14px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace; }
+@media (prefers-color-scheme: dark) { :root { --bg:#10181f; --bg-alt:#16222c; --text:#e7edf3; --text-dim:#9aa9b8; --rule:#2a3a48; --accent:#1fa2e8; } }
+*,*::before,*::after { box-sizing:border-box; } html { -webkit-text-size-adjust:100%; }
+body { margin:0; font-family:var(--font); font-size:17px; line-height:1.6; color:var(--text); background:var(--bg); -webkit-font-smoothing:antialiased; }
+img { max-width:100%; height:auto; display:block; } a { color:var(--accent); text-underline-offset:2px; }
+h1,h2 { line-height:1.2; letter-spacing:-.02em; margin:0 0 .5em; font-weight:650; } h1 { font-size:clamp(1.75rem,5vw,2.5rem); } h2 { font-size:1.3rem; margin:0 0 .4em; }
+p { margin:0 0 1.1em; } :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.wrap { max-width:var(--maxw); margin-inline:auto; padding-left:max(var(--pad),env(safe-area-inset-left,0px)); padding-right:max(var(--pad),env(safe-area-inset-right,0px)); }
+.skip { position:absolute; left:-9999px; top:0; z-index:100; background:var(--navy); color:#fff; padding:.75rem 1.25rem; border-radius:0 0 8px 0; } .skip:focus { left:0; }
+.nav { border-bottom:1px solid var(--rule); padding-top:env(safe-area-inset-top,0px); }
+.nav .wrap { display:flex; align-items:center; gap:1rem; min-height:58px; }
+.brand { display:flex; align-items:center; gap:.55rem; font-weight:650; color:var(--text); text-decoration:none; letter-spacing:-.02em; } .brand img { width:26px; height:26px; border-radius:6px; }
+.nav ul { display:flex; gap:1rem; list-style:none; margin:0 0 0 auto; padding:0; font-size:.9375rem; }
+.nav ul a { color:var(--text-dim); text-decoration:none; } .nav ul a:hover, .nav ul a[aria-current] { color:var(--text); }
+main { padding-block:clamp(2rem,6vw,3.5rem); }
+.count { font:600 .8125rem/1 var(--mono); letter-spacing:.06em; color:var(--text-dim); text-transform:uppercase; margin-bottom:.75rem; }
+.lede { font-size:1.0625rem; color:var(--text-dim); max-width:58ch; }
+.cards { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-top:2rem; } @media (max-width:600px) { .cards { grid-template-columns:1fr; } }
+.card { background:var(--bg-alt); border:1px solid var(--rule); border-radius:var(--radius); padding:1.5rem; display:flex; flex-direction:column; }
+.card p { color:var(--text-dim); font-size:.9688rem; flex:1; }
+.card .go { align-self:flex-start; font-weight:600; text-decoration:none; background:var(--accent); color:#fff; padding:.6rem 1.1rem; border-radius:9px; }
+.card .go:hover { filter:brightness(1.1); }
+footer { border-top:1px solid var(--rule); padding-block:2rem; padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px)); color:var(--text-dim); font-size:.875rem; }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="../images/brand/favicon-64.png" alt="" width="26" height="26">Logcaliper</a>
+    <ul>
+      <li><a href="/sources/">Sources</a></li>
+      <li><a href="/profiler/">Profiler</a></li>
+      <li><a href="/fun/" aria-current="page">Fun</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+  <div class="wrap">
+    <p class="count">Fun</p>
+    <h1>The scale of data, as a game and a quiz</h1>
+    <p class="lede">Sizing lives on a feel for magnitudes that almost nobody has. These two are for getting it. Both use the numbers Logcaliper itself uses, so a day of firewall logs is the same day here as in the app.</p>
+
+    <div class="cards">
+      <article class="card">
+        <h2>Threshold</h2>
+        <p>Data sizes fall from the top and you sort each one against a line: more than a gigabyte? More than a Blu-ray? More than a day of one firewall's logs? Three lives, and every miss shows the real number.</p>
+        <a class="go" href="/threshold/" data-goatcounter-click="threshold-from-fun">Play Threshold →</a>
+      </article>
+      <article class="card">
+        <h2>The quiz</h2>
+        <p>Ten questions, one minute. Each asks which of two things holds more data: Wikipedia or Fortnite, a gram of DNA or the Internet Archive. Most people are off by orders of magnitude. A new ten every day.</p>
+        <a class="go" href="/quiz/" data-goatcounter-click="quiz-from-fun">Take the quiz →</a>
+      </article>
+    </div>
+
+    <p style="margin-top:2rem;color:var(--text-dim);font-size:.9375rem">The serious side is next door: the <a href="/sources/">measured event sizes</a> and the <a href="/profiler/">profiler</a>.</p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">Figures from Logcaliper's own catalogue. &copy; 2026 Christophe Briguet</div>
+</footer>
+
+</body>
+</html>

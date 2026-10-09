@@ -1,0 +1,98 @@
+[
+ {
+  "category": "Firewall",
+  "average": 600,
+  "burst": 3000,
+  "driver": "per appliance; TLS inspection multiplies it"
+ },
+ {
+  "category": "Router",
+  "average": 15,
+  "burst": 200,
+  "driver": "control plane only; ACL logging is the swing"
+ },
+ {
+  "category": "IDS/IPS",
+  "average": 200,
+  "burst": 2000,
+  "driver": "alert-only sensors far lower, Zeek/Suricata far higher"
+ },
+ {
+  "category": "Servers",
+  "average": 30,
+  "burst": 250,
+  "driver": "generic appliance OS, no process auditing"
+ },
+ {
+  "category": "Proxy",
+  "average": 600,
+  "burst": 3000,
+  "driver": "one record per HTTP request, tracks user count"
+ },
+ {
+  "category": "Database",
+  "average": 100,
+  "burst": 1000,
+  "driver": "audit policy decides this, not workload"
+ },
+ {
+  "category": "AD/Domain controller",
+  "average": 500,
+  "burst": 3000,
+  "driver": "Kerberos tickets; ~40/sec per 1,000 users"
+ },
+ {
+  "category": "Windows servers",
+  "average": 50,
+  "burst": 300,
+  "driver": "assumes 4688 plus Sysmon"
+ },
+ {
+  "category": "Windows workstation",
+  "average": 5,
+  "burst": 50,
+  "driver": "assumes Sysmon; raw EDR telemetry is 10x"
+ },
+ {
+  "category": "Linux/Unix host",
+  "average": 30,
+  "burst": 300,
+  "driver": "auditd rules decide this"
+ },
+ {
+  "category": "Network switch",
+  "average": 3,
+  "burst": 50,
+  "driver": "link state and 802.1X only"
+ },
+ {
+  "category": "Managed endpoint",
+  "average": 10,
+  "burst": 100,
+  "driver": "detections only is far lower, full telemetry far higher"
+ },
+ {
+  "category": "Network flows",
+  "average": 2000,
+  "burst": 10000,
+  "driver": "unsampled; 1:1000 sampling is 1000x lower"
+ },
+ {
+  "category": "Application",
+  "average": 100,
+  "burst": 1000,
+  "driver": "web access logs high, service audit trails low"
+ },
+ {
+  "category": "Distributed system",
+  "average": 100,
+  "burst": 1000,
+  "driver": "per node at INFO; log level is the lever"
+ },
+ {
+  "category": "SIEM",
+  "average": 10000,
+  "burst": 50000,
+  "driver": "a normalised feed from another platform"
+ }
+]
