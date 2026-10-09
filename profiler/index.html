@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self' blob:; base-uri 'none'; form-action 'none'">
+<!-- Safari on iOS reads this tag and asks the App Store for the listing to draw its own banner; the page itself sends nothing. -->
+<meta name="apple-itunes-app" content="app-id=381096276">
+
+<title>Profile a log file — Logcaliper</title>
+<meta name="description" content="Give Logcaliper a sample of the log you plan to collect. It reads the file in your browser, line by line, and reports the lines, the bytes and the line lengths, reconciled to the byte. Nothing is uploaded.">
+<link rel="canonical" href="https://logcaliper.app/profiler/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://logcaliper.app/profiler/">
+<meta property="og:site_name" content="Logcaliper">
+<meta property="og:title" content="Profile a log file">
+<meta property="og:description" content="Read a sample log in your browser and get its lines, bytes and line lengths, reconciled to the byte. Nothing is uploaded.">
+<meta property="og:image" content="https://logcaliper.app/images/profiler-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Logcaliper profiler reading a log file in the browser: a progress bar, then the lines and bytes it counted.">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Profile a log file">
+<meta name="twitter:description" content="Read a sample log in your browser and get its lines, bytes and line lengths, reconciled to the byte. Nothing is uploaded.">
+<meta name="twitter:image" content="https://logcaliper.app/images/profiler-og.png">
+<meta name="twitter:creator" content="@cbriguet">
+
+<meta name="theme-color" content="#334F71">
+<link rel="icon" type="image/png" sizes="32x32" href="../images/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../images/brand/favicon-64.png">
+<link rel="apple-touch-icon" href="../images/brand/apple-touch-icon.png">
+
+<!-- No analytics on this page, on purpose. The privacy note below promises
+     that nothing leaves the browser, and a counter would make that false. -->
+
+<style>
+:root {
+  --navy:      #334F71;
+  --navy-deep: #22374e;
+  --navy-ink:  #16242f;
+  /* Light value chosen for 4.5:1 on both --bg (#fff, 5.5:1) and --bg-alt
+     (#f4f6f9, 5.1:1); the brighter #1fa2e8 lives in the dark block below. */
+  --accent:    #0b6f9e;
+  --right:     #1d7a4c;
+  --wrong:     #a8332b;
+
+  --bg:        #ffffff;
+  --bg-alt:    #f4f6f9;
+  --surface:   #ffffff;
+  --text:      #16242f;
+  --text-dim:  #566373;
+  --rule:      #dfe4ea;
+  --field:     #767f8a;
+
+  --maxw: 1080px;
+  --pad: clamp(1.25rem, 4vw, 2.5rem);
+  --radius: 14px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:       #10181f;
+    --bg-alt:   #16222c;
+    --surface:  #1a2731;
+    --text:     #e7edf3;
+    --text-dim: #9aa9b8;
+    --rule:     #2a3a48;
+    --field:    #6b7a88;
+    --accent:   #1fa2e8;
+    --right:    #4ec98a;
+    --wrong:    #ef6b62;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+h1, h2, h3 { line-height: 1.2; letter-spacing: -0.02em; margin: 0 0 .5em; font-weight: 650; }
+h1 { font-size: clamp(2rem, 5.5vw, 3.25rem); }
+h2 { font-size: clamp(1.5rem, 3.4vw, 2.125rem); }
+h3 { font-size: 1.0625rem; }
+p  { margin: 0 0 1.1em; }
+.lede { font-size: clamp(1.0625rem, 2.2vw, 1.3125rem); color: var(--text-dim); max-width: 62ch; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.wrap {
+  max-width: var(--maxw); margin-inline: auto;
+  padding-left: max(var(--pad), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--pad), env(safe-area-inset-right, 0px));
+}
+
+/* ---- skip link ---- */
+.skip {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--navy); color: #fff; padding: .75rem 1.25rem; border-radius: 0 0 8px 0;
+}
+.skip:focus { left: 0; }
+
+/* ---- nav ---- */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--rule);
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.nav .wrap { display: flex; align-items: center; gap: .75rem; min-height: 58px; }
+.brand { display: flex; align-items: center; gap: .55rem; font-weight: 650; color: var(--text); text-decoration: none; letter-spacing: -.02em; }
+.brand img { width: 26px; height: 26px; flex: none; border-radius: 6px; }
+.nav .app { margin-left: auto; font-size: .9375rem; color: var(--text-dim); text-decoration: none; }
+.nav .app:hover { color: var(--text); }
+
+main { padding-block: clamp(2rem, 6vw, 3.5rem); }
+
+/* ---- eyebrow, as the quiz uses for its counters ---- */
+.count { font: 600 .8125rem/1 var(--mono); letter-spacing: .06em;
+         color: var(--text-dim); text-transform: uppercase; margin: 0 0 .75rem; }
+
+/* ---- the privacy note and the picker ---- */
+.privacy {
+  background: var(--bg-alt); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 1rem 1.25rem; margin: 1.75rem 0 1.5rem; max-width: 64ch; font-size: .9688rem;
+}
+.pick { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin: 0 0 .8rem; }
+.note { color: var(--text-dim); font-size: .9375rem; margin: 0; }
+
+/* The primary control is a label around a visually hidden file input, so it
+   reads as the site's button while the input itself keeps its keyboard and
+   screen-reader behaviour. The input stays in the tab order: focus lands on
+   it and the label draws the ring through :focus-within. */
+.go {
+  font: inherit; font-weight: 600; cursor: pointer; display: inline-block; position: relative;
+  background: var(--navy); color: #fff; border: 0; border-radius: 9px; padding: .8rem 1.8rem; line-height: 1.3;
+}
+.go:hover { background: var(--navy-deep); }
+.go:focus-within { outline: 2px solid var(--accent); outline-offset: 3px; }
+.go.wait { opacity: .55; cursor: progress; }
+@media (prefers-color-scheme: dark) {
+  .go { background: var(--accent); color: #06141d; }
+  .go:hover { background: #4fb8ee; }
+}
+.vh {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---- the chosen file, shown under the refused and error panels ---- */
+.file { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .75rem;
+        margin: 0 0 1.5rem; font-weight: 600; overflow-wrap: anywhere; }
+.file .amt { font-family: var(--mono); font-variant-numeric: tabular-nums;
+             font-weight: 400; font-size: .9375rem; color: var(--text-dim); }
+
+/* ---- running ---- */
+.track { height: 10px; background: var(--rule); border-radius: 5px; overflow: hidden; }
+.fill { height: 100%; width: 0; border-radius: 5px; background: var(--accent); transition: width .25s linear; }
+@media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
+.meta { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: .9375rem;
+        color: var(--text-dim); margin: .75rem 0 1.25rem; }
+
+/* ---- refused, error ---- */
+.panel { background: var(--bg-alt); border: 1px solid var(--rule); border-radius: var(--radius);
+         padding: 1.25rem 1.35rem; margin: 0 0 1.75rem; max-width: 64ch; }
+.panel h2 { font-size: 1.0625rem; margin: 0 0 .35rem; letter-spacing: -.01em; }
+.panel.no h2 { color: var(--wrong); }
+.panel p { margin: 0; color: var(--text-dim); font-size: .9688rem; }
+.panel .actions { margin-top: 1rem; }
+
+/* ---- result ---- */
+.title { font-size: clamp(1.35rem, 2.6vw, 1.75rem); margin: 0 0 .75rem; overflow-wrap: anywhere; }
+.stopped { color: var(--text-dim); margin: 0 0 1rem; }
+.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.card { background: var(--bg-alt); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1.75rem; }
+/* Two tiles fit a phone (375 px leaves 277 px inside the card) and six fit
+   a desktop row; a value never breaks between its number and its unit. */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 1.5rem 2rem; }
+.stat { min-width: 0; }
+.stat .v { font-size: clamp(1.35rem, 5.2vw, 2rem); font-weight: 650; letter-spacing: -.03em; line-height: 1;
+           font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stat .k { color: var(--text-dim); font-size: .875rem; margin-top: .35rem; }
+.counters { margin: 1.5rem 0 0; color: var(--text-dim); font-size: .9688rem; }
+.recon { margin: .4rem 0 0; font-size: .9688rem; color: var(--right); }
+.recon.warn { color: var(--wrong); font-weight: 600; }
+.actions { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-top: 1.25rem; }
+.mini {
+  font: inherit; font-weight: 600; font-size: .9375rem; cursor: pointer;
+  display: inline-flex; align-items: center; gap: .45rem;
+  background: transparent; color: var(--text); text-decoration: none;
+  border: 1px solid var(--field); border-radius: 9px; padding: .6rem 1rem;
+}
+.mini:hover:not(:disabled):not([aria-disabled="true"]) { border-color: var(--accent); color: var(--accent); }
+.mini:disabled, .mini[aria-disabled="true"] { cursor: default; color: var(--text-dim); }
+
+/* ---- small print ---- */
+.plug { margin: 1rem 0 0; color: var(--text-dim); font-size: .9375rem; }
+.plug a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.how { margin: 2.5rem 0 0; padding-top: 1.5rem; border-top: 1px solid var(--rule);
+       color: var(--text-dim); font-size: .9375rem; max-width: 64ch; }
+.how b { color: var(--text); }
+
+/* ---- table: the home page's rules, for the template table step 2 adds ---- */
+.table-wrap { overflow-x: auto; margin-top: 2rem; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .9375rem; }
+caption { text-align: left; padding: 1rem 1.25rem; color: var(--text-dim); font-size: .875rem; border-bottom: 1px solid var(--rule); }
+th, td { text-align: left; padding: .7rem 1.25rem; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+th { font-weight: 600; font-size: .8125rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-dim); }
+td.num { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+td.cat { color: var(--text-dim); }
+
+/* ---- footer ---- */
+footer {
+  border-top: 1px solid var(--rule); padding-block: 2.5rem;
+  padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
+  color: var(--text-dim); font-size: .875rem;
+}
+footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="../images/brand/favicon-64.png" alt="" width="26" height="26">Logcaliper</a>
+    <a class="app" href="/">← logcaliper.app</a>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+  <div class="wrap">
+
+    <section id="intro">
+      <h1>Profile a log file</h1>
+      <p class="lede">Give Logcaliper a sample of the log you plan to collect. It reads the file in your browser,
+         line by line, and reports what it is made of: how many lines, how long they run, and whether every byte
+         was accounted for. Message templates and events per second come in the next release.</p>
+    </section>
+
+    <!-- the chosen file: one line, shown under the refused and error panels (the other states name it in their heading) -->
+    <p class="file" id="fileLine" hidden><span id="fileName"></span><span class="amt" id="fileSize"></span></p>
+
+    <!-- refused: the worker's verdict, with its remedy; the picker is shown again below it -->
+    <section id="refused" hidden>
+      <div class="panel no">
+        <h2 id="refusedHead" tabindex="-1">Logcaliper cannot read this file</h2>
+        <p id="refusedMsg"></p>
+      </div>
+    </section>
+
+    <!-- error: something the reader did not expect -->
+    <section id="error" hidden>
+      <div class="panel no">
+        <h2 id="errorHead" tabindex="-1">The reader stopped</h2>
+        <p id="errorMsg"></p>
+        <div class="actions"><button class="mini" id="errorAgain" type="button">Profile another file</button></div>
+      </div>
+    </section>
+
+    <!-- empty: the privacy note and the picker -->
+    <section id="empty">
+      <div class="privacy" role="note">Your browser reads the file here. Nothing about it is sent anywhere: this page is static, has no analytics and no upload. Open the Network panel while it runs: nothing goes to any server.</div>
+      <div class="pick">
+        <label class="go wait" id="pick"><span id="pickText">Loading…</span><input type="file" id="file" class="vh" disabled></label>
+      </div>
+      <p class="note">Files of 50 to 500 MB are the normal case.</p>
+    </section>
+
+    <!-- running -->
+    <section id="running" hidden>
+      <p class="count">In progress</p>
+      <h2 class="title" id="runHead" tabindex="-1">Reading</h2>
+      <div class="track" id="bar" role="progressbar" aria-labelledby="runHead" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="fill" id="fill"></div></div>
+      <p class="meta"><span id="pBytes"></span> · <span id="pPct">0%</span> · <span id="pLines">0 lines</span><span id="pEta"></span></p>
+      <button class="mini" id="cancel" type="button">Cancel</button>
+    </section>
+
+    <!-- done, and cancelled: the same figures, with the stop line when the run was partial -->
+    <section id="result" hidden>
+      <p class="count" id="resultEyebrow">Result</p>
+      <h2 class="title" id="resultHead" tabindex="-1">Profile</h2>
+      <p class="stopped" id="stopped" hidden></p>
+      <div class="card">
+        <div class="stats">
+          <div class="stat"><div class="v" id="vLines">0</div><div class="k">Lines</div></div>
+          <div class="stat"><div class="v" id="vBytes">0</div><div class="k">Bytes</div></div>
+          <div class="stat"><div class="v" id="vAvg">0</div><div class="k">Average line</div></div>
+          <div class="stat"><div class="v" id="vLongest">0</div><div class="k">Longest line</div></div>
+          <div class="stat"><div class="v" id="vTime">0</div><div class="k">Time</div></div>
+          <div class="stat"><div class="v" id="vRate">0</div><div class="k">Throughput</div></div>
+        </div>
+        <p class="counters" id="counters"></p>
+        <p class="recon" id="recon"></p>
+      </div>
+      <div class="actions"><button class="mini" id="again" type="button">Profile another file</button></div>
+      <p class="plug">The measured event sizes in <a href="/">Logcaliper</a>,
+         the free iOS calculator for log and SIEM sizing, come from samples like this one.</p>
+    </section>
+
+    <p class="how"><b>How this works.</b> The file is read in chunks of about 8 MB by a Web Worker, so the page stays
+       responsive while it runs. Every line's byte length is counted, terminator included, so the totals reconcile
+       to the byte against the size of the file. The next release adds message templates and events per second; this one counts lines
+       and bytes.<span id="howFallback" hidden> In this browser the worker was loaded from worker.js directly
+       rather than built inside the page; it is the same code, and after a stop that had to shut it down it is
+       loaded again the same way.</span></p>
+
+    <p id="live" class="vh" aria-live="polite"></p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">Nothing leaves your browser. &copy; 2026 Christophe Briguet</div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var CHUNK = 8 * 1024 * 1024;     // what the worker reads at a time; the small print says 8 MB
+  var CANCEL_GRACE_MS = 500;       // the least a cancel may go unanswered before the worker is terminated
+  var STATES = ["empty", "running", "refused", "error", "result"];
+
+  var el = function (id) { return document.getElementById(id); };
+  var input = el("file");
+  var blobURL = null, fallback = false, worker = null, run = null, runSeq = 0;
+  var dead = false;   // set once a worker failed before it ever answered: no more are made
+
+  function human(b) {
+    var u = ["B", "KB", "MB", "GB", "TB", "PB", "EB"], n = 0;
+    while (b >= 1000 && n < u.length - 1) { b /= 1000; n++; }
+    var s = b >= 100 ? b.toFixed(0) : b >= 10 ? b.toFixed(1) : b.toFixed(2);
+    // Only trim zeros sitting after a decimal point. The old pattern made the
+    // dot optional, so it also ate the zeros off integers: "700" became "7",
+    // "150" became "15". Four reference points rendered 10x or 100x too small
+    // while the ratio beside them, computed from raw bytes, stayed correct.
+    if (s.indexOf(".") >= 0) s = s.replace(/\.?0+$/, "");
+    // 999.95 KB rounds to "1000 KB": step the unit instead.
+    if (s === "1000" && n < u.length - 1) { s = "1"; n++; }
+    return s + " " + u[n];
+  }
+
+  function num(n) { return Math.round(n).toLocaleString(); }
+  function plural(n, one, many) { return num(n) + " " + (n === 1 ? one : many); }
+
+  /* Rounded before the minutes are split off, so 59.95 s reads "1 min"
+     rather than "60 s", and 119.7 s "2 min" rather than "1 min 60 s". */
+  function minutes(total) {
+    var m = Math.floor(total / 60), s = total - m * 60;
+    return m + " min" + (s ? " " + s + " s" : "");
+  }
+
+  function duration(ms) {
+    if (Math.round(ms) < 1000) return Math.round(ms) + " ms";
+    var s = ms / 1000;
+    if (s < 9.95) return s.toFixed(1) + " s";
+    var total = Math.round(s);
+    return total < 60 ? total + " s" : minutes(total);
+  }
+
+  function eta(seconds) {
+    if (seconds < 1) return "under a second left";
+    var total = Math.round(seconds);
+    return "about " + (total < 60 ? total + " s" : minutes(total)) + " left";
+  }
+
+  /* One state on screen at a time. Refused is the exception: the verdict
+     stays up and the picker comes back under it, so the remedy and the
+     retry sit together. */
+  function show(state) {
+    STATES.forEach(function (id) { el(id).hidden = true; });
+    el(state).hidden = false;
+    if (state === "refused") el("empty").hidden = false;
+    el("fileLine").hidden = (state === "empty" || state === "running" || state === "result" || !run);
+  }
+
+  /* A new sentence is set at once. The same sentence twice in a row (the
+     same bad file chosen twice) is cleared first and set a moment later, so
+     it is announced again; only one such timer is ever pending. */
+  var sayTimer = null;
+  function say(text) {
+    var live = el("live");
+    if (sayTimer) { clearTimeout(sayTimer); sayTimer = null; }
+    if (live.textContent !== text) { live.textContent = text; return; }
+    live.textContent = "";
+    sayTimer = setTimeout(function () { sayTimer = null; live.textContent = text; }, 50);
+  }
+
+  /* Result sentences with their numbers set in mono, like the tiles: parts
+     alternate plain text and figures. Built from nodes, never from markup. */
+  function sentence(target, parts) {
+    while (target.firstChild) target.removeChild(target.firstChild);
+    parts.forEach(function (p, i) {
+      if (i % 2 === 0) { target.appendChild(document.createTextNode(p)); return; }
+      var n = document.createElement("span");
+      n.className = "n";
+      n.textContent = p;
+      target.appendChild(n);
+    });
+  }
+
+  /* The average line is the number sizing lives on and the catalogue quotes
+     it in whole bytes, so it stays in bytes at every size: a tenth of a byte
+     under ten thousand, whole bytes above, never "2.41 KB". */
+  function avgText(x) { var r = Math.round(x * 10) / 10; return (r < 10000 ? r.toFixed(1) : num(r)) + " B"; }
+  function bytesWord(n) { return n === 1 ? " byte" : " bytes"; }
+
+  function focusOn(id) {
+    try { el(id).focus({ preventScroll: id === "runHead" }); } catch (e) { el(id).focus(); }
+  }
+
+  function clearTimer() {
+    if (run && run.timer) { clearTimeout(run.timer); run.timer = null; }
+  }
+
+  /* Terminates the worker and, unless the browser cannot make one at all,
+     makes its replacement at once, so the blob: entry that creation leaves
+     in the Network panel belongs to the stop, not to the next run. */
+  function dropWorker() {
+    if (worker) { worker.terminate(); worker = null; }
+    if (dead) return;
+    try { ensureWorker(); } catch (e) { worker = null; }
+  }
+
+  /* ---- loading the worker ---- */
+
+  /* The picker opens when the worker has said it is ready, so a file can
+     never be chosen while the worker's own script is still on its way. */
+  function ready(ok) {
+    el("howFallback").hidden = !fallback;
+    if (!ok) {
+      el("pick").className = "go";
+      el("pickText").textContent = "Choose a log file";
+      input.disabled = true;
+      return;
+    }
+    try { ensureWorker(); }
+    catch (e) { showError("The reader could not be started: " + ((e && e.message) ? e.message : e), true); }
+  }
+
+  function pickerReady() {
+    el("pick").className = "go";
+    el("pickText").textContent = "Choose a log file";
+    input.disabled = false;
+  }
+
+  /* The worker is built from reader.js and worker.js fetched here and joined
+     into one blob, so it runs under this page's Content Security Policy
+     rather than its own. Both fetches are same-origin and happen once, at
+     load; nothing is fetched while a file is being read. If the blob route is
+     closed, the worker is loaded from worker.js by URL and the small print
+     says so. */
+  function loadWorker() {
+    if (typeof Worker === "undefined") {
+      ready(false);
+      showError("This browser has no Web Workers, which Logcaliper needs to read a file without freezing the page. Try a current Safari, Firefox, Chrome or Edge.", true);
+      return;
+    }
+    var canBlob = typeof fetch === "function" && typeof Blob !== "undefined" &&
+                  typeof URL !== "undefined" && typeof URL.createObjectURL === "function";
+    if (!canBlob) { fallback = true; ready(true); return; }
+    var LOAD_MS = 4000;
+    // A stalled fetch, headers or body, must not leave the picker on
+    // "Loading…": past the limit the page gives up on the blob route, aborts
+    // what it was waiting for, and loads the worker by URL.
+    var ac = (typeof AbortController === "function") ? new AbortController() : null;
+    var opts = ac ? { signal: ac.signal } : undefined;
+    var timeout = new Promise(function (_, reject) {
+      setTimeout(function () { if (ac) ac.abort(); reject(new Error("timeout")); }, LOAD_MS);
+    });
+    var scripts = Promise.all([fetch("reader.js", opts), fetch("worker.js", opts)]).then(function (rs) {
+      if (!rs[0].ok || !rs[1].ok) throw new Error("script not found");
+      return Promise.all([rs[0].text(), rs[1].text()]);
+    });
+    Promise.race([scripts, timeout]).then(function (t) {
+      try { blobURL = URL.createObjectURL(new Blob([t[0] + "\n" + t[1]], { type: "text/javascript" })); }
+      catch (e) { fallback = true; }
+      ready(true);
+    }, function () {
+      fallback = true;
+      ready(true);
+    });
+  }
+
+  /* One worker, made when the page is ready and kept across runs while it
+     behaves. Making one shows up in the Network panel as a blob: entry, and
+     a reader who was told to watch that panel during a run should see
+     nothing appear. The worker is replaced only after it was terminated or
+     reported an error. Every run carries its own id, and the worker echoes
+     it, so an answer to an earlier run is dropped rather than shown. */
+  function ensureWorker() {
+    if (worker) return worker;
+    if (dead) throw new Error("The reader could not be started.");
+    var w = null, viaBlob = false;
+    if (blobURL && !fallback) {
+      try { w = new Worker(blobURL); viaBlob = true; }
+      catch (e) { fallback = true; el("howFallback").hidden = false; }
+    }
+    if (!w) w = new Worker("worker.js");
+    w.answered = false;
+    w.onmessage = onMessage;
+    /* A script that fails to load or throws at the top fires error before
+       the worker ever answers. That is not a run failing but the reader
+       failing to start: a blob worker is tried once more by URL, and a URL
+       worker that fails is the end of it. Without this a dead worker would
+       be rebuilt, fail, and be rebuilt again without end. */
+    w.onerror = function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      var message = (e && e.message) ? e.message : "The reader stopped with an error it could not describe.";
+      if (w.answered) { showError(message); return; }
+      w.terminate();
+      if (worker === w) worker = null;
+      if (viaBlob && !fallback) {
+        fallback = true;
+        el("howFallback").hidden = false;
+        // With a run open the run ends here as an error and the stop makes
+        // the URL worker, so a script request can only coincide with a stop.
+        if (run) { showError(message); return; }
+        try { ensureWorker(); } catch (err) { worker = null; }
+        return;
+      }
+      dead = true;
+      showError("The reader could not be started in this browser. Try a current Safari, Firefox, Chrome or Edge.", true);
+    };
+    worker = w;
+    return w;
+  }
+
+  /* ---- the run ---- */
+
+  function start(file) {
+    // A run still open here means the previous one never finished: its
+    // timer must not fire on this one, and its worker is not trusted.
+    if (run) { clearTimer(); dropWorker(); }
+    if (!worker) { showError("This browser could not start the reader. Try a current Safari, Firefox, Chrome or Edge.", true); return; }
+    run = { id: ++runSeq, file: file, samples: [], last: null, cancelling: false, timer: null };
+    el("fileName").textContent = file.name;
+    el("fileSize").textContent = human(file.size);
+    el("runHead").textContent = "Reading " + file.name;
+    el("fill").style.width = "0%";
+    el("bar").setAttribute("aria-valuenow", "0");
+    el("pBytes").textContent = "0 B of " + human(file.size);
+    el("pPct").textContent = "0%";
+    el("pLines").textContent = "0 lines";
+    el("pEta").textContent = "";
+    el("cancel").removeAttribute("aria-disabled");
+    el("cancel").textContent = "Cancel";
+    show("running");
+    focusOn("runHead");
+    say("Reading " + file.name + ", " + human(file.size) + ".");
+    try {
+      ensureWorker().postMessage({ type: "start", file: file, chunkBytes: CHUNK, runId: run.id });
+    } catch (e) {
+      showError("The reader could not be started: " + ((e && e.message) ? e.message : e));
+    }
+  }
+
+  function onMessage(e) {
+    if (e && e.target) e.target.answered = true;
+    var m = e.data;
+    if (m && m.type === "ready") { if (e.target === worker && !dead) pickerReady(); return; }
+    if (!run || e.target !== worker) return;
+    if (!m || (m.runId !== undefined && m.runId !== run.id)) return;
+    if (m.type === "progress") onProgress(m);
+    else if (m.type === "refused") showRefused(m);
+    else if (m.type === "done") showResult(m.result, false, false);
+    else if (m.type === "cancelled") showResult(m.result, true, false);
+    else if (m.type === "error") showError(m.message);
+  }
+
+  /* The ETA comes from a two-second window over the worker's own clock, not
+     from the overall average: a file that starts slow (cold cache) and speeds
+     up would otherwise promise a minute for ten seconds of work. It is held
+     back for the first second, when the window has nothing to say yet. */
+  function onProgress(m) {
+    run.last = m;
+    // The worker is alive and reads the cancel flag after this chunk:
+    // give it another grace before the hard stop.
+    if (run.cancelling && run.timer) { clearTimeout(run.timer); run.timer = setTimeout(forcedStop, run.grace); }
+    var pct = m.fileSize > 0 ? Math.min(100, 100 * m.bytesRead / m.fileSize) : 100;
+    el("fill").style.width = pct.toFixed(2) + "%";
+    el("bar").setAttribute("aria-valuenow", String(Math.floor(pct)));
+    el("pBytes").textContent = human(m.bytesRead) + " of " + human(m.fileSize);
+    el("pPct").textContent = Math.floor(pct) + "%";
+    el("pLines").textContent = plural(m.lines, "line", "lines");
+
+    var s = run.samples;
+    s.push({ t: m.elapsedMs, b: m.bytesRead });
+    while (s.length > 2 && m.elapsedMs - s[1].t >= 2000) s.shift();
+    var text = "";
+    if (m.elapsedMs >= 1000 && s.length > 1 && m.bytesRead < m.fileSize) {
+      var a = s[0], z = s[s.length - 1];
+      var rate = (z.b - a.b) / ((z.t - a.t) / 1000);
+      if (rate > 0) text = " · " + eta((m.fileSize - m.bytesRead) / rate);
+    }
+    el("pEta").textContent = text;
+  }
+
+  function showRefused(m) {
+    clearTimer();
+    el("refusedMsg").textContent = m.message;
+    show("refused");
+    focusOn("refusedHead");
+    say("Logcaliper cannot read this file. " + m.message);
+    run = null;
+  }
+
+  function showError(message, fatal) {
+    clearTimer();
+    dropWorker();
+    el("errorMsg").textContent = message;
+    el("errorAgain").hidden = !!fatal;
+    show("error");
+    focusOn("errorHead");
+    say("The reader stopped. " + message);
+    run = null;
+  }
+
+  /* One renderer for done and cancelled. A forced stop (the worker never
+     answered the cancel and was terminated) has only the last progress to
+     show, so the figures it cannot vouch for are left blank rather than
+     guessed. */
+  function showResult(r, partial, forced) {
+    clearTimer();
+    if (forced) dropWorker();
+    var t = r.totals, c = r.counters, tm = r.timing, rc = r.reconciliation, f = r.file;
+    var dash = "—";
+    var val = function (x, fmt) { return (x === null || x === undefined) ? dash : fmt(x); };
+
+    el("resultEyebrow").textContent = "Result";
+    el("resultHead").textContent = (partial ? "Stopped reading " : "Profile of ") + f.name;
+    el("stopped").hidden = !partial;
+    if (partial) {
+      el("stopped").textContent = "Read up to " + human(f.bytesRead) + " of " + human(f.size) + "; the figures describe that part.";
+    }
+    el("vLines").textContent = val(t.lines, num);
+    el("vBytes").textContent = val(t.bytes, human);
+    el("vAvg").textContent = val(t.avgLineBytes, avgText);
+    el("vLongest").textContent = val(t.longestLineBytes, human);
+    el("vTime").textContent = val(tm.ms, duration);
+    el("vRate").textContent = val(tm.bytesPerSecond, function (x) { return human(x) + "/s"; });
+
+    el("counters").hidden = !c;
+    if (c) {
+      var parts = [
+        "", num(c.empty), c.empty === 1 ? " empty line, " : " empty lines, ",
+        num(c.undecodable), c.undecodable === 1 ? " line with invalid UTF-8, " : " lines with invalid UTF-8, ",
+        num(c.crlf), c.crlf === 1 ? " CRLF line, " : " CRLF lines, ",
+        num(c.overLong), c.overLong === 1 ? " line over 64 KB." : " lines over 64 KB."
+      ];
+      if (c.truncated) {
+        parts.push(" ", num(c.truncated), c.truncated === 1 ? " line longer than 16 MB was measured on its first 16 MB." : " lines longer than 16 MB were measured on their first 16 MB.");   // the cap is 16,000,000 bytes
+      }
+      if (tm.linesPerSecond >= 0.5) {
+        parts.push(" Read at ", num(tm.linesPerSecond), Math.round(tm.linesPerSecond) === 1 ? " line per second." : " lines per second.");
+      }
+      sentence(el("counters"), parts);
+    }
+    var recon = el("recon");
+    if (forced || !rc) {
+      recon.className = "recon warn";
+      sentence(recon, ["The reader did not answer within half a second and was shut down, so only the figures it had already announced are shown."]);
+    } else if (rc.ok) {
+      recon.className = "recon";
+      sentence(recon, ["Every byte accounted for: ", num(t.bytes), bytesWord(t.bytes) + " of lines plus ", num(f.bomBytes),
+        bytesWord(f.bomBytes) + " of BOM equal the ", num(f.bytesRead), bytesWord(f.bytesRead) + " read."]);
+    } else {
+      recon.className = "recon warn";
+      sentence(recon, ["Not every byte accounted for: ", num(t.bytes), bytesWord(t.bytes) + " of lines plus ", num(f.bomBytes),
+        bytesWord(f.bomBytes) + " of BOM leave a residual of ", num(rc.residual), " against the ", num(f.bytesRead), bytesWord(f.bytesRead) + " read."]);
+    }
+
+    show("result");
+    focusOn("resultHead");
+    say((partial ? "Stopped after " + human(f.bytesRead) + ". " : "Done. ") +
+        val(t.lines, function (x) { return plural(x, "line", "lines"); }) +
+        (t.bytes === null ? "" : " in " + human(t.bytes)) +
+        ((tm.ms === null || tm.ms === undefined) ? "." : ", read in " + duration(tm.ms) + "."));
+    run = null;
+  }
+
+  function forcedStop() {
+    if (!run) return;
+    var p = run.last, f = run.file;
+    showResult({
+      schemaVersion: 1, status: "partial",
+      file: { name: f.name, size: f.size, bytesRead: p ? p.bytesRead : 0, bomBytes: null },
+      totals: { lines: p ? p.lines : 0, bytes: null, avgLineBytes: null, longestLineBytes: null },
+      counters: null,
+      timing: { ms: null, bytesPerSecond: null, linesPerSecond: null },   // the worker's clock stopped before the stop
+      reconciliation: null
+    }, true, true);
+  }
+
+  function reset() {
+    clearTimer();
+    run = null;
+    show("empty");
+    try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
+  }
+
+  /* ---- wiring ---- */
+
+  input.addEventListener("change", function () {
+    var f = input.files && input.files[0];
+    if (!f) return;
+    start(f);
+    input.value = "";    // so that choosing the same file again fires change again
+  });
+
+  /* Cooperative first. The worker reads the cancel flag between chunks, so
+     the grace is at least two chunks at the pace this run has shown (half a
+     second at the least): a healthy worker on a slow disk is not cut off,
+     a hung one still is. The button stays focusable while it waits. */
+  el("cancel").addEventListener("click", function () {
+    if (!run || run.cancelling) return;
+    run.cancelling = true;
+    el("cancel").setAttribute("aria-disabled", "true");
+    el("cancel").textContent = "Stopping…";
+    say("Stopping.");
+    var s = run.samples, gap = s.length > 1 ? s[s.length - 1].t - s[s.length - 2].t : (s.length === 1 ? s[0].t : CANCEL_GRACE_MS);
+    run.grace = Math.max(CANCEL_GRACE_MS, 2 * gap);
+    try { worker.postMessage({ type: "cancel" }); }
+    catch (e) { forcedStop(); return; }
+    run.timer = setTimeout(forcedStop, run.grace);
+  });
+
+  el("again").addEventListener("click", reset);
+  el("errorAgain").addEventListener("click", reset);
+
+  loadWorker();
+})();
+</script>
+
+</body>
+</html>

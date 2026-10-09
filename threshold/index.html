@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-itunes-app" content="app-id=381096276">
 
 <title>Threshold — is it bigger than a Blu-ray? — Logcaliper</title>
 <meta name="description" content="Data sizes fall from the top. Sort each one against the line before it hits the floor: a day of firewall logs, a gram of DNA, an hour of Netflix. Three lives, ten thresholds.">
@@ -201,7 +202,7 @@ footer a { color: var(--accent); }
   <p class="hint"><button type="button" class="mute" id="mute">Sound: on</button></p>
 
   <footer>
-    Everyday sizes are the ones from <a href="/quiz/">the quiz</a>; log volumes are computed the way <a href="/">Logcaliper</a> computes them, from typical event rates and sizes. Decimal units: 1 GB is 1,000,000,000 bytes.
+    Everyday sizes are the ones from <a href="/quiz/">the quiz</a>; log volumes are computed the way <a href="https://apps.apple.com/us/app/logcaliper/id381096276?ct=threshold-foot&amp;mt=8" data-goatcounter-click="appstore-from-threshold-foot">Logcaliper</a>, the free iOS calculator for log and SIEM sizing, computes them, from typical event rates and sizes. Decimal units: 1 GB is 1,000,000,000 bytes.
   </footer>
 </div>
 <input class="copyfield" id="copyfield" type="text" readonly aria-hidden="true" tabindex="-1">
@@ -290,7 +291,7 @@ footer a { color: var(--accent); }
     { text:'a year of one firewall’s logs', bytes:13888454400000, ref:'fw_year', hint:'14 TB' }
   ];
   var PER_LEVEL = 8, LIVES = 3;
-  var APPSTORE = 'https://apps.apple.com/us/app/logcaliper/id381096276';
+  var APPSTORE = 'https://apps.apple.com/us/app/logcaliper/id381096276?ct=threshold-end&mt=8';
 
   var UNITS = ['B','kB','MB','GB','TB','PB'];
   function fmtBytes(n){ var p=0,v=n; while (v>=1000 && p<UNITS.length-1){ v/=1000; p++; } var s = p===0 ? Math.round(v).toLocaleString() : (v<10 ? v.toFixed(1).replace(/\.0$/,'') : Math.round(v).toLocaleString()); return s+' '+UNITS[p]; }
@@ -435,6 +436,8 @@ footer a { color: var(--accent); }
     var share = 'Threshold: ' + g.score + ' points, out on level ' + (g.level+1) + ' (more than ' + L.text + '?). Which is bigger, a Blu-ray or a day of firewall logs? https://logcaliper.app/threshold/';
     card.querySelector('.again').addEventListener('click', function(){ newGame(true); });
     card.querySelector('.copy').addEventListener('click', function(){ count('share'); copyText(share, card.querySelector('.copy')); });
+    // The card is built after count.js bound its click handlers, so this link is counted by hand.
+    var plugLink = card.querySelector('.plug a'); if (plugLink) plugLink.addEventListener('click', function(){ count('appstore'); });
     overlay = document.createElement('div'); overlay.className = 'overlay'; overlay.appendChild(card); stage.appendChild(overlay);
     card.querySelector('.again').focus();
   }
