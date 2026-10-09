@@ -32,7 +32,8 @@ ok(!/name="robots"/.test(page), "no robots meta");
 const urls = [...page.matchAll(/https?:\/\/[^\s"'<>)]+/g)].map(m => m[0]);
 const allowed = ["https://logcaliper.app/profiler/", "https://logcaliper.app/images/profiler-og.png"];
 ok(urls.every(u => allowed.includes(u)), "external URLs only in meta tags: " + [...new Set(urls)].join(", "));
-ok(!/<script[^>]*src=/.test(page) && !/<link[^>]*stylesheet/.test(page), "no external script or stylesheet");
+ok(!/<script[^>]*src=(?!"estimate\.js")/.test(page) && !/<link[^>]*stylesheet/.test(page), "no script from elsewhere than this folder, no stylesheet");
+ok(/<script src="estimate\.js"><\/script>\s*<script>/.test(page), "estimate.js is loaded by the page, before the inline script");
 
 // tokens identical to the home page
 const tok = (src, block) => Object.fromEntries([...src.matchAll(/--([a-z-]+):\s*([^;]+);/g)].map(m => [m[1], m[2].trim()]));
@@ -66,7 +67,8 @@ ok(/role="progressbar"/.test(page), "progressbar role");
 for (const id of ["empty", "running", "refused", "error", "result"]) ok(new RegExp(`<section id="${id}"`).test(page), `state section #${id}`);
 ok(/<p class="how">/.test(page), "how this works");
 const how = page.match(/<p class="how">([\s\S]*?)<span id="howFallback"/)[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-ok(how.split(/(?<=\.)\s/).length === 4, "how-it-works is the lead-in plus three sentences: " + how.split(/(?<=\.)\s/).length);
+ok(how.split(/(?<=\.)\s/).length === 6, "how-it-works is the lead-in plus five sentences: " + how.split(/(?<=\.)\s/).length);
+ok(/4,000 templates/.test(how) && /40%/.test(how) && /six common formats/.test(how) && /first 200 lines/.test(how), "how-it-works names the cap, the threshold, the formats and the probe");
 ok(!/!/.test(page.replace(/<script>[\s\S]*<\/script>/, "").replace(/<style>[\s\S]*<\/style>/, "").replace(/!DOCTYPE/, "").replace(/<!--[\s\S]*?-->/g, "")), "no exclamation marks in the copy");
 
 // the inline script
@@ -76,8 +78,13 @@ ok(!/=>|\blet\b|\bconst\b|`|\bclass\b|\basync\b|\bawait\b|^\s*(import|export)\b|
 ok(!/innerHTML|insertAdjacentHTML|document\.write/.test(code), "no innerHTML");
 ok(!/localStorage|sessionStorage/.test(code), "no storage");
 ok(/new Blob\(\[/.test(script) && /URL\.createObjectURL/.test(script) && /new Worker\("worker\.js"\)/.test(script), "blob worker with URL fallback");
-ok(/fetch\("reader\.js"(, opts)?\)/.test(script) && /fetch\("worker\.js"(, opts)?\)/.test(script), "fetches only its own two scripts");
-ok((code.match(/fetch\(/g) || []).length === 2, "exactly two fetch calls");
+for (const f of ["reader.js", "masks.js", "drain.js", "stamps.js", "worker.js"]) ok(new RegExp(`fetch\\("${f.replace(".", "\\.")}", opts\\)`).test(script), `fetches ${f} for the blob worker`);
+ok(/fetch\("sample\.log"\)/.test(script), "fetches the sample on request");
+ok((code.match(/fetch\(/g) || []).length === 6, "exactly six fetch calls: the five scripts and the sample");
+ok(/<a href="sample\.log" id="sample">Try the sample<\/a>/.test(page), "the sample link is a plain link to the file");
+for (const id of ["vEps", "vTemplates", "timeLine", "estimator", "eEps", "eBytes", "eDays", "eComp", "eOut", "templates", "tplCaption", "tplBody", "more", "dlJson", "dlCsv", "pTemplates"]) ok(new RegExp(`id="${id}"`).test(page), `element #${id}`);
+ok(/<p class="counters" id="tplCaption"><\/p>\s*<div class="table-wrap">\s*<table>\s*<caption class="vh">Message templates<\/caption>/.test(page) && /<th scope="col">Template<\/th>/.test(page), "the template table has its sentence above it, a hidden caption and scoped headers");
+ok(/LCEstimate\.RETENTION/.test(script) && /LCEstimate\.storage\(/.test(script) && /LCEstimate\.scale\(/.test(script), "the estimator uses estimate.js, not its own arithmetic");
 ok(/500/.test(code) && /terminate\(\)/.test(code), "hard-terminate after 500 ms");
 ok(/function human\(b\)/.test(script) && /\["B", "KB", "MB", "GB", "TB", "PB", "EB"\]/.test(script), "human() from the quiz");
 console.log(fails ? `\n${fails} check(s) failed` : "\nall page checks passed");

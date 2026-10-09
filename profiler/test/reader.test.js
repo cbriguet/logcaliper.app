@@ -19,6 +19,9 @@ var vm = require("node:vm");
 var cp = require("node:child_process");
 
 var LCReader = require("../reader.js");
+var LCMasks = require("../masks.js");
+var LCDrain = require("../drain.js");
+var LCStamps = require("../stamps.js");
 var workerSrc = fs.readFileSync(path.join(__dirname, "..", "worker.js"), "utf8");
 
 var DIR = process.argv[2] || process.env.LC_TEST_DIR || path.join(os.tmpdir(), "logcaliper-profiler-test");
@@ -288,7 +291,7 @@ function runWorker(file, chunkBytes, hooks) {
     var settle = function (fn, v) { file.settled = true; fn(v); };
     setTimeout(function () { settle(reject, new Error("the worker gave no answer in " + WAIT_MS + " ms")); }, WAIT_MS).unref();
     var ctx = {
-      LCReader: LCReader, setTimeout: setTimeout, Promise: Promise, Uint8Array: Uint8Array,
+      LCReader: LCReader, LCMasks: LCMasks, LCDrain: LCDrain, LCStamps: LCStamps, setTimeout: setTimeout, Promise: Promise, Uint8Array: Uint8Array,
       Date: Date, performance: performance, Math: Math, Error: Error, String: String, console: console,
       importScripts: function () { throw new Error("importScripts was called although LCReader is defined"); },
       /* Through JSON, as structured clone would: plain data, and objects of
@@ -306,14 +309,15 @@ function runWorker(file, chunkBytes, hooks) {
 
 test("worker: the first line is the importScripts guard and nothing else touches the network", function () {
   var first = workerSrc.split("\n")[0];
-  assert.equal(first, "if (typeof LCReader === 'undefined') importScripts('reader.js');");
+  assert.equal(first, "if (typeof LCReader === 'undefined') importScripts('reader.js', 'masks.js', 'drain.js', 'stamps.js');");
   var code = function (src) { return src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, ""); };
-  var readerSrc = fs.readFileSync(path.join(__dirname, "..", "reader.js"), "utf8");
-  [code(readerSrc), code(workerSrc).split("\n").slice(1).join("\n")].forEach(function (src) {
+  var srcOf = function (name) { return fs.readFileSync(path.join(__dirname, "..", name), "utf8"); };
+  var others = ["reader.js", "masks.js", "drain.js", "stamps.js", "estimate.js"].map(srcOf);
+  others.map(code).concat([code(workerSrc).split("\n").slice(1).join("\n")]).forEach(function (src) {
     assert.doesNotMatch(src, /\b(fetch|XMLHttpRequest|WebSocket|sendBeacon|importScripts|EventSource|navigator)\b/);
   });
-  var es6 = /=>|\blet\b|\bconst\b|`|\bclass\b|\basync\b|\bawait\b|^\s*(import|export)\b/m;
-  assert.doesNotMatch(code(readerSrc), es6, "reader.js is ES5");
+  var es6 = /=>|\blet\b|\bconst\b|`|\bclass\b|\basync\b|\bawait\b|^\s*(import|export)\b|\bfor\s*\(\s*(var\s+)?\w+\s+of\b/m;
+  others.forEach(function (src, i) { assert.doesNotMatch(code(src), es6, ["reader.js", "masks.js", "drain.js", "stamps.js", "estimate.js"][i] + " is ES5"); });
   assert.doesNotMatch(code(workerSrc), es6, "worker.js is ES5");
 });
 
@@ -342,6 +346,45 @@ test("worker: done, with progress at the end and a reconciled result", function 
     assert.deepEqual(r.counters, { empty: expect.emptyLines, undecodable: expect.undecodableLines, crlf: expect.crlfLines, overLong: expect.overLongLines, truncated: expect.truncatedLines });
     assert.deepEqual(r.reconciliation, { residual: 0, ok: true });
     assert.ok(r.timing.ms >= 0 && r.timing.bytesPerSecond > 0 && r.timing.linesPerSecond > 0);
+    assert.ok(typeof progress[progress.length - 1].templates === "number" && progress[progress.length - 1].templates === r.templates.count);
+
+    /* The templates: every line is in a row, in Other, or empty; Other
+       holds the lines over 64 KB (mixed.log has three) and their bytes. */
+    var tp = r.templates, held = 0, heldBytes = 0;
+    assert.equal(tp.cap, 4000);
+    assert.equal(tp.evicted, 0);
+    assert.equal(tp.count, tp.rows.length);
+    tp.rows.forEach(function (row, i) {
+      assert.ok(typeof row.template === "string" && row.lines >= 1 && row.bytes >= 0);
+      if (i > 0) assert.ok(tp.rows[i - 1].lines >= row.lines, "most lines first");
+      held += row.lines; heldBytes += row.bytes;
+    });
+    assert.equal(tp.other.overLong, expect.overLongLines);
+    assert.equal(tp.other.lines, expect.overLongLines);
+    assert.equal(held + tp.other.lines + r.counters.empty, r.totals.lines, "every line accounted for");
+    assert.equal(heldBytes + tp.other.bytes, Math.round(r.totals.avgLineBytes * r.totals.lines), "every content byte accounted for");
+    assert.ok(tp.count >= 14 && tp.count < 200, tp.count + " templates for a file written from 14");
+
+    /* The time: mixed.log is syslog without a year, in random order. */
+    var tm = r.time;
+    assert.equal(tm.format.id, "syslog");
+    assert.equal(tm.yearless, true);
+    assert.equal(tm.lines, r.totals.lines - r.counters.empty);
+    assert.equal(tm.stamped + tm.unstamped, tm.lines);
+    assert.ok(tm.stamped > tm.lines * 0.9, "most lines stamped");
+    assert.ok(tm.spanSeconds > 0 && tm.perSecond > 0);
+  });
+});
+
+test("worker: templates and time are the same whatever the chunking", function () {
+  var bytes = bytesOf("mixed.log");
+  return Promise.all([4096, 65536, 8 * MiB].map(function (size) {
+    return runWorker(fakeFile(bytes, "mixed.log"), size).then(function (posted) { return posted[posted.length - 1].result; });
+  })).then(function (results) {
+    results.slice(1).forEach(function (r) {
+      assert.deepEqual(r.templates, results[0].templates);
+      assert.deepEqual(r.time, results[0].time);
+    });
   });
 });
 
@@ -432,7 +475,7 @@ test("worker: a bad message type is an error, a small chunk is widened to the 64
     assert.ok(widths.slice(1).every(function (w) { return w === 65536; }), "4 KiB is raised to 64 KiB too");
   }).then(function () {
     return new Promise(function (resolve) {
-      var ctx = { LCReader: LCReader, postMessage: function (m) { if (m.type !== "ready") resolve(m); }, importScripts: function () {} };
+      var ctx = { LCReader: LCReader, LCMasks: LCMasks, LCDrain: LCDrain, LCStamps: LCStamps, postMessage: function (m) { if (m.type !== "ready") resolve(m); }, importScripts: function () {} };
       ctx.self = ctx;
       vm.createContext(ctx);
       vm.runInContext(workerSrc, ctx);

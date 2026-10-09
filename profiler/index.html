@@ -8,14 +8,14 @@
 <meta name="apple-itunes-app" content="app-id=381096276">
 
 <title>Profile a log file — Logcaliper</title>
-<meta name="description" content="Give Logcaliper a sample of the log you plan to collect. It reads the file in your browser, line by line, and reports the lines, the bytes and the line lengths, reconciled to the byte. Nothing is uploaded.">
+<meta name="description" content="Give Logcaliper a sample of the log you plan to collect. It reads the file in your browser, line by line, and reports the lines, the bytes, the message templates, the events per second and what a year of it takes to keep. Nothing is uploaded.">
 <link rel="canonical" href="https://logcaliper.app/profiler/">
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://logcaliper.app/profiler/">
 <meta property="og:site_name" content="Logcaliper">
 <meta property="og:title" content="Profile a log file">
-<meta property="og:description" content="Read a sample log in your browser and get its lines, bytes and line lengths, reconciled to the byte. Nothing is uploaded.">
+<meta property="og:description" content="Read a sample log in your browser: lines, bytes, message templates, events per second and a year of storage, reconciled to the byte. Nothing is uploaded.">
 <meta property="og:image" content="https://logcaliper.app/images/profiler-og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -23,7 +23,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Profile a log file">
-<meta name="twitter:description" content="Read a sample log in your browser and get its lines, bytes and line lengths, reconciled to the byte. Nothing is uploaded.">
+<meta name="twitter:description" content="Read a sample log in your browser: lines, bytes, message templates, events per second and a year of storage, reconciled to the byte. Nothing is uploaded.">
 <meta name="twitter:image" content="https://logcaliper.app/images/profiler-og.png">
 <meta name="twitter:creator" content="@cbriguet">
 
@@ -225,6 +225,29 @@ th { font-weight: 600; font-size: .8125rem; text-transform: uppercase; letter-sp
 td.num { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
 td.cat { color: var(--text-dim); }
 
+/* ---- the estimator ---- */
+.est { margin-top: 1.25rem; }
+.est h3 { margin: 0 0 1rem; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 1rem 1.5rem; }
+.fields label { display: block; font-size: .875rem; color: var(--text-dim); }
+.fields input, .fields select {
+  display: block; width: 100%; margin-top: .3rem; font: inherit; color: var(--text); background: var(--surface);
+  border: 1px solid var(--field); border-radius: 9px; padding: .5rem .7rem; font-variant-numeric: tabular-nums;
+}
+.fields input:focus, .fields select:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.est-out { margin: 1.25rem 0 0; }
+.est-out .n { font-weight: 650; }
+.est .plug { margin-top: 1rem; }
+
+/* ---- the template table: the count, then the template, so a phone shows
+   both before it scrolls to the share and the bytes ---- */
+#templates .table-wrap { margin-top: .75rem; }
+td.tpl { font-family: var(--mono); font-size: .875rem; white-space: normal; overflow-wrap: anywhere; min-width: 18rem; }
+@media (max-width: 600px) { #templates th, #templates td { padding-left: .8rem; padding-right: .8rem; } td.tpl { min-width: 15rem; } }
+td.tpl .w { color: var(--accent); font-weight: 600; }
+tr.other td { color: var(--text-dim); }
+tr.other td.tpl { font-family: var(--font); }
+
 /* ---- footer ---- */
 footer {
   border-top: 1px solid var(--rule); padding-block: 2.5rem;
@@ -252,8 +275,9 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
     <section id="intro">
       <h1>Profile a log file</h1>
       <p class="lede">Give Logcaliper a sample of the log you plan to collect. It reads the file in your browser,
-         line by line, and reports what it is made of: how many lines, how long they run, and whether every byte
-         was accounted for. Message templates and events per second come in the next release.</p>
+         line by line, and reports what it is made of: how many lines and how long they run, the message templates
+         behind them, the events per second over the time the sample covers, and what a year of it takes to keep.
+         Nothing is uploaded.</p>
     </section>
 
     <!-- the chosen file: one line, shown under the refused and error panels (the other states name it in their heading) -->
@@ -283,6 +307,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
         <label class="go wait" id="pick"><span id="pickText">Loading…</span><input type="file" id="file" class="vh" disabled></label>
       </div>
       <p class="note">Files of 50 to 500 MB are the normal case.</p>
+      <p class="note">No log at hand? <a href="sample.log" id="sample">Try the sample</a>: 1.5 MB of made-up syslog, fetched from this site and then read like any file.</p>
     </section>
 
     <!-- running -->
@@ -290,7 +315,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
       <p class="count">In progress</p>
       <h2 class="title" id="runHead" tabindex="-1">Reading</h2>
       <div class="track" id="bar" role="progressbar" aria-labelledby="runHead" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="fill" id="fill"></div></div>
-      <p class="meta"><span id="pBytes"></span> · <span id="pPct">0%</span> · <span id="pLines">0 lines</span><span id="pEta"></span></p>
+      <p class="meta"><span id="pBytes"></span> · <span id="pPct">0%</span> · <span id="pLines">0 lines</span> · <span id="pTemplates">0 templates</span><span id="pEta"></span></p>
       <button class="mini" id="cancel" type="button">Cancel</button>
     </section>
 
@@ -304,22 +329,64 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
           <div class="stat"><div class="v" id="vLines">0</div><div class="k">Lines</div></div>
           <div class="stat"><div class="v" id="vBytes">0</div><div class="k">Bytes</div></div>
           <div class="stat"><div class="v" id="vAvg">0</div><div class="k">Average line</div></div>
+          <div class="stat"><div class="v" id="vEps">—</div><div class="k">Events per second</div></div>
+          <div class="stat"><div class="v" id="vTemplates">0</div><div class="k">Templates</div></div>
           <div class="stat"><div class="v" id="vLongest">0</div><div class="k">Longest line</div></div>
           <div class="stat"><div class="v" id="vTime">0</div><div class="k">Time</div></div>
           <div class="stat"><div class="v" id="vRate">0</div><div class="k">Throughput</div></div>
         </div>
         <p class="counters" id="counters"></p>
+        <p class="counters" id="timeLine"></p>
         <p class="recon" id="recon"></p>
       </div>
-      <div class="actions"><button class="mini" id="again" type="button">Profile another file</button></div>
-      <p class="plug">The <a href="/sources/">measured event sizes</a> in <a href="/">Logcaliper</a>,
-         the free iOS calculator for log and SIEM sizing, come from samples like this one; set yours against them.</p>
+
+      <!-- the estimator: the app's Storage tab, seeded from the profile -->
+      <div class="card est" id="estimator">
+        <h3>What this log takes to keep</h3>
+        <div class="fields">
+          <label>Events per second<input id="eEps" type="number" min="0" step="any" inputmode="decimal" autocomplete="off"></label>
+          <label>Bytes per event<input id="eBytes" type="number" min="0" step="any" inputmode="decimal" autocomplete="off"></label>
+          <label>Retention<select id="eDays"></select></label>
+          <label>Compression<select id="eComp">
+            <option value="1">None</option><option value="2">1:2</option><option value="4">1:4</option>
+            <option value="5">1:5</option><option value="8">1:8</option><option value="10">1:10</option><option value="20">1:20</option>
+          </select></label>
+        </div>
+        <p class="est-out" id="eOut"></p>
+        <p class="plug">The same arithmetic over a list of sources, with replication and the number of nodes, is the Estimation tab
+           of <a href="/">Logcaliper</a>, the free iOS calculator; the <a href="/sources/">measured event sizes</a> it ships with
+           come from samples like this one.</p>
+      </div>
+
+      <!-- the templates, most lines first; the rest on request. The sentence
+           sits above the scrolling table so it is read whole on a phone. -->
+      <div id="templates" hidden>
+        <p class="counters" id="tplCaption"></p>
+        <div class="table-wrap">
+        <table>
+          <caption class="vh">Message templates</caption>
+          <thead><tr><th scope="col">Lines</th><th scope="col">Template</th><th scope="col">Share</th><th scope="col">Avg bytes</th></tr></thead>
+          <tbody id="tplBody"></tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="mini" id="again" type="button">Profile another file</button>
+        <button class="mini" id="more" type="button" hidden>Show all templates</button>
+        <button class="mini" id="dlJson" type="button">Download the profile (JSON)</button>
+        <button class="mini" id="dlCsv" type="button">Download the templates (CSV)</button>
+      </div>
     </section>
 
     <p class="how"><b>How this works.</b> The file is read in chunks of about 8 MB by a Web Worker, so the page stays
        responsive while it runs. Every line's byte length is counted, terminator included, so the totals reconcile
-       to the byte against the size of the file. The next release adds message templates and events per second; this one counts lines
-       and bytes.<span id="howFallback" hidden> In this browser the worker was loaded from worker.js directly
+       to the byte against the size of the file. Timestamps, addresses, ids and numbers are masked, then Drain, the
+       log parsing algorithm, groups each line with the template it shares at least 40% of its words with and
+       wildcards the words that differ; up to 4,000 templates are kept, and past that the least recently used are
+       folded into Other. The rate is the lines that carry a timestamp over the span from the earliest to the
+       latest, in whichever of six common formats the first 200 lines use. The storage line is the arithmetic of
+       the app's Estimation tab, at the retention and compression you pick.<span id="howFallback" hidden> In this browser the worker was loaded from worker.js directly
        rather than built inside the page; it is the same code, and after a stop that had to shut it down it is
        loaded again the same way.</span></p>
 
@@ -331,6 +398,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
   <div class="wrap">Nothing leaves your browser. &copy; 2026 Christophe Briguet · <a href="/privacy/">Privacy</a></div>
 </footer>
 
+<script src="estimate.js"></script>
 <script>
 (function () {
   "use strict";
@@ -341,7 +409,9 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
 
   var el = function (id) { return document.getElementById(id); };
   var input = el("file");
-  var blobURL = null, fallback = false, worker = null, run = null, runSeq = 0;
+  var blobURL = null, fallback = false, worker = null, run = null, runSeq = 0, lastResult = null;
+  var SHOW = 25;                   // template rows shown before "Show all"
+  var MASK_RE = /(<\*>|<(?:mac|ts|uuid|ip|hex|num)>)/g;   // what the table sets in colour
   var dead = false;   // set once a worker failed before it ever answered: no more are made
 
   function human(b) {
@@ -423,6 +493,44 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
   function avgText(x) { var r = Math.round(x * 10) / 10; return (r < 10000 ? r.toFixed(1) : num(r)) + " B"; }
   function bytesWord(n) { return n === 1 ? " byte" : " bytes"; }
 
+  /* A rate, with the digits it deserves: 0.16, 8.3, 128. */
+  function rateText(x) { return x < 1 ? x.toFixed(2) : x < 10 ? x.toFixed(1) : num(x); }
+
+  /* A span of time in its two largest units: "46 min 12 s", "3 h 5 min", "12 days 7 h". */
+  function spanText(seconds) {
+    var s = Math.round(seconds), m, h, d;
+    if (s < 60) return s + " s";
+    m = Math.floor(s / 60); s -= m * 60;
+    if (m < 60) return m + " min" + (s ? " " + s + " s" : "");
+    h = Math.floor(m / 60); m -= h * 60;
+    if (h < 24) return h + " h" + (m ? " " + m + " min" : "");
+    d = Math.floor(h / 24); h -= d * 24;
+    return plural(d, "day", "days") + (h ? " " + h + " h" : "");
+  }
+
+  function share(a, b) { return b > 0 ? 100 * a / b : 0; }
+  /* Whole percent in the middle, a decimal at both ends, and never "100%"
+     for a part that is not the whole. */
+  function shareText(a, b) {
+    var p = share(a, b);
+    if (p > 0 && p < 0.05) return "<0.1%";
+    return (p >= 99.95 && a !== b ? "99.9" : (p >= 99 || p < 10) ? p.toFixed(1) : p.toFixed(0)) + "%";
+  }
+
+  /* Like sentence(), with the figures marked rather than alternated: a
+     string is text, fig(x) is a figure. */
+  function fig(x) { return { n: String(x) }; }
+  function write(target, items) {
+    while (target.firstChild) target.removeChild(target.firstChild);
+    items.forEach(function (p) {
+      if (typeof p === "string") { target.appendChild(document.createTextNode(p)); return; }
+      var n = document.createElement("span");
+      n.className = "n";
+      n.textContent = p.n;
+      target.appendChild(n);
+    });
+  }
+
   function focusOn(id) {
     try { el(id).focus({ preventScroll: id === "runHead" }); } catch (e) { el(id).focus(); }
   }
@@ -462,12 +570,12 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
     input.disabled = false;
   }
 
-  /* The worker is built from reader.js and worker.js fetched here and joined
-     into one blob, so it runs under this page's Content Security Policy
-     rather than its own. Both fetches are same-origin and happen once, at
-     load; nothing is fetched while a file is being read. If the blob route is
-     closed, the worker is loaded from worker.js by URL and the small print
-     says so. */
+  /* The worker is built from reader.js, masks.js, drain.js, stamps.js and
+     worker.js fetched here and joined into one blob, so it runs under this
+     page's Content Security Policy rather than its own. The five fetches are
+     same-origin and happen once, at load; nothing is fetched while a file is
+     being read. If the blob route is closed, the worker is loaded from
+     worker.js by URL and the small print says so. */
   function loadWorker() {
     if (typeof Worker === "undefined") {
       ready(false);
@@ -486,12 +594,13 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
     var timeout = new Promise(function (_, reject) {
       setTimeout(function () { if (ac) ac.abort(); reject(new Error("timeout")); }, LOAD_MS);
     });
-    var scripts = Promise.all([fetch("reader.js", opts), fetch("worker.js", opts)]).then(function (rs) {
-      if (!rs[0].ok || !rs[1].ok) throw new Error("script not found");
-      return Promise.all([rs[0].text(), rs[1].text()]);
+    var scripts = Promise.all([fetch("reader.js", opts), fetch("masks.js", opts), fetch("drain.js", opts), fetch("stamps.js", opts), fetch("worker.js", opts)]).then(function (rs) {
+      var i;
+      for (i = 0; i < rs.length; i++) if (!rs[i].ok) throw new Error("script not found");
+      return Promise.all(rs.map(function (r) { return r.text(); }));
     });
     Promise.race([scripts, timeout]).then(function (t) {
-      try { blobURL = URL.createObjectURL(new Blob([t[0] + "\n" + t[1]], { type: "text/javascript" })); }
+      try { blobURL = URL.createObjectURL(new Blob([t.join("\n")], { type: "text/javascript" })); }
       catch (e) { fallback = true; }
       ready(true);
     }, function () {
@@ -560,6 +669,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
     el("pBytes").textContent = "0 B of " + human(file.size);
     el("pPct").textContent = "0%";
     el("pLines").textContent = "0 lines";
+    el("pTemplates").textContent = "0 templates";
     el("pEta").textContent = "";
     el("cancel").removeAttribute("aria-disabled");
     el("cancel").textContent = "Cancel";
@@ -601,6 +711,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
     el("pBytes").textContent = human(m.bytesRead) + " of " + human(m.fileSize);
     el("pPct").textContent = Math.floor(pct) + "%";
     el("pLines").textContent = plural(m.lines, "line", "lines");
+    el("pTemplates").textContent = plural(m.templates || 0, "template", "templates");
 
     var s = run.samples;
     s.push({ t: m.elapsedMs, b: m.bytesRead });
@@ -641,9 +752,10 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
   function showResult(r, partial, forced) {
     clearTimer();
     if (forced) dropWorker();
-    var t = r.totals, c = r.counters, tm = r.timing, rc = r.reconciliation, f = r.file;
+    var t = r.totals, c = r.counters, tm = r.timing, rc = r.reconciliation, f = r.file, tp = r.templates, tme = r.time;
     var dash = "—";
     var val = function (x, fmt) { return (x === null || x === undefined) ? dash : fmt(x); };
+    lastResult = r;
 
     el("resultEyebrow").textContent = "Result";
     el("resultHead").textContent = (partial ? "Stopped reading " : "Profile of ") + f.name;
@@ -654,6 +766,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
     el("vLines").textContent = val(t.lines, num);
     el("vBytes").textContent = val(t.bytes, human);
     el("vAvg").textContent = val(t.avgLineBytes, avgText);
+    el("vEps").textContent = (tme && tme.perSecond !== null && tme.perSecond !== undefined) ? rateText(tme.perSecond) : dash;
+    el("vTemplates").textContent = tp ? num(tp.count) : dash;
     el("vLongest").textContent = val(t.longestLineBytes, human);
     el("vTime").textContent = val(tm.ms, duration);
     el("vRate").textContent = val(tm.bytesPerSecond, function (x) { return human(x) + "/s"; });
@@ -661,19 +775,20 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
     el("counters").hidden = !c;
     if (c) {
       var parts = [
-        "", num(c.empty), c.empty === 1 ? " empty line, " : " empty lines, ",
-        num(c.undecodable), c.undecodable === 1 ? " line with invalid UTF-8, " : " lines with invalid UTF-8, ",
-        num(c.crlf), c.crlf === 1 ? " CRLF line, " : " CRLF lines, ",
-        num(c.overLong), c.overLong === 1 ? " line over 64 KB." : " lines over 64 KB."
+        fig(num(c.empty)), c.empty === 1 ? " empty line, " : " empty lines, ",
+        fig(num(c.undecodable)), c.undecodable === 1 ? " line with invalid UTF-8, " : " lines with invalid UTF-8, ",
+        fig(num(c.crlf)), c.crlf === 1 ? " CRLF line, " : " CRLF lines, ",
+        fig(num(c.overLong)), c.overLong === 1 ? " line over 64 KB." : " lines over 64 KB."
       ];
       if (c.truncated) {
-        parts.push(" ", num(c.truncated), c.truncated === 1 ? " line longer than 16 MB was measured on its first 16 MB." : " lines longer than 16 MB were measured on their first 16 MB.");   // the cap is 16,000,000 bytes
+        parts.push(" ", fig(num(c.truncated)), c.truncated === 1 ? " line longer than 16 MB was measured on its first 16 MB." : " lines longer than 16 MB were measured on their first 16 MB.");   // the cap is 16,000,000 bytes
       }
       if (tm.linesPerSecond >= 0.5) {
-        parts.push(" Read at ", num(tm.linesPerSecond), Math.round(tm.linesPerSecond) === 1 ? " line per second." : " lines per second.");
+        parts.push(" Read at ", fig(num(tm.linesPerSecond)), Math.round(tm.linesPerSecond) === 1 ? " line per second." : " lines per second.");
       }
-      sentence(el("counters"), parts);
+      write(el("counters"), parts);
     }
+    showTime(tme, forced);
     var recon = el("recon");
     if (forced || !rc) {
       recon.className = "recon warn";
@@ -687,14 +802,188 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
       sentence(recon, ["Not every byte accounted for: ", num(t.bytes), bytesWord(t.bytes) + " of lines plus ", num(f.bomBytes),
         bytesWord(f.bomBytes) + " of BOM leave a residual of ", num(rc.residual), " against the ", num(f.bytesRead), bytesWord(f.bytesRead) + " read."]);
     }
+    fillEstimator(r);
+    showTemplates(r);
+    el("dlCsv").hidden = !tp;
 
     show("result");
     focusOn("resultHead");
     say((partial ? "Stopped after " + human(f.bytesRead) + ". " : "Done. ") +
         val(t.lines, function (x) { return plural(x, "line", "lines"); }) +
         (t.bytes === null ? "" : " in " + human(t.bytes)) +
+        (tp ? ", " + plural(tp.count, "template", "templates") : "") +
         ((tm.ms === null || tm.ms === undefined) ? "." : ", read in " + duration(tm.ms) + "."));
     run = null;
+  }
+
+  /* The time the sample covers, in one sentence, or why there is no rate. */
+  function showTime(tme, forced) {
+    var line = el("timeLine"), items;
+    line.hidden = forced || !tme;
+    if (line.hidden) return;
+    if (!tme.format) {
+      write(line, ["No timestamp was recognised in the first " + num(Math.min(tme.lines, 200)) + " lines, so there is no rate. " +
+        "The formats known are ISO 8601, Common Log Format, syslog, YYYY/MM/DD, DD-Mon-YYYY and Unix epoch; if you know the rate, type it below."]);
+      return;
+    }
+    items = ["Timestamps in " + tme.format.name + " on ", fig(tme.stamped === tme.lines ? "every line" : shareText(tme.stamped, tme.lines) + " of lines"),
+      (tme.yearless ? " (no year in them)" : "") + ", from ", fig(tme.firstText), " to ", fig(tme.lastText)];
+    if (tme.perSecond !== null && tme.perSecond !== undefined) {
+      items.push(", ", fig(spanText(tme.spanSeconds)), ": ", fig(rateText(tme.perSecond)), " events per second.");
+    } else if (tme.stamped < 2) {
+      items.push(": one stamp is not a span, so there is no rate.");
+    } else {
+      items.push(", under a second: too short for a rate.");
+    }
+    if (tme.unstamped > 0) {
+      items.push(" The ", fig(num(tme.unstamped)), tme.unstamped === 1 ? " line without a stamp (a continuation line, most likely) is not in the rate." : " lines without a stamp (continuation lines, most likely) are not in the rate.");
+    }
+    if (tme.backwards > 0) {
+      items.push(" ", fig(num(tme.backwards)), tme.backwards === 1 ? " line is earlier than the one before it." : " lines are earlier than the one before them.");
+    }
+    write(line, items);
+  }
+
+  /* ---- the estimator ---- */
+
+  function fillRetention() {
+    var sel = el("eDays");
+    LCEstimate.RETENTION.forEach(function (r) {
+      var o = document.createElement("option");
+      o.value = String(r.days);
+      o.textContent = r.label;
+      if (r.days === 365) o.selected = true;
+      sel.appendChild(o);
+    });
+  }
+
+  function estimate() {
+    var eps = parseFloat(el("eEps").value), bytes = parseFloat(el("eBytes").value);
+    var days = parseFloat(el("eDays").value), comp = parseFloat(el("eComp").value);
+    var out = el("eOut"), r = LCEstimate.retention(days), items, s;
+    if (!(eps > 0) || !(bytes > 0)) {
+      write(out, [(!(eps > 0) && !(bytes > 0)) ? "Type the events per second and the bytes per event to size it." :
+        !(eps > 0) ? "No rate could be read from the sample. Type the events per second to size it." :
+        "Type the bytes per event to size it."]);
+      return;
+    }
+    s = LCEstimate.storage({ eventsPerSecond: eps, bytesPerEvent: bytes, days: days, compression: comp });
+    items = [fig(rateText(eps)), " events per second at ", fig(num(bytes) + " B"), " is ", fig(LCEstimate.scale(s.perDay).text), " a day. ",
+      (r ? r.label : num(days) + " days") + " of it is ", fig(LCEstimate.scale(s.raw).text)];
+    if (comp > 1) items.push(" as written, ", fig(LCEstimate.scale(s.stored).text), " compressed 1:" + num(comp));
+    if (r && r.note) items.push(" (" + r.note + ")");
+    items.push(".");
+    write(out, items);
+  }
+
+  function fillEstimator(r) {
+    var tme = r.time, t = r.totals;
+    el("eEps").value = (tme && tme.perSecond) ? String(Math.round(tme.perSecond * 100) / 100) : "";
+    el("eBytes").value = (t && t.avgLineBytes) ? String(Math.round(t.avgLineBytes)) : "";
+    estimate();
+  }
+
+  /* ---- the templates ---- */
+
+  function cell(cls, text) {
+    var td = document.createElement("td");
+    if (cls) td.className = cls;
+    td.textContent = text;
+    return td;
+  }
+
+  /* The wildcard and the masks set in colour; split on a capturing group,
+     so the odd parts are the marks. Nodes, never markup. */
+  function templateCell(text) {
+    var td = document.createElement("td");
+    td.className = "tpl";
+    if (text === "") { td.textContent = "(blank)"; return td; }   // lines of whitespace only
+    text.split(MASK_RE).forEach(function (p, i) {
+      if (!p) return;
+      if (i % 2 === 1) {
+        var w = document.createElement("span");
+        w.className = "w";
+        w.textContent = p;
+        td.appendChild(w);
+      } else {
+        td.appendChild(document.createTextNode(p));
+      }
+    });
+    return td;
+  }
+
+  function tplRow(row, total) {
+    var tr = document.createElement("tr");
+    tr.appendChild(cell("num", num(row.lines)));
+    tr.appendChild(templateCell(row.template));
+    tr.appendChild(cell("num", shareText(row.lines, total)));
+    tr.appendChild(cell("num", num(row.bytes / row.lines)));
+    return tr;
+  }
+
+  function showTemplates(r) {
+    var tp = r.templates, wrap = el("templates"), body = el("tplBody"), more = el("more"), total = r.totals.lines;
+    var rows, shown, i, held = 0, otherTr = null, what = [];
+    while (body.firstChild) body.removeChild(body.firstChild);
+    more.hidden = true;
+    more.onclick = null;
+    if (!tp || (tp.rows.length === 0 && !tp.other.lines)) { wrap.hidden = true; return; }
+    wrap.hidden = false;
+    rows = tp.rows;
+    shown = Math.min(SHOW, rows.length);
+    for (i = 0; i < shown; i++) body.appendChild(tplRow(rows[i], total));
+    rows.forEach(function (x) { held += x.lines; });
+    if (tp.other.lines) {
+      if (tp.evicted) what.push(plural(tp.evicted, "template", "templates") + " past the " + num(tp.cap) + " kept");
+      if (tp.other.overLong) what.push(plural(tp.other.overLong, "line", "lines") + " over 64 KB");
+      otherTr = document.createElement("tr");
+      otherTr.className = "other";
+      otherTr.appendChild(cell("num", num(tp.other.lines)));
+      otherTr.appendChild(cell("tpl", "Other: " + what.join(" and ")));
+      otherTr.appendChild(cell("num", shareText(tp.other.lines, total)));
+      otherTr.appendChild(cell("num", num(tp.other.bytes / tp.other.lines)));
+      body.appendChild(otherTr);
+    }
+    write(el("tplCaption"), [fig(plural(rows.length, "template", "templates")), " cover ", fig(plural(held, "line", "lines")),
+      (held === total ? "" : " (" + shareText(held, total) + " of the file)") +
+      (shown < rows.length ? ", the " + num(shown) + " most frequent shown first. " : (rows.length ? ", most frequent first. " : ". ")) +
+      "<*> is a word that varies; <ts>, <ip>, <num>, <hex>, <uuid> and <mac> were masked before clustering."]);
+    if (shown < rows.length) {
+      more.hidden = false;
+      more.textContent = "Show all " + plural(rows.length, "template", "templates");
+      more.onclick = function () {
+        var j;
+        for (j = shown; j < rows.length; j++) body.insertBefore(tplRow(rows[j], total), otherTr);
+        more.hidden = true;
+        write(el("tplCaption"), [fig(plural(rows.length, "template", "templates")), " cover ", fig(plural(held, "line", "lines")),
+          (held === total ? "" : " (" + shareText(held, total) + " of the file)") + ", most frequent first. " +
+          "<*> is a word that varies; <ts>, <ip>, <num>, <hex>, <uuid> and <mac> were masked before clustering."]);
+      };
+    }
+  }
+
+  /* ---- downloads: a blob of this page's own making, nothing fetched ---- */
+
+  function baseName(name) { return name.replace(/\.[A-Za-z0-9]{1,8}$/, "") || "profile"; }
+
+  function download(name, mime, text) {
+    var a = document.createElement("a"), url;
+    try { url = URL.createObjectURL(new Blob([text], { type: mime })); } catch (e) { return; }
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+  }
+
+  /* Quoted when it must be, and a field that a spreadsheet would read as
+     a formula (one starting with =, +, - or @) is given a leading quote
+     mark inside the quotes, which the spreadsheet shows and the formula
+     engine does not run. */
+  function csvField(s) {
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return /[",\n\r']/.test(s) ? "\"" + s.replace(/"/g, "\"\"") + "\"" : s;
   }
 
   function forcedStop() {
@@ -706,13 +995,16 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
       totals: { lines: p ? p.lines : 0, bytes: null, avgLineBytes: null, longestLineBytes: null },
       counters: null,
       timing: { ms: null, bytesPerSecond: null, linesPerSecond: null },   // the worker's clock stopped before the stop
-      reconciliation: null
+      reconciliation: null,
+      templates: null,
+      time: null
     }, true, true);
   }
 
   function reset() {
     clearTimer();
     run = null;
+    lastResult = null;
     show("empty");
     try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
   }
@@ -746,6 +1038,48 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
   el("again").addEventListener("click", reset);
   el("errorAgain").addEventListener("click", reset);
 
+  ["eEps", "eBytes", "eDays", "eComp"].forEach(function (id) {
+    el(id).addEventListener("input", estimate);
+    el(id).addEventListener("change", estimate);
+  });
+
+  el("dlJson").addEventListener("click", function () {
+    if (!lastResult) return;
+    download(baseName(lastResult.file.name) + "-profile.json", "application/json", JSON.stringify(lastResult, null, 2) + "\n");
+  });
+
+  el("dlCsv").addEventListener("click", function () {
+    if (!lastResult || !lastResult.templates) return;
+    var tp = lastResult.templates, total = lastResult.totals.lines, out = ["lines,share,avg_bytes,template"];
+    tp.rows.forEach(function (r) { out.push([r.lines, share(r.lines, total).toFixed(2), Math.round(r.bytes / r.lines), csvField(r.template)].join(",")); });
+    if (tp.other.lines) out.push([tp.other.lines, share(tp.other.lines, total).toFixed(2), Math.round(tp.other.bytes / tp.other.lines), "Other"].join(","));
+    download(baseName(lastResult.file.name) + "-templates.csv", "text/csv", out.join("\n") + "\n");
+  });
+
+  /* The sample is fetched from this site, once, before the run starts: a
+     plain GET of a static file, then the same path as a chosen file. A
+     browser without File() is left to download it instead. */
+  el("sample").addEventListener("click", function (e) {
+    var link = e.currentTarget;
+    if (typeof fetch !== "function" || typeof File !== "function") return;   // the link downloads the file instead
+    e.preventDefault();
+    if (input.disabled || run) return;   // the reader is not ready, or busy: nothing happens, rather than the raw file replacing the page
+    link.setAttribute("aria-disabled", "true");
+    link.textContent = "Fetching the sample…";
+    fetch("sample.log").then(function (res) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.blob();
+    }).then(function (blob) {
+      start(new File([blob], "sample.log", { type: "text/plain" }));
+    }).catch(function (err) {
+      showError("The sample could not be fetched: " + ((err && err.message) ? err.message : err) + ".");
+    }).then(function () {
+      link.removeAttribute("aria-disabled");
+      link.textContent = "Try the sample";
+    });
+  });
+
+  fillRetention();
   loadWorker();
 })();
 </script>
