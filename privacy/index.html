@@ -80,8 +80,8 @@ footer { border-top:1px solid var(--rule); padding-block:2rem; padding-bottom:ca
   <div class="wrap">
     <a class="brand" href="/"><img src="../images/brand/favicon-64.png" alt="" width="26" height="26">Logcaliper</a>
     <ul>
-      <li><a href="/sources/">Sources</a></li>
       <li><a href="/profiler/">Profiler</a></li>
+      <li><a href="/sources/">Sources</a></li>
       <li><a href="/fun/">Fun</a></li>
     </ul>
   </div>
@@ -143,7 +143,7 @@ footer { border-top:1px solid var(--rule); padding-block:2rem; padding-bottom:ca
     <h2>The website</h2>
     <p>These pages count visits with <a href="https://www.goatcounter.com/">GoatCounter</a>: the home page, Sources and its pages, the rate pages under /eps/, Fun, the quiz and its score pages, the game, and this page. Only the profiler does not. On each, the browser sends GoatCounter the page's address (its path and any query string), its title, the referrer, the screen width and a flag saying whether the browser looks automated. Some links are counted when tapped, such as the App Store badge and the links between these pages: the count carries the link's name and its label. The quiz also counts when a round starts, daily or practice, when it ends, with your score out of ten as the name of the event, and when a result is shared or the card is saved. The game counts a start, a game over, a share and a tap on its App Store link; the score is not sent.</p>
     <p>GoatCounter keeps hourly totals by path and by referrer, and daily totals by browser and operating system (read from the request headers), country (from the address), language and screen width, on servers in Finland and Germany, with backups kept for up to thirty days. Its option to record individual page views is off for this site. The address and the full browser signature are not stored with the totals: to count a visit once rather than every reload, GoatCounter keeps the site id, your browser's User-Agent string and your address together as a key in memory, matched to a random id, and only the random id reaches the database; the key is dropped eight hours after the last page it saw from you. No cookie is set. I pull the per-day totals onto the same private dashboard.</p>
-    <p>The <a href="/profiler/">profiler</a> has no counter at all and loads nothing from anywhere but this site: its two scripts and the site's icons, which its Content-Security-Policy pins to logcaliper.app. The file you give it is read in your browser and never leaves it. Its own test refuses any outside address in the page and any use of browser storage.</p>
+    <p>The <a href="/profiler/">profiler</a> has no counter at all and loads nothing from anywhere but this site: its own scripts, the site's icons and, when you ask for it, its sample log, which its Content-Security-Policy pins to logcaliper.app. The file you give it is read in your browser and never leaves it. Its own test refuses any outside address in the page and any use of browser storage.</p>
 
     <h3>What stays in your browser</h3>
     <p>The quiz remembers that you played a given day's ten, one entry for each day you played, kept until you clear it. The game keeps your best score and whether the sound is on. Both sit in your browser's local storage, which you can clear; no page on the site reads them except the one that wrote them. The counter script reads one local-storage flag of its own on every counted page, which exists only if you opt out of it yourself (open any counted page with <code>#toggle-goatcounter</code> on the end of its address). The profiler stores nothing. There are no cookies on the site.</p>

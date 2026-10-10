@@ -35,6 +35,7 @@ import json
 import math
 import pathlib
 import re
+import subprocess
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DATA = ROOT / "sources" / "data"
@@ -42,6 +43,7 @@ SITE = "https://logcaliper.app"
 YEAR = 2026
 APP_ID = "381096276"
 DAY = 86400
+PROFILER_PUBLISHED = "2026-10-09"   # b4b20d7, the commit that put /profiler/ live
 
 
 # ------------------------------------------------------------------ data
@@ -241,7 +243,7 @@ CALC_JS = """<script>
 def page(*, title, description, path, body, nav_current=None, jsonld=None):
     nav = "".join(
         f'<li><a href="{href}"{" aria-current=\"page\"" if key == nav_current else ""}>{label}</a></li>'
-        for key, href, label in (("sources", "/sources/", "Sources"), ("profiler", "/profiler/", "Profiler"), ("fun", "/fun/", "Fun")))
+        for key, href, label in (("profiler", "/profiler/", "Profiler"), ("sources", "/sources/", "Sources"), ("fun", "/fun/", "Fun")))
     ld = f'\n<script type="application/ld+json">\n{json.dumps(jsonld, indent=1, ensure_ascii=False)}\n</script>' if jsonld else ""
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -542,16 +544,32 @@ def store_facts():
     return facts
 
 
+def last_change(path):
+    """The date of the last commit that touched path, or None outside a git checkout."""
+    try:
+        out = subprocess.run(["git", "log", "-1", "--format=%cs", "--", path], cwd=ROOT,
+                             capture_output=True, text=True, timeout=10).stdout.strip()
+        return out or None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
 def home_jsonld():
     """Rewrite the home page's JSON-LD from sources/data/store.json and
-    sources/data/mentions.json. Google's software-app result wants name,
-    operating system, category, an offer and an aggregate rating; the rest
-    is what a careful reader of the markup would expect to find true."""
+    sources/data/mentions.json: one graph of the site, its author, and the
+    two tools the home page presents as equals, the profiler and the app.
+    Google's software-app result wants name, operating system, category, an
+    offer and an aggregate rating; the rating and the citations describe
+    the App Store listing, so they sit on the app and never on the profiler,
+    whose node has none (Search Console will list it as not eligible for a
+    rich result, which is right). The rest is what a careful reader of the
+    markup would expect to find true."""
     facts = json.loads((DATA / "store.json").read_text())
     mentions = json.loads(MENTIONS_FILE.read_text()) if MENTIONS_FILE.exists() else []
+    author = {"@id": SITE + "/#author"}
     ld = {
-        "@context": "https://schema.org",
         "@type": "MobileApplication",
+        "@id": SITE + "/#app",
         "name": "Logcaliper",
         "operatingSystem": f"iOS {facts['minimumOs']} or later",
         "applicationCategory": "UtilitiesApplication",
@@ -566,13 +584,51 @@ def home_jsonld():
         "datePublished": facts["released"],
         "dateModified": facts["updated"],
         "fileSize": f"{facts['fileSizeBytes'] / 1e6:.1f} MB",
-        "author": {"@type": "Person", "name": "Christophe Briguet", "url": SITE + "/"},
+        "author": author,
     }
     if facts.get("rating") and facts.get("ratingCount"):
         ld["aggregateRating"] = {"@type": "AggregateRating", "ratingValue": facts["rating"], "ratingCount": facts["ratingCount"],
                                  "bestRating": 5, "worstRating": 1}
     if mentions:
         ld["citation"] = [{"@type": "CreativeWork", "name": m["title"], "url": m["url"], "author": m.get("author", "")} for m in mentions if m.get("url")]
+    app = ld
+    profiler = {
+        "@type": "WebApplication",
+        "@id": SITE + "/#profiler",
+        "name": "Logcaliper Profiler",
+        "url": SITE + "/profiler/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript and Web Workers. Safari 16.4 or later, or a current Chrome, Edge or Firefox.",
+        "description": ("Reads a log sample in the browser, with nothing uploaded, and reports its lines and bytes reconciled to the byte, "
+                        "the average bytes per event, the message templates (Drain, after masking timestamps, addresses, ids and numbers), "
+                        "the events per second over the time its timestamps cover, and what a year of it takes to keep."),
+        "featureList": [
+            "Lines and bytes reconciled to the byte against the size of the file",
+            "Average and longest line in bytes",
+            "Message templates by Drain, after masking timestamps, IPv4 and MAC addresses, UUIDs, hex ids and numbers",
+            "Events per second over the time the timestamps cover, in six timestamp formats",
+            "Storage for a day and for a chosen retention and compression",
+            "JSON and CSV downloads",
+            "Nothing uploaded: no analytics, and a Content Security Policy that allows no outside connection",
+        ],
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+        "isAccessibleForFree": True,
+        "image": SITE + "/images/profiler-og.png",
+        "screenshot": SITE + "/images/profiler/hero-light.webp",
+        "datePublished": PROFILER_PUBLISHED,
+        "author": author,
+    }
+    modified = last_change("profiler/")
+    if modified:
+        profiler["dateModified"] = modified
+    ld = {"@context": "https://schema.org", "@graph": [
+        {"@type": "WebSite", "@id": SITE + "/#website", "name": "Logcaliper", "url": SITE + "/", "publisher": author},
+        {"@type": "Person", "@id": SITE + "/#author", "name": "Christophe Briguet", "url": SITE + "/",
+         "sameAs": ["https://x.com/cbriguet", "https://www.linkedin.com/in/cbriguet/"]},
+        profiler,
+        app,
+    ]}
     page = ROOT / "index.html"
     s = page.read_text()
     start = s.index('<script type="application/ld+json">')
@@ -593,8 +649,8 @@ def main():
         f = store_facts()
         print(f"store: version {f['version']}, rating {f['rating']} from {f['ratingCount']}, updated {f['updated']}")
     if (DATA / "store.json").exists():
-        ld = home_jsonld()
-        print(f"home page: structured data rebuilt ({len(ld)} fields" + (", with citations" if "citation" in ld else "") + ")")
+        nodes = home_jsonld()["@graph"]
+        print(f"home page: structured data rebuilt ({len(nodes)} nodes" + (", the app's with citations" if "citation" in nodes[-1] else "") + ")")
     sources, rates, units = load()
     paths = []
     for s in sources:

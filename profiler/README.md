@@ -11,7 +11,9 @@ upload; its Content Security Policy allows no connection but to its own
 origin, and the worker that reads the file never calls `fetch`. Open the
 Network panel while it runs: nothing goes to any server. The one request
 the page makes after load is the sample, on request, and that is a GET of a
-static file from this site before the run starts.
+static file from this site before the run starts. `/profiler/#run-sample` runs
+the sample once on arrival; it is the home page's "or try the 1.5 MB
+sample" link.
 
 ## The pieces
 
@@ -42,6 +44,7 @@ node profiler/test/drain.test.js profiler/test/files
 node profiler/test/stamps.test.js
 node profiler/test/estimate.test.js
 node profiler/test/page.test.js
+node profiler/test/home.test.js
 ```
 
 `make-files.py` writes the fixtures and a manifest of the exact figures
@@ -51,7 +54,13 @@ identical. `drain.test.js` carries Drain3's own tests over unchanged, then
 runs Drain3 itself on the fixtures through `drain-oracle.py` (with `uv`)
 and compares cluster by cluster, with and without the cap. `page.test.js`
 pins the page's chrome, policy and copy, and refuses any URL that is not
-one of its own metas.
+one of its own metas. `home.test.js` runs the profiler on its sample and
+fails if the home page, or either share card's description, quotes the
+sample differently from what the profiler reads.
+
+The home page's pictures of the result are made from this page by
+`images/shots/make-shots.mjs` (headless Chrome, the sample, both schemes);
+run it after a change to the result card.
 
 ## What a result holds
 

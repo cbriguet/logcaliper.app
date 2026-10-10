@@ -6,24 +6,24 @@
 <!-- Safari's own banner: icon, rating, View or Open. No script, nothing sent by the page. -->
 <meta name="apple-itunes-app" content="app-id=381096276">
 
-<title>Logcaliper — size your log management and SIEM deployment</title>
-<meta name="description" content="A free iOS calculator for log and SIEM capacity planning. Pick your sources, get the volume, the storage and the cluster it needs. 39 vendor event sizes built in.">
+<title>Logcaliper — log profiler and SIEM sizing calculator</title>
+<meta name="description" content="Measure a log sample in your browser, nothing uploaded: bytes per event, events per second, templates. Then size storage and cluster in the free iOS app.">
 <link rel="canonical" href="https://logcaliper.app/">
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://logcaliper.app/">
 <meta property="og:site_name" content="Logcaliper">
-<meta property="og:title" content="Logcaliper — size your log management and SIEM deployment">
-<meta property="og:description" content="Pick your sources, get the volume, the storage and the cluster it needs. 39 vendor event sizes built in. Free on the App Store.">
-<meta property="og:image" content="https://logcaliper.app/images/og.png">
+<meta property="og:title" content="Measure a log sample, then size your SIEM">
+<meta property="og:description" content="The profiler reads a log in your browser, nothing uploaded: bytes per event, events per second, message templates. The free iOS app sizes every source to storage and cluster.">
+<meta property="og:image" content="https://logcaliper.app/images/og-home.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Logcaliper running on an iPhone, converting 5,000 messages per second into 216 gigabytes per day.">
+<meta property="og:image:alt" content="Logcaliper's two tools: the profiler's result for a sample log in a browser window, 146.5 bytes a line and 8.3 events per second, beside the iPhone app converting 5,000 messages per second into 216 GB a day.">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Logcaliper — size your log management and SIEM deployment">
-<meta name="twitter:description" content="Pick your sources, get the volume, the storage and the cluster it needs. 39 vendor event sizes built in. Free on the App Store.">
-<meta name="twitter:image" content="https://logcaliper.app/images/og.png">
+<meta name="twitter:title" content="Measure a log sample, then size your SIEM">
+<meta name="twitter:description" content="The profiler reads a log in your browser, nothing uploaded: bytes per event, events per second, message templates. The free iOS app sizes every source to storage and cluster.">
+<meta name="twitter:image" content="https://logcaliper.app/images/og-home.png">
 <meta name="twitter:creator" content="@cbriguet">
 
 <meta name="theme-color" content="#334F71">
@@ -34,48 +34,102 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "MobileApplication",
-  "name": "Logcaliper",
-  "operatingSystem": "iOS 18.0 or later",
-  "applicationCategory": "UtilitiesApplication",
-  "url": "https://logcaliper.app/",
-  "downloadUrl": "https://apps.apple.com/us/app/logcaliper/id381096276",
-  "description": "A calculator for log management and SIEM capacity planning: converts data sizes and rates, estimates volume, storage and cluster size from a list of sources, and compares data sizes.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "image": "https://logcaliper.app/images/brand/logo-512.png",
-  "screenshot": "https://logcaliper.app/images/app/convert.png",
-  "softwareVersion": "3.1.0",
-  "datePublished": "2010-07-14",
-  "dateModified": "2026-10-03",
-  "fileSize": "5.2 MB",
-  "author": {
-    "@type": "Person",
-    "name": "Christophe Briguet",
-    "url": "https://logcaliper.app/"
-  },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": 4.8,
-    "ratingCount": 5,
-    "bestRating": 5,
-    "worstRating": 1
-  },
-  "citation": [
+  "@graph": [
     {
-      "@type": "CreativeWork",
-      "name": "Sizing and Scoping Your IBM Security QRadar SIEM Deployment",
-      "url": "https://www.ibm.com/support/pages/system/files/support/swg/swgdocs.nsf/0/d9bed769493ae09d8525823b00798501/$FILE/2018.03.21.Think2018.Sizing.and.scoping.your.QRadar.deployment-8947.pdf",
-      "author": "Adam Frank and Robert McGinley, IBM Security"
+      "@type": "WebSite",
+      "@id": "https://logcaliper.app/#website",
+      "name": "Logcaliper",
+      "url": "https://logcaliper.app/",
+      "publisher": {
+        "@id": "https://logcaliper.app/#author"
+      }
     },
     {
-      "@type": "CreativeWork",
-      "name": "What size should my Splunk license be?",
-      "url": "https://www.splunk.com/en_us/blog/tips-and-tricks/what-size-should-my-splunk-license-be.html",
-      "author": "Vishal Nakra, Splunk"
+      "@type": "Person",
+      "@id": "https://logcaliper.app/#author",
+      "name": "Christophe Briguet",
+      "url": "https://logcaliper.app/",
+      "sameAs": [
+        "https://x.com/cbriguet",
+        "https://www.linkedin.com/in/cbriguet/"
+      ]
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://logcaliper.app/#profiler",
+      "name": "Logcaliper Profiler",
+      "url": "https://logcaliper.app/profiler/",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript and Web Workers. Safari 16.4 or later, or a current Chrome, Edge or Firefox.",
+      "description": "Reads a log sample in the browser, with nothing uploaded, and reports its lines and bytes reconciled to the byte, the average bytes per event, the message templates (Drain, after masking timestamps, addresses, ids and numbers), the events per second over the time its timestamps cover, and what a year of it takes to keep.",
+      "featureList": [
+        "Lines and bytes reconciled to the byte against the size of the file",
+        "Average and longest line in bytes",
+        "Message templates by Drain, after masking timestamps, IPv4 and MAC addresses, UUIDs, hex ids and numbers",
+        "Events per second over the time the timestamps cover, in six timestamp formats",
+        "Storage for a day and for a chosen retention and compression",
+        "JSON and CSV downloads",
+        "Nothing uploaded: no analytics, and a Content Security Policy that allows no outside connection"
+      ],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "isAccessibleForFree": true,
+      "image": "https://logcaliper.app/images/profiler-og.png",
+      "screenshot": "https://logcaliper.app/images/profiler/hero-light.webp",
+      "datePublished": "2026-10-09",
+      "author": {
+        "@id": "https://logcaliper.app/#author"
+      },
+      "dateModified": "2026-10-10"
+    },
+    {
+      "@type": "MobileApplication",
+      "@id": "https://logcaliper.app/#app",
+      "name": "Logcaliper",
+      "operatingSystem": "iOS 18.0 or later",
+      "applicationCategory": "UtilitiesApplication",
+      "url": "https://logcaliper.app/",
+      "downloadUrl": "https://apps.apple.com/us/app/logcaliper/id381096276",
+      "description": "A calculator for log management and SIEM capacity planning: converts data sizes and rates, estimates volume, storage and cluster size from a list of sources, and compares data sizes.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "image": "https://logcaliper.app/images/brand/logo-512.png",
+      "screenshot": "https://logcaliper.app/images/app/convert.png",
+      "softwareVersion": "3.1.0",
+      "datePublished": "2010-07-14",
+      "dateModified": "2026-10-03",
+      "fileSize": "5.2 MB",
+      "author": {
+        "@id": "https://logcaliper.app/#author"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": 4.8,
+        "ratingCount": 5,
+        "bestRating": 5,
+        "worstRating": 1
+      },
+      "citation": [
+        {
+          "@type": "CreativeWork",
+          "name": "Sizing and Scoping Your IBM Security QRadar SIEM Deployment",
+          "url": "https://www.ibm.com/support/pages/system/files/support/swg/swgdocs.nsf/0/d9bed769493ae09d8525823b00798501/$FILE/2018.03.21.Think2018.Sizing.and.scoping.your.QRadar.deployment-8947.pdf",
+          "author": "Adam Frank and Robert McGinley, IBM Security"
+        },
+        {
+          "@type": "CreativeWork",
+          "name": "What size should my Splunk license be?",
+          "url": "https://www.splunk.com/en_us/blog/tips-and-tricks/what-size-should-my-splunk-license-be.html",
+          "author": "Vishal Nakra, Splunk"
+        }
+      ]
     }
   ]
 }
@@ -116,7 +170,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: calc(60px + env(safe-area-inset-top, 0px)); }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 body {
@@ -169,43 +223,123 @@ section { padding-block: clamp(3.5rem, 9vw, 6.5rem); }
 .nav ul { display: flex; gap: 1.4rem; list-style: none; margin: 0 0 0 auto; padding: 0; font-size: .9375rem; }
 .nav a:not(.brand) { color: var(--text-dim); text-decoration: none; }
 .nav a:not(.brand):hover { color: var(--text); }
-/* On a phone the in-page anchors fold away and the three destinations
-   stay: Sources and Profiler are the tools, Fun is the game and the quiz. */
+/* On a phone the in-page anchors fold away (iOS app, Mentions, Contact)
+   and the three destinations stay: Profiler and Sources are the tools,
+   Fun is the game and the quiz. The app's door is in the hero below. */
 @media (max-width: 720px) {
   .nav ul { gap: 1rem; font-size: .9rem; }
   .nav li:not(.tool) { display: none; }
 }
 
-/* ---- hero ---- */
+/* ---- hero: the method, in two doors of equal build ----
+   The hero's own colours live here, not on :root: profiler/test/page.test.js
+   requires every :root token of this page to exist, identical, on the profiler. */
 .hero {
+  --hero-text: #c3d3e2;
+  --hero-dim:  #b2c5d7;   /* 4.7:1 on the lightest part of a door, where #9fb6cb was 3.96 */
   background: linear-gradient(165deg, var(--navy) 0%, var(--navy-deep) 55%, var(--navy-ink) 100%);
   color: #fff;
-  padding-block: clamp(3rem, 8vw, 5.5rem);
+  padding-block: clamp(2.25rem, 4.5vw, 3.25rem) clamp(2.5rem, 6vw, 4.5rem);
   overflow: hidden;
 }
-.hero h1 { color: #fff; max-width: 15ch; }
-.hero .lede { color: #c3d3e2; max-width: 46ch; }
-.hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
-@media (max-width: 860px) {
-  .hero-grid { grid-template-columns: 1fr; }
-  .hero-shot { max-width: 260px; margin-inline: auto; }
-  .hero-shot img { max-width: 100%; }
-}
+.hero h1 { color: #fff; font-size: clamp(2rem, 4.4vw, 3rem); margin-bottom: .45em; }
+@media (min-width: 600px) { .hero h1 .l { display: block; } }
+.hero .lede { color: var(--hero-text); max-width: 58ch; margin: 0; }
 
-.hero-shot img {
-  border-radius: 34px;
+.doors { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: clamp(1.75rem, 3.5vw, 2.25rem); }
+.door {
+  min-width: 0; display: flex; flex-direction: column;
+  background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.12);
+  border-radius: var(--radius); padding: 1.5rem 1.5rem 1.25rem;
+}
+.door h2 { display: flex; align-items: center; gap: .65rem; color: #fff; font-size: clamp(1.25rem, 2.2vw, 1.5rem); letter-spacing: -.015em; margin: 0 0 .5rem; }
+.door h2 .n { font: 600 .8125rem/1 var(--mono); letter-spacing: 0; border: 1px solid rgba(255,255,255,.5); border-radius: 6px; padding: .3rem .5rem; }
+.door .desc { color: var(--hero-text); font-size: 1rem; line-height: 1.6; margin: 0 0 1.25rem; }
+.door .cta { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; margin: 0 0 .9rem; }
+.door .meta { color: var(--hero-dim); font-size: .875rem; line-height: 1.55; margin: 0; }
+.door .also, .door .meta a { color: var(--hero-text); text-underline-offset: 3px; }
+.door .also { font-size: .9375rem; }
+.door .also:hover, .door .meta a:hover { color: #fff; }
+.hero a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* The profiler's button weighs what Apple's badge weighs: a dark fill, a
+   light hairline, white type, the same 56 px. No glyph, one line. */
+.btn {
+  display: inline-flex; align-items: center; min-height: 56px; padding: 0 1.4rem;
+  background: #0b1117; border: 1px solid rgba(255,255,255,.55); border-radius: 10px;
+  color: #fff; font-weight: 600; font-size: 1.0625rem; line-height: 1.2; text-decoration: none;
+}
+.btn:hover { background: #1a2836; }
+.badge { display: inline-block; line-height: 0; }
+.badge img { width: 169px; height: 56px; }
+
+/* Copy for a touch device (no Network panel there, and the big files are
+   on a computer) and copy for a desktop. */
+.phone-only { display: none; }
+@media (hover: none) and (pointer: coarse) { .wide-only { display: none; } .phone-only { display: inline; } }
+
+.shot { margin: 1.5rem 0 0; }
+.frame {
+  border-radius: 12px; overflow: hidden; background: var(--bg);
+  box-shadow: 0 30px 60px -12px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.12);
+}
+/* the bar takes the visitor's scheme, like the capture inside it */
+.frame .bar { height: 30px; display: flex; align-items: center; justify-content: center; background: var(--bg-alt); border-bottom: 1px solid var(--rule); }
+.frame .bar span { font: 500 .75rem/1 var(--mono); color: var(--text-dim); }
+.frame img { width: 100%; }
+.stage img {
+  width: 240px; margin-inline: auto; border-radius: 11.3% / 5.2%;
   box-shadow: 0 30px 60px -12px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.09);
-  margin-inline: auto;
-  width: 100%;
-  max-width: 300px;
+}
+.shot figcaption { margin-top: .75rem; color: var(--hero-dim); font-size: .875rem; line-height: 1.5; }
+.shot.app figcaption { text-align: center; }
+.either { margin: 1.25rem 0 0; color: var(--hero-dim); font-size: .9375rem; text-align: center; }
+
+@media (max-width: 600px) {
+  .door { padding: 1.25rem 1rem 1rem; }
+  .btn { flex: 1 1 100%; justify-content: center; }
+  .stage img { width: 220px; }
+}
+@media (min-width: 900px) {
+  .doors { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: 1.5rem; }
+  .door .shot { margin-top: auto; padding-top: 1.5rem; }
+  .stage img { width: min(290px, 80%); }
+  .shot.app figcaption { text-align: left; }
+}
+/* With subgrid the two doors share their rows: headings, texts, calls to
+   action, small print, pictures and captions each start on one line, and
+   the phone is drawn exactly as tall as the browser window beside it. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 900px) {
+    .doors { grid-template-rows: repeat(6, auto); row-gap: 0; }
+    .door { display: grid; grid-row: span 6; grid-template-rows: subgrid; }
+    .door .shot { grid-row: span 2; display: grid; grid-template-rows: subgrid; margin: 0; padding-top: 1.5rem; }
+    .stage { position: relative; }
+    .stage img { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: auto; height: 100%; max-width: none; }
+  }
 }
 
-.cta { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-top: 1.75rem; }
-.badge img { width: 190px; }
-.free { font-size: .875rem; color: #9fb6cb; }
-.hero .also { margin: 1rem 0 0; font-size: .9375rem; }
-.hero .also a { color: #c3d3e2; text-decoration: underline; text-underline-offset: 3px; }
-.hero .also a:hover { color: #fff; }
+/* ---- the two tool sections ---- */
+.label { font: 600 .8125rem/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); margin: 0 0 1rem; }
+.go {
+  display: inline-flex; align-items: center; min-height: 52px; padding: 0 1.6rem; border-radius: 9px;
+  background: var(--navy); color: #fff; font-weight: 600; text-decoration: none;
+}
+.go:hover { background: var(--navy-deep); }
+@media (prefers-color-scheme: dark) { .go { background: var(--accent); color: #06141d; } .go:hover { background: #4fb8ee; } }
+.go-row { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; margin-top: 2rem; }
+.go-row .fine { color: var(--text-dim); font-size: .9375rem; }
+
+.tpl-note { margin: 2.5rem 0 0; color: var(--text-dim); font-size: .9375rem; max-width: 70ch; }
+.tpl-note + .table-wrap { margin-top: .75rem; }
+.vh { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+td.tpl { font-family: var(--mono); font-size: .875rem; white-space: normal; overflow-wrap: anywhere; min-width: 18rem; }
+td.tpl .w { color: var(--accent); font-weight: 600; }
+th.r { text-align: right; }
+@media (max-width: 600px) { #profiler th, #profiler td { padding-left: .75rem; padding-right: .75rem; } td.tpl { min-width: 15rem; } }
+
+.privacy { background: var(--bg-alt); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem 1.25rem; margin: 2rem 0 0; max-width: 64ch; font-size: .9688rem; }
+.privacy b { font-weight: 650; }
 
 /* ---- modes ---- */
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem; margin-top: 2.5rem; }
@@ -262,7 +396,7 @@ footer {
   color: var(--text-dim); font-size: .875rem;
 }
 footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; }
-footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; padding: 0; }
+footer ul { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; list-style: none; margin: 0 0 0 auto; padding: 0; }
 </style>
 
 <!-- Analytics: GoatCounter, cookieless and no personal data.
@@ -291,9 +425,9 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
       Logcaliper
     </a>
     <ul>
-      <li><a href="#modes">What it does</a></li>
-      <li class="tool"><a href="/sources/" data-goatcounter-click="sources-from-nav">Sources</a></li>
       <li class="tool"><a href="/profiler/" data-goatcounter-click="profiler-from-nav">Profiler</a></li>
+      <li><a href="#app" data-goatcounter-click="app-from-nav">iOS app</a></li>
+      <li class="tool"><a href="/sources/" data-goatcounter-click="sources-from-nav">Sources</a></li>
       <li class="tool"><a href="/fun/" data-goatcounter-click="fun-from-nav">Fun</a></li>
       <li><a href="#mentions">Mentions</a></li>
       <li><a href="#contact">Contact</a></li>
@@ -304,40 +438,113 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
 <main id="main" tabindex="-1">
 
 <header class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <h1>Size your log deployment before you buy it.</h1>
-      <p class="lede">Logcaliper turns a list of sources into the numbers you have to plan for: events per second, gigabytes per day, storage at retention, and the cluster to hold it.</p>
-      <div class="cta">
-        <a class="badge" href="https://apps.apple.com/us/app/logcaliper/id381096276?ct=site-hero&amp;mt=8"
-           data-goatcounter-click="appstore-hero"
-           data-goatcounter-title="App Store (hero badge)">
-          <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&releaseDate=1279065600" alt="Download Logcaliper on the App Store" width="190" height="63" loading="eager">
-        </a>
-        <span class="free">Free. No account required.</span>
-      </div>
-      <p class="also"><a href="/profiler/" data-goatcounter-click="profiler-from-hero">Or profile a log sample first, in your browser →</a></p>
+  <div class="wrap">
+    <h1><span class="l">Measure a log sample,</span> <span class="l">then size the deployment.</span></h1>
+    <p class="lede">Every SIEM quote turns on two numbers, bytes per event and events per second. Most of the time both are guessed.</p>
+
+    <div class="doors">
+      <article class="door" aria-labelledby="door-profiler">
+        <h2 id="door-profiler"><span class="n">1</span> Measure, with the profiler</h2>
+        <p class="desc">In your browser: give it a log file and it reports the bytes per event, the events per second, the message templates and what a year of it takes to keep.</p>
+        <div class="cta">
+          <a class="btn" href="/profiler/" data-goatcounter-click="profiler-from-hero" data-goatcounter-title="Profiler (hero button)">Profile a log file →</a>
+          <a class="also" href="/profiler/#run-sample" data-goatcounter-click="sample-from-hero">or try the 1.5 MB sample</a>
+        </div>
+        <p class="meta">Free, and nothing is uploaded<span class="wide-only">: the profiler's page has no analytics and no upload. Open the Network panel while it runs.</span><span class="phone-only">. A 500 MB log wants a computer; the sample runs here. <a href="mailto:?subject=Logcaliper%20profiler&amp;body=https%3A%2F%2Flogcaliper.app%2Fprofiler%2F" data-goatcounter-click="profiler-mail-from-hero">Email yourself the link</a> for later.</span></p>
+        <figure class="shot web">
+          <div class="frame">
+            <div class="bar" aria-hidden="true"><span>logcaliper.app/profiler/</span></div>
+            <picture>
+              <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="images/profiler/hero-phone-dark.webp" width="390" height="405">
+              <source media="(max-width: 600px)" srcset="images/profiler/hero-phone-light.webp" width="390" height="405">
+              <source media="(prefers-color-scheme: dark)" srcset="images/profiler/hero-dark.webp" width="600" height="679">
+              <img src="images/profiler/hero-light.webp" width="600" height="679" alt="The profiler's result for its 1.5 MB sample log: 10,021 lines, 1.48 MB, an average line of 146.5 bytes, 8.3 events per second, 46 templates and a longest line of 307 bytes." fetchpriority="high" decoding="async">
+            </picture>
+          </div>
+          <figcaption>The result for the 1.5 MB sample. The average line and the events per second are the two figures step 2 needs.</figcaption>
+        </figure>
+      </article>
+
+      <article class="door" aria-labelledby="door-app">
+        <h2 id="door-app"><span class="n">2</span> Size, with the app</h2>
+        <p class="desc">On iPhone and iPad: type in those two figures, the size in whole bytes, or take one of the 39 measured sizes, for every source you collect from, and get the storage, the cluster and the node count.</p>
+        <div class="cta">
+          <a class="badge" href="https://apps.apple.com/us/app/logcaliper/id381096276?ct=site-hero&amp;mt=8"
+             data-goatcounter-click="appstore-hero"
+             data-goatcounter-title="App Store (hero badge)">
+            <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&releaseDate=1279065600" alt="Download Logcaliper on the App Store" width="169" height="56" loading="eager">
+          </a>
+        </div>
+        <p class="meta">Free since 2010. No account. iOS 18 or later.</p>
+        <figure class="shot app">
+          <div class="stage">
+            <img src="images/app/convert.png" width="415" height="900" alt="Logcaliper on iPhone converting 5,000 messages per second into 216 gigabytes per day, at an average event size of 500 bytes for Tanium.">
+          </div>
+          <figcaption>5,000 messages a second at 500 B is 216 GB a day.</figcaption>
+        </figure>
+      </article>
     </div>
-    <div class="hero-shot">
-      <img src="images/app/convert.png" alt="Logcaliper on iPhone converting 5,000 messages per second into 216 gigabytes per day, at an average event size of 500 bytes for Tanium." width="300" height="650">
-    </div>
+    <p class="either">Either works alone: the profiler needs no app, and the app needs no sample.</p>
   </div>
 </header>
 
-<section id="modes">
+<section id="profiler">
   <div class="wrap">
-    <h2>Three calculators, one tool</h2>
-    <p class="lede" style="max-width:56ch">Capacity planning is arithmetic done under pressure, usually in a meeting. Logcaliper does the arithmetic so the conversation can be about the answer.</p>
+    <p class="label">Step 1 · Measure</p>
+    <h2>What the profiler measures</h2>
+    <p class="lede" style="max-width:58ch">Give it a sample of the log you plan to collect; 50 to 500 MB is the normal case. It reads the file line by line in a Web Worker, on your machine, and reports what a SIEM is sized on.</p>
 
     <div class="cards">
       <article class="card">
-        <h3><span class="n">01</span> Conversion</h3>
-        <p>Move between message rates and volumes — per second, hour, day, month or year; bits and bytes; decimal and binary. The unit confusion that causes sizing errors, removed.</p>
+        <h3><span class="n">01</span> Bytes per event</h3>
+        <p>Every line is counted, terminator included, and the total reconciled to the byte against the size of the file. The average line is the bytes per event a sizing needs.</p>
       </article>
       <article class="card">
-        <h3><span class="n">02</span> Estimation</h3>
-        <p>Build a list of the sources you will actually collect from, set compression, indexing and retention, and get the storage that list needs at that retention, the cluster capacity and the number of data nodes to hold it.</p>
-        <p style="margin-top:.75rem"><a href="/profiler/" data-goatcounter-click="profiler-from-card">Profile your own log sample first →</a></p>
+        <h3><span class="n">02</span> Message templates</h3>
+        <p>Timestamps, addresses, ids and numbers are masked, then Drain groups the lines into the templates behind them, each with its share and its average size. The largest is the first to filter before you pay to keep it.</p>
+      </article>
+      <article class="card">
+        <h3><span class="n">03</span> Events per second, and a year</h3>
+        <p>The timestamps, in any of six common formats, give the rate over the time the sample covers. At your retention and compression that is a day and a year of storage. The profile downloads as JSON, the templates as CSV.</p>
+      </article>
+    </div>
+
+    <p class="tpl-note">The three largest of the sample's 46 templates, as the profiler shows them. &lt;*&gt; is a word that varies; &lt;ts&gt;, &lt;ip&gt;, &lt;num&gt; and &lt;hex&gt; were masked before clustering.</p>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="The sample's three largest templates">
+      <table>
+        <caption class="vh">The three largest templates of the sample</caption>
+        <thead><tr><th scope="col" class="r">Lines</th><th scope="col">Template</th><th scope="col" class="r">Share</th><th scope="col" class="r">Avg bytes</th></tr></thead>
+        <tbody id="sample-templates">
+          <tr><td class="num">1,439</td><td class="tpl"><span class="w">&lt;ts&gt;</span> <span class="w">&lt;*&gt;</span> nginx[<span class="w">&lt;num&gt;</span>]: <span class="w">&lt;ip&gt;</span> - <span class="w">&lt;*&gt;</span> <span class="w">&lt;*&gt;</span> <span class="w">&lt;*&gt;</span> HTTP/<span class="w">&lt;num&gt;</span>" <span class="w">&lt;num&gt;</span> <span class="w">&lt;num&gt;</span> "-" <span class="w">&lt;*&gt;</span></td><td class="num">14%</td><td class="num">134</td></tr>
+          <tr><td class="num">1,178</td><td class="tpl"><span class="w">&lt;ts&gt;</span> <span class="w">&lt;*&gt;</span> app[<span class="w">&lt;num&gt;</span>]: INFO <span class="w">&lt;*&gt;</span> method=GET <span class="w">&lt;*&gt;</span> status=<span class="w">&lt;num&gt;</span> <span class="w">&lt;*&gt;</span></td><td class="num">12%</td><td class="num">142</td></tr>
+          <tr><td class="num">1,072</td><td class="tpl"><span class="w">&lt;ts&gt;</span> <span class="w">&lt;*&gt;</span> app[<span class="w">&lt;num&gt;</span>]: INFO worker <span class="w">&lt;num&gt;</span> <span class="w">&lt;*&gt;</span> job <span class="w">&lt;hex&gt;</span> <span class="w">&lt;*&gt;</span> <span class="w">&lt;*&gt;</span> <span class="w">&lt;*&gt;</span></td><td class="num">11%</td><td class="num">112</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="privacy"><b>Nothing leaves your browser.</b> The profiler is a static page with no analytics and no upload, and its Content Security Policy allows no connection except to this site. Open the Network panel while it runs.</p>
+    <div class="go-row">
+      <a class="go" href="/profiler/" data-goatcounter-click="profiler-from-section">Profile a log file</a>
+      <a href="/profiler/#run-sample" data-goatcounter-click="sample-from-section">or try the 1.5 MB sample</a>
+    </div>
+  </div>
+</section>
+
+<section id="app" class="alt">
+  <div class="wrap">
+    <p class="label" id="modes">Step 2 · Size</p>
+    <h2>What the app sizes</h2>
+    <p class="lede" style="max-width:56ch">Capacity planning is arithmetic done under pressure, usually in a meeting. The app does the arithmetic for the whole deployment, source by source, so the conversation can be about the answer.</p>
+
+    <div class="cards">
+      <article class="card">
+        <h3><span class="n">01</span> Estimation</h3>
+        <p>Build a list of the sources you will actually collect from, each with its rate and its event size, measured by you or taken from the 39 built in. Set compression, indexing and retention, and get the storage that list needs, the cluster capacity and the number of data nodes to hold it. The List and Storage tabs.</p>
+        <p style="margin-top:.75rem"><a href="/profiler/" data-goatcounter-click="profiler-from-card">Measure your own event size first →</a></p>
+      </article>
+      <article class="card">
+        <h3><span class="n">02</span> Conversion</h3>
+        <p>Move between message rates and volumes — per second, hour, day, month or year; bits and bytes; decimal and binary. The unit confusion that causes sizing errors, removed. Type the rate and the event size you measured, and + adds them to the list.</p>
       </article>
       <article class="card">
         <h3><span class="n">03</span> Comparison</h3>
@@ -346,17 +553,22 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
         <p style="margin-top:.35rem"><a href="/quiz/" data-goatcounter-click="quiz-from-card">Or take the ten-question quiz →</a></p>
       </article>
     </div>
+
+    <div class="go-row">
+      <a class="go" href="https://apps.apple.com/us/app/logcaliper/id381096276?ct=site-section&amp;mt=8" data-goatcounter-click="appstore-from-section" data-goatcounter-title="App Store (app section)">Get the app</a>
+      <span class="fine">Free on the App Store since 2010. iPhone and iPad, iOS 18 or later. No account.</span>
+    </div>
   </div>
 </section>
 
-<section id="sources" class="alt">
+<section id="sources">
   <div class="wrap">
     <h2>Event sizes that come from the field</h2>
-    <p class="lede" style="max-width:58ch">The average event size is what sizing lives or dies on, and it varies by more than a factor of ten between sources. Logcaliper ships measured averages so you are not guessing.</p>
+    <p class="lede" style="max-width:58ch">The average event size is what sizing lives or dies on, and it varies by more than a factor of ten between sources. The app ships measured averages for the sources you cannot sample, and <a href="/profiler/" data-goatcounter-click="profiler-from-sources">the profiler</a> measures the ones you can.</p>
 
     <div class="stats">
       <div class="stat"><div class="v">39</div><div class="k">sources built in</div></div>
-      <div class="stat"><div class="v">15</div><div class="k">categories</div></div>
+      <div class="stat"><div class="v">16</div><div class="k">categories</div></div>
       <div class="stat"><div class="v">10M+</div><div class="k">logs analysed</div></div>
     </div>
 
@@ -377,7 +589,7 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
           <tr><td>Cisco Netflow v9</td><td class="cat">Network flows</td><td class="num">814</td></tr>
           <tr><td>Windows Server 2016</td><td class="cat">Windows servers</td><td class="num">800</td></tr>
           <tr><td>Crowdstrike</td><td class="cat">Managed endpoint</td><td class="num">540</td></tr>
-          <tr><td>Active Directory</td><td class="cat">Application</td><td class="num">300</td></tr>
+          <tr><td>Active Directory</td><td class="cat">AD/Domain controller</td><td class="num">300</td></tr>
           <tr><td>Apache Hadoop</td><td class="cat">Distributed system</td><td class="num">192</td></tr>
           <tr><td>Android</td><td class="cat">Mobile OS</td><td class="num">138</td></tr>
         </tbody>
@@ -391,10 +603,10 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
   </div>
 </section>
 
-<section id="mentions">
+<section id="mentions" class="alt">
   <div class="wrap">
     <h2>Mentions</h2>
-    <p class="lede" style="max-width:54ch">Logcaliper is free because it is useful to people, and that is the whole return. Engineers have put it to work in their own write-ups:</p>
+    <p class="lede" style="max-width:54ch">Logcaliper is free because it is useful to people, and that is the whole return. Engineers have put the app to work in their own write-ups:</p>
     <div class="mentions">
       <article class="mention">
         <h3><a href="https://www.ibm.com/support/pages/system/files/support/swg/swgdocs.nsf/0/d9bed769493ae09d8525823b00798501/$FILE/2018.03.21.Think2018.Sizing.and.scoping.your.QRadar.deployment-8947.pdf" data-goatcounter-click="mention-ibm">Sizing and Scoping Your IBM Security QRadar SIEM Deployment</a></h3>
@@ -408,10 +620,10 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
   </div>
 </section>
 
-<section id="contact" class="alt">
+<section id="contact">
   <div class="wrap">
     <h2>Tell me what is missing</h2>
-    <p class="lede" style="max-width:52ch">A source you collect from that is not in the catalogue, a number that does not match what you measure, a mode that should exist. All of it is welcome.</p>
+    <p class="lede" style="max-width:52ch">A source you collect from that is not in the catalogue, a timestamp format the profiler does not read, a number that does not match what you measure, a mode the app should have. All of it is welcome.</p>
     <p class="contact-cta">
       <a class="handle" href="https://x.com/cbriguet" rel="me">@cbriguet<span> on X</span></a>
     </p>
@@ -424,6 +636,7 @@ footer ul { display: flex; gap: 1.25rem; list-style: none; margin: 0 0 0 auto; p
   <div class="wrap">
     <span>&copy; 2026 Christophe Briguet</span>
     <ul>
+      <li><a href="/profiler/" data-goatcounter-click="profiler-from-footer">Profiler</a></li>
       <li><a href="https://apps.apple.com/us/app/logcaliper/id381096276?ct=site-footer&amp;mt=8"
              data-goatcounter-click="appstore-footer"
              data-goatcounter-title="App Store (footer)">App Store</a></li>

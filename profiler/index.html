@@ -19,7 +19,7 @@
 <meta property="og:image" content="https://logcaliper.app/images/profiler-og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The Logcaliper profiler reading a log file in the browser: a progress bar, then the lines and bytes it counted.">
+<meta property="og:image:alt" content="The Logcaliper profiler's result for its 1.5 MB sample log: 10,021 lines, an average line of 146.5 bytes, 8.3 events per second and 46 templates, read in the browser with nothing uploaded.">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Profile a log file">
@@ -370,8 +370,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
           </select></label>
         </div>
         <p class="est-out" id="eOut"></p>
-        <p class="plug">The same arithmetic over a list of sources, with replication and the number of nodes, is the Estimation tab
-           of <a href="/">Logcaliper</a>, the free iOS calculator; the <a href="/sources/">measured event sizes</a> it ships with
+        <p class="plug">The same arithmetic over a list of sources, with replication and the number of nodes, is the List and Storage tabs
+           of <a href="/#app">Logcaliper</a>, the free iOS calculator; the <a href="/sources/">measured event sizes</a> it ships with
            come from samples like this one.</p>
       </div>
 
@@ -403,7 +403,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
        wildcards the words that differ; up to 4,000 templates are kept, and past that the least recently used are
        folded into Other. The rate is the lines that carry a timestamp over the span from the earliest to the
        latest, in whichever of six common formats the first 200 lines use. The storage line is the arithmetic of
-       the app's Estimation tab, at the retention and compression you pick.<span id="howFallback" hidden> In this browser the worker was loaded from worker.js directly
+       the app's Storage tab, at the retention and compression you pick.<span id="howFallback" hidden> In this browser the worker was loaded from worker.js directly
        rather than built inside the page; it is the same code, and after a stop that had to shut it down it is
        loaded again the same way.</span></p>
 
@@ -585,10 +585,21 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
     catch (e) { showError("The reader could not be started: " + ((e && e.message) ? e.message : e), true); }
   }
 
+  /* /profiler/#run-sample, the home page's "or try the 1.5 MB sample": the
+     sample runs once, on arrival, as if its link had been pressed. The hash
+     names no element, so the browser does not scroll towards one while the
+     result takes its place; it goes before the run, so a reload or a second
+     worker does not run it again. */
+  var sampleOnArrival = location.hash === "#run-sample";
   function pickerReady() {
     el("pick").className = "go";
     el("pickText").textContent = "Choose a log file";
     input.disabled = false;
+    if (sampleOnArrival) {
+      sampleOnArrival = false;
+      if (history.replaceState) history.replaceState(null, "", location.pathname + location.search);
+      el("sample").click();
+    }
   }
 
   /* The worker is built from reader.js, masks.js, drain.js, stamps.js and
@@ -847,7 +858,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
         "The formats known are ISO 8601, Common Log Format, syslog, YYYY/MM/DD, DD-Mon-YYYY and Unix epoch; if you know the rate, type it below."]);
       return;
     }
-    items = ["Timestamps in " + tme.format.name + " on ", fig(tme.stamped === tme.lines ? "every line" : shareText(tme.stamped, tme.lines) + " of lines"),
+    items = ["Timestamps in " + tme.format.name + " on ", fig(tme.stamped === tme.lines ? "every line" : shareText(tme.stamped, tme.lines)), tme.stamped === tme.lines ? "" : " of lines",
       (tme.yearless ? " (no year in them)" : "") + ", from ", fig(tme.firstText), " to ", fig(tme.lastText)];
     if (tme.perSecond !== null && tme.perSecond !== undefined) {
       items.push(", ", fig(spanText(tme.spanSeconds)), ": ", fig(rateText(tme.perSecond)), " events per second.");
