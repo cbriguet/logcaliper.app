@@ -61,6 +61,9 @@ const privacy = "Your browser reads the file here. Nothing about it is sent anyw
 ok(page.includes(">" + privacy + "<"), "privacy line verbatim and alone in its element");
 ok(/<label class="go[^"]*"[^>]*>.*<input type="file" id="file" class="vh"/.test(page), "label.go wraps the visually hidden file input");
 ok(page.includes("Files of 50 to 500 MB are the normal case."), "size note");
+ok(/<span class="or">or drop one anywhere on this page<\/span>/.test(page), "the picker says a drop works too");
+ok(/<div id="dropOverlay" hidden aria-hidden="true"><div class="box" id="dropText">Drop the file to read it here<\/div><\/div>/.test(page), "the drop overlay, hidden and out of the accessibility tree");
+ok(/#dropOverlay \{[^}]*pointer-events: none/.test(page), "the overlay takes no pointer events, so the drop reaches the document");
 ok(/<footer>\s*<div class="wrap">Nothing leaves your browser\. &copy; 2026 Christophe Briguet · <a href="\/privacy\/">Privacy<\/a><\/div>\s*<\/footer>/.test(page), "footer exact");
 ok(/aria-live="polite"/.test(page), "aria-live region");
 ok(/role="progressbar"/.test(page), "progressbar role");
@@ -84,6 +87,10 @@ ok((code.match(/fetch\(/g) || []).length === 6, "exactly six fetch calls: the fi
 ok(/<a href="sample\.log" id="sample">Try the sample<\/a>/.test(page), "the sample link is a plain link to the file");
 for (const id of ["vEps", "vTemplates", "timeLine", "estimator", "eEps", "eBytes", "eDays", "eComp", "eOut", "templates", "tplCaption", "tplBody", "more", "dlJson", "dlCsv", "pTemplates"]) ok(new RegExp(`id="${id}"`).test(page), `element #${id}`);
 ok(/<p class="counters" id="tplCaption"><\/p>\s*<div class="table-wrap">\s*<table>\s*<caption class="vh">Message templates<\/caption>/.test(page) && /<th scope="col">Template<\/th>/.test(page), "the template table has its sentence above it, a hidden caption and scoped headers");
+ok(/document\.addEventListener\("dragover", function \(e\) \{\s*e\.preventDefault\(\);/.test(script) && /document\.addEventListener\("drop", function \(e\) \{\s*e\.preventDefault\(\);/.test(script), "dragover and drop are claimed at the document before anything else, files or not, so no drop can navigate away");
+ok(/document\.addEventListener\("dragleave"/.test(script) && /relatedTarget === null/.test(script), "the overlay goes when the drag leaves the window");
+ok(/types\[i\] === "Files"/.test(script) && /webkitGetAsEntry/.test(script) && /decline\("That is a folder\. Drop one log file\."\)/.test(script), "only a drag of files shows the overlay; a folder is declined where the eye is");
+ok(/var fetching = false/.test(script) && /!run && !fetching/.test(script) && /if \(run\) return;   \/\/ a file chosen or dropped meanwhile keeps its run/.test(script), "the sample on its way counts as busy, and a late sample never replaces a run");
 ok(/LCEstimate\.RETENTION/.test(script) && /LCEstimate\.storage\(/.test(script) && /LCEstimate\.scale\(/.test(script), "the estimator uses estimate.js, not its own arithmetic");
 ok(/500/.test(code) && /terminate\(\)/.test(code), "hard-terminate after 500 ms");
 ok(/function human\(b\)/.test(script) && /\["B", "KB", "MB", "GB", "TB", "PB", "EB"\]/.test(script), "human() from the quiz");

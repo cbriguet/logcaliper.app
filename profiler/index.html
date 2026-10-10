@@ -248,6 +248,22 @@ td.tpl .w { color: var(--accent); font-weight: 600; }
 tr.other td { color: var(--text-dim); }
 tr.other td.tpl { font-family: var(--font); }
 
+/* ---- the drop target: the whole window, with the picker as the sign.
+   The overlay takes no pointer events, so the drop lands on the page
+   beneath it and reaches the document's own handler. ---- */
+.pick .or { color: var(--text-dim); font-size: .9375rem; }
+#dropOverlay {
+  position: fixed; inset: 0; z-index: 60; pointer-events: none;
+  display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+}
+#dropOverlay .box {
+  max-width: 34rem; width: 100%; padding: 2.5rem 2rem; text-align: center;
+  border: 2px dashed var(--accent); border-radius: var(--radius); background: var(--surface);
+  color: var(--text); font-weight: 600; font-size: 1.125rem; line-height: 1.4;
+}
+#dropOverlay.no .box { border-color: var(--field); color: var(--text-dim); }
+
 /* ---- footer ---- */
 footer {
   border-top: 1px solid var(--rule); padding-block: 2.5rem;
@@ -305,6 +321,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
       <div class="privacy" role="note">Your browser reads the file here. Nothing about it is sent anywhere: this page is static, has no analytics and no upload. Open the Network panel while it runs: nothing goes to any server.</div>
       <div class="pick">
         <label class="go wait" id="pick"><span id="pickText">Loading…</span><input type="file" id="file" class="vh" disabled></label>
+        <span class="or">or drop one anywhere on this page</span>
       </div>
       <p class="note">Files of 50 to 500 MB are the normal case.</p>
       <p class="note">No log at hand? <a href="sample.log" id="sample">Try the sample</a>: 1.5 MB of made-up syslog, fetched from this site and then read like any file.</p>
@@ -394,6 +411,9 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
   </div>
 </main>
 
+<!-- shown while a file is dragged over the window; it says what a drop will do -->
+<div id="dropOverlay" hidden aria-hidden="true"><div class="box" id="dropText">Drop the file to read it here</div></div>
+
 <footer>
   <div class="wrap">Nothing leaves your browser. &copy; 2026 Christophe Briguet · <a href="/privacy/">Privacy</a></div>
 </footer>
@@ -410,6 +430,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
   var el = function (id) { return document.getElementById(id); };
   var input = el("file");
   var blobURL = null, fallback = false, worker = null, run = null, runSeq = 0, lastResult = null;
+  var fetching = false;            // the sample is on its way: no other file is started meanwhile
   var SHOW = 25;                   // template rows shown before "Show all"
   var MASK_RE = /(<\*>|<(?:mac|ts|uuid|ip|hex|num)>)/g;   // what the table sets in colour
   var dead = false;   // set once a worker failed before it ever answered: no more are made
@@ -655,7 +676,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
 
   /* ---- the run ---- */
 
-  function start(file) {
+  function start(file, note) {
     // A run still open here means the previous one never finished: its
     // timer must not fire on this one, and its worker is not trusted.
     if (run) { clearTimer(); dropWorker(); }
@@ -675,7 +696,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
     el("cancel").textContent = "Cancel";
     show("running");
     focusOn("runHead");
-    say("Reading " + file.name + ", " + human(file.size) + ".");
+    say((note ? note + " " : "") + "Reading " + file.name + ", " + human(file.size) + ".");
     try {
       ensureWorker().postMessage({ type: "start", file: file, chunkBytes: CHUNK, runId: run.id });
     } catch (e) {
@@ -1013,9 +1034,10 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
 
   input.addEventListener("change", function () {
     var f = input.files && input.files[0];
-    if (!f) return;
-    start(f);
     input.value = "";    // so that choosing the same file again fires change again
+    if (!f) return;
+    if (run || fetching) { say(busyText() + "."); return; }
+    start(f);
   });
 
   /* Cooperative first. The worker reads the cancel flag between chunks, so
@@ -1063,20 +1085,122 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
     var link = e.currentTarget;
     if (typeof fetch !== "function" || typeof File !== "function") return;   // the link downloads the file instead
     e.preventDefault();
-    if (input.disabled || run) return;   // the reader is not ready, or busy: nothing happens, rather than the raw file replacing the page
+    if (input.disabled || run || fetching) return;   // the reader is not ready, or busy: nothing happens, rather than the raw file replacing the page
+    fetching = true;
     link.setAttribute("aria-disabled", "true");
     link.textContent = "Fetching the sample…";
     fetch("sample.log").then(function (res) {
       if (!res.ok) throw new Error("HTTP " + res.status);
       return res.blob();
     }).then(function (blob) {
+      fetching = false;
+      if (run) return;   // a file chosen or dropped meanwhile keeps its run
       start(new File([blob], "sample.log", { type: "text/plain" }));
     }).catch(function (err) {
+      fetching = false;
+      if (run) return;
       showError("The sample could not be fetched: " + ((err && err.message) ? err.message : err) + ".");
     }).then(function () {
+      fetching = false;
       link.removeAttribute("aria-disabled");
       link.textContent = "Try the sample";
     });
+  });
+
+  /* ---- drag and drop ----
+     The window is the target: a file dropped anywhere is read. Every drag
+     is claimed, files or not, because a drop the page does not claim is
+     handled by the browser, which navigates to a dropped file or link and
+     loses the page; a drag of text or a link is claimed and then ignored.
+     The overlay is shown while a file is over the window and says what a
+     drop will do, or why it will do nothing; it goes when the drag leaves
+     the window (a dragleave with nowhere to go), on the drop, and after a
+     long backstop with no dragover, since a drag that ends elsewhere can
+     leave without a word. A browser on Linux sends no dragover while the
+     pointer is still, which is why the backstop is long. A folder is
+     declined in the overlay, where the eye is, and in the live region. */
+  var dropTimer = null, dragSaid = false;
+  var DRAG_BACKSTOP_MS = 4000, DECLINE_MS = 2500;
+
+  function dragHasFiles(e) {
+    var t = e.dataTransfer, types, i;
+    if (!t) return false;
+    types = t.types;
+    if (!types) return false;
+    for (i = 0; i < types.length; i++) if (types[i] === "Files") return true;
+    return false;
+  }
+
+  function canTake() { return !input.disabled && !dead && !run && !fetching; }
+
+  /* Why a file cannot be taken now, for the overlay and the live region. */
+  function busyText() {
+    if (dead) return "The reader could not start in this browser";
+    if (run && run.cancelling) return "Stopping " + run.file.name + "; a moment";
+    if (run) return "Still reading " + run.file.name + "; cancel it first";
+    if (fetching) return "Fetching the sample; a moment";
+    return "The reader is loading; a moment";
+  }
+
+  function hideOverlay() {
+    if (dropTimer) { clearTimeout(dropTimer); dropTimer = null; }
+    el("dropOverlay").hidden = true;
+    dragSaid = false;
+  }
+
+  function showOverlay(text, ok, ms) {
+    var o = el("dropOverlay");
+    if (dropTimer) { clearTimeout(dropTimer); dropTimer = null; }
+    o.className = ok ? "" : "no";
+    el("dropText").textContent = text;
+    o.hidden = false;
+    dropTimer = setTimeout(function () { dropTimer = null; hideOverlay(); }, ms);
+  }
+
+  function dragOver() {
+    var ok = canTake();
+    showOverlay(ok ? "Drop the file to read it here" : busyText(), ok, DRAG_BACKSTOP_MS);
+    if (!ok && !dragSaid) { dragSaid = true; say(busyText() + "."); }   // once per drag: the drop itself will not fire
+  }
+
+  /* The decline stays up long enough to be read, then goes on its own. */
+  function decline(text) {
+    showOverlay(text, false, DECLINE_MS);
+    say(text);
+  }
+
+  /* A folder arrives as a File that cannot be read; the item's entry says
+     so where the browser offers one (webkitGetAsEntry is in every current
+     browser, under that name), and only on the drop itself. */
+  function isFolder(e) {
+    var items = e.dataTransfer.items, entry;
+    if (!items || !items[0] || typeof items[0].webkitGetAsEntry !== "function") return false;
+    try { entry = items[0].webkitGetAsEntry(); } catch (err) { return false; }
+    return !!(entry && entry.isDirectory);
+  }
+
+  document.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    var files = dragHasFiles(e);
+    try { e.dataTransfer.dropEffect = (files && canTake()) ? "copy" : "none"; } catch (err) { /* read-only in some browsers */ }
+    if (files) dragOver();
+  });
+
+  /* Leaving the window: the browser gives the event nowhere to go. Between
+     two elements of the page it names the one entered, and nothing is done. */
+  document.addEventListener("dragleave", function (e) {
+    if (e.relatedTarget === null || e.relatedTarget === undefined) hideOverlay();
+  });
+
+  document.addEventListener("drop", function (e) {
+    e.preventDefault();
+    if (!dragHasFiles(e)) { hideOverlay(); return; }
+    var files = e.dataTransfer.files, f = files && files[0];
+    if (!f) { hideOverlay(); return; }
+    if (!canTake()) { decline(busyText()); return; }
+    if (isFolder(e)) { decline("That is a folder. Drop one log file."); return; }
+    hideOverlay();
+    start(f, files.length > 1 ? "Several files were dropped; " + f.name + " is read first, so drop the others one at a time." : "");
   });
 
   fillRetention();
