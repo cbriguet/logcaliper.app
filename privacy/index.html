@@ -89,7 +89,7 @@ footer { border-top:1px solid var(--rule); padding-block:2rem; padding-bottom:ca
 
 <main id="main" tabindex="-1">
   <div class="wrap">
-    <p class="count">Privacy · 9 October 2026</p>
+    <p class="count">Privacy · 10 October 2026</p>
     <h1>What Logcaliper sends, and what it does not</h1>
     <p class="lede">The app and this site are made by one person for engineers who read privacy pages. So this one names the actual events, every property they carry, and the one identifier. The page lives in the site's public repository, so its history is public too.</p>
 
@@ -97,7 +97,7 @@ footer { border-top:1px solid var(--rule); padding-block:2rem; padding-bottom:ca
       <ul>
         <li>No account, no sign-in, nothing to register, no permissions asked for.</li>
         <li>The app sends usage events to Amplitude: which screen, which conversion, a game score. They are listed below, with everything they carry.</li>
-        <li>No name, no email, no contacts, no location. One event carries two numbers you can set by hand; it is named below.</li>
+        <li>No name, no email, no contacts, no location, and from version 3.1.1 no number you typed. Until then one event carried two numbers you could set by hand; it is named below.</li>
         <li>The website counts visits with GoatCounter, without cookies. The profiler page sends nothing at all.</li>
         <li>Nothing is sold, shared or used for advertising, and nothing is joined with data from other apps or sites. The app's privacy manifest says no tracking; the App Store label says <i>Data Not Linked to You</i>.</li>
       </ul>
@@ -116,10 +116,11 @@ footer { border-top:1px solid var(--rule); padding-block:2rem; padding-bottom:ca
         <tr><td>Comparison</td><td class="dim">a comparison is shown</td><td><code>unit_source</code>, <code>unit_target</code></td></tr>
         <tr><td>Estimate</td><td class="dim">the Storage screen computes</td><td><code>source_count</code>; <code>compression</code> and <code>distributed_storage</code>, on or off; <code>retention</code>, the period as shown; <code>result_unit</code>, the unit the total is shown in; <code>units_mode</code></td></tr>
         <tr><td>Share button clicked</td><td class="dim">the share sheet opens</td><td><code>source_count</code>; <code>result_unit</code></td></tr>
-        <tr><td>Device added to list</td><td class="dim">a source joins your list</td><td><code>vendor</code>, the source's name from the catalogue; <code>logsize</code>, the event size, the catalogue's figure unless you changed it; and <code>rate</code>, the number you typed converted to events per second. These are the two numbers you can set by hand that leave the app.</td></tr>
+        <tr><td>Device added to list</td><td class="dim">a source joins your list</td><td><code>vendor</code>, the source's name from the catalogue, and nothing else from version 3.1.1. Until then it also carried <code>logsize</code>, the event size, and <code>rate</code>, the number you typed converted to events per second: the only two numbers you could set by hand that left the app. They no longer do.</td></tr>
         <tr><td>Change units, Change mode, Change compression ratio</td><td class="dim">a setting changes</td><td>the new setting</td></tr>
         <tr><td>About page selected</td><td class="dim">About opens</td><td><code>app_version</code></td></tr>
-        <tr><td>Asked for a review</td><td class="dim">the Log tab appears</td><td><code>launch_count</code>, the appearance count the review prompt is keyed to</td></tr>
+        <tr><td>Asked for a review</td><td class="dim">the app asks Apple to show its rating prompt: from 3.1.1 at most once per version, after an estimate, a share or a copy, never in the first session and not before two days after the first launch (until then, every time the Log tab appeared)</td><td><code>moment</code>, estimate, share or copy; <code>session_count</code>; <code>days_since_first_launch</code>, or -1 for someone who had the app before 3.1.1; <code>app_version</code>. Until 3.1.1: <code>launch_count</code>, the appearance count the prompt was keyed to</td></tr>
+        <tr><td>About row tapped</td><td class="dim">from 3.1.1, one of the About rows that opens something is tapped</td><td><code>row</code>: missing_source, rate, website or privacy</td></tr>
         <tr><td>Game opened, Game started, Game over, Game shared</td><td class="dim">Threshold, in the app</td><td><code>from</code>, where it was opened; <code>score</code>, <code>level</code>, <code>answered</code></td></tr>
       </tbody>
     </table>
@@ -134,7 +135,8 @@ footer { border-top:1px solid var(--rule); padding-block:2rem; padding-bottom:ca
     <h3>What the app does not do</h3>
     <ul>
       <li>It asks for no permission: no contacts, photos, location, microphone or notifications.</li>
-      <li>Share, on the Storage screen, opens the system share sheet with the estimate as text, a picture and a link to logcaliper.app; whichever app you pick sends it, and the app sends nothing itself. Feedback, in Settings, opens Mail with a message addressed to me and sends no event.</li>
+      <li>Share, on the Storage screen, opens the system share sheet with the estimate as text, a picture and a link to logcaliper.app; whichever app you pick sends it, and the app sends nothing itself. Feedback, in Settings, opens Mail with a message addressed to me and sends no event; so does "A source that is missing", in About, apart from the row event above. Nothing is sent until you send it.</li>
+      <li>The links the app writes into a shared estimate or the game's shared line carry a tag saying where they came from (<code>ref=app-share</code> or <code>ref=app-game</code> on logcaliper.app, a campaign name on the App Store link), so the site's counter and Apple's report can tell how many people a shared estimate brought. The tag says nothing about you.</li>
       <li>The review prompt is Apple's, shown on Apple's terms. The game is a page bundled inside the app; it loads nothing and links nowhere, keeps your best score and whether the sound is on in the app's own storage on the device, and reports only what the table above says.</li>
       <li>There is no advertising, no advertising SDK, and no tracking across apps or sites.</li>
       <li>There is no switch in the app to turn the events off. That is a fair thing to want; if you want it, say so.</li>
@@ -155,6 +157,7 @@ footer { border-top:1px solid var(--rule); padding-block:2rem; padding-bottom:ca
     <p>Deleting the app ends its events. There is no account, so there is nothing to look up, export or delete by name: the events are keyed to the device identifier above, which neither you nor I can read off a device, and which Apple resets when the developer's apps are gone. Questions, or something on this page that does not match what you see on the wire: <a href="https://x.com/cbriguet" rel="me">@cbriguet</a>, or an issue on <a href="https://github.com/cbriguet/logcaliper.app">the site's repository</a>.</p>
 
     <h2>Changes</h2>
+    <p><b>10 October 2026.</b> For version 3.1.1 of the app: "Device added to list" no longer carries the rate and the event size you set; the review prompt asks at the end of a task, at most once per version, and its event fires only when it asks; a new event counts taps on the About screen's rows; shared links carry a tag naming where they came from. The profiler loads its own scripts and, when you ask, its sample log.</p>
     <p><b>9 October 2026.</b> This page replaces a generated policy. The app's About screen links here from version 3.1.1, and the App Store listing points here from the same release.</p>
   </div>
 </main>
