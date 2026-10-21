@@ -202,7 +202,7 @@ footer a { color: var(--accent); }
   <p class="hint"><button type="button" class="mute" id="mute">Sound: on</button></p>
 
   <footer>
-    Everyday sizes are the ones from <a href="/quiz/">the quiz</a>; log volumes are computed the way <a href="https://apps.apple.com/us/app/logcaliper/id381096276?ct=threshold-foot&amp;mt=8" data-goatcounter-click="appstore-from-threshold-foot">Logcaliper</a>, the free iOS calculator for log and SIEM sizing, computes them, from typical event rates and sizes. Decimal units: 1 GB is 1,000,000,000 bytes. <a href="/privacy/">Privacy</a>.
+    Everyday sizes are the ones from <a href="/quiz/">the quiz</a>; log volumes are computed the way <a href="https://apps.apple.com/us/app/logcaliper/id381096276?pt=406082&amp;ct=threshold-foot&amp;mt=8" data-goatcounter-click="appstore-from-threshold-foot">Logcaliper</a>, the free iOS calculator for log and SIEM sizing, computes them, from typical event rates and sizes. Decimal units: 1 GB is 1,000,000,000 bytes. <a href="/privacy/">Privacy</a>.
   </footer>
 </div>
 <input class="copyfield" id="copyfield" type="text" readonly aria-hidden="true" tabindex="-1">
@@ -291,7 +291,7 @@ footer a { color: var(--accent); }
     { text:'a year of one firewall’s logs', bytes:13888454400000, ref:'fw_year', hint:'14 TB' }
   ];
   var PER_LEVEL = 8, LIVES = 3;
-  var APPSTORE = 'https://apps.apple.com/us/app/logcaliper/id381096276?ct=threshold-end&mt=8';
+  var APPSTORE = 'https://apps.apple.com/us/app/logcaliper/id381096276?pt=406082&amp;ct=threshold-end&mt=8';
 
   var UNITS = ['B','kB','MB','GB','TB','PB'];
   function fmtBytes(n){ var p=0,v=n; while (v>=1000 && p<UNITS.length-1){ v/=1000; p++; } var s = p===0 ? Math.round(v).toLocaleString() : (v<10 ? v.toFixed(1).replace(/\.0$/,'') : Math.round(v).toLocaleString()); return s+' '+UNITS[p]; }

@@ -42,6 +42,9 @@ DATA = ROOT / "sources" / "data"
 SITE = "https://logcaliper.app"
 YEAR = 2026
 APP_ID = "381096276"
+# App Store Connect's provider token: with it an App Store link's ct= is
+# attributed under Analytics, Acquisition, Campaigns; without it, ignored.
+PT = "406082"
 DAY = 86400
 PROFILER_PUBLISHED = "2026-10-09"   # b4b20d7, the commit that put /profiler/ live
 
@@ -300,7 +303,7 @@ def page(*, title, description, path, body, nav_current=None, jsonld=None):
 <footer>
   <div class="wrap">
     <p>Event sizes are averages measured from more than ten million log events, the figures Logcaliper ships. Typical rates are informed estimates, not measurements, and each page says what drives them. Decimal units: 1 GB is 1,000,000,000 bytes.</p>
-    <p>&copy; {YEAR} Christophe Briguet · <a href="/sources/">All sources</a> · <a href="/profiler/">Profiler</a> · <a href="https://apps.apple.com/us/app/logcaliper/id{APP_ID}?ct=sources-footer&amp;mt=8" data-goatcounter-click="appstore-from-sources-footer">The app</a> · <a href="/privacy/">Privacy</a></p>
+    <p>&copy; {YEAR} Christophe Briguet · <a href="/sources/">All sources</a> · <a href="/profiler/">Profiler</a> · <a href="https://apps.apple.com/us/app/logcaliper/id{APP_ID}?pt={PT}&amp;ct=sources-footer&amp;mt=8" data-goatcounter-click="appstore-from-sources-footer">The app</a> · <a href="/privacy/">Privacy</a></p>
   </div>
 </footer>
 {CALC_JS}
@@ -329,7 +332,7 @@ def calculator(devices, eps, bytes_, days, *, bytes_label="Bytes per event"):
 
 def plug(ct):
     return f"""<div class="plug">
-  <p><a href="https://apps.apple.com/us/app/logcaliper/id{APP_ID}?ct={ct}&amp;mt=8" data-goatcounter-click="appstore-from-{ct}">Logcaliper</a>, free on iOS, has these sizes and rates built in and sizes a whole list of sources at retention: storage, cluster capacity, nodes.</p>
+  <p><a href="https://apps.apple.com/us/app/logcaliper/id{APP_ID}?pt={PT}&amp;ct={ct}&amp;mt=8" data-goatcounter-click="appstore-from-{ct}">Logcaliper</a>, free on iOS, has these sizes and rates built in and sizes a whole list of sources at retention: storage, cluster capacity, nodes.</p>
 </div>"""
 
 
