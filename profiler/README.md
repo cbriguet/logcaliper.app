@@ -70,7 +70,12 @@ over 64 KB, over 16 MB), `timing`, `reconciliation`; since the second,
 `templates` (every live cluster with its lines and bytes, the Other row,
 the cap and the eviction count) and `time` (the format, the stamped and
 unstamped lines, the first and last stamps as written, the span and the
-rate). The JSON download is this object as it is.
+rate); since the third, in `time`, `earliestText` and `latestText`, the
+span's two ends as written (a file joined newest first does not start at
+its earliest), and `bytesPerEvent`, the content of every line over the
+stamped lines, which the estimator is seeded with when there is a rate, so
+a stack trace's continuation lines weigh in with their event. The JSON
+download is this object as it is.
 
 ## Licence
 

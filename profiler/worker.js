@@ -71,8 +71,13 @@ if (typeof LCReader === 'undefined') importScripts('reader.js', 'masks.js', 'dra
     };
   }
 
+  /* Bytes per event, where the rate counts the stamped lines: the content
+     of every line over those lines, so a stack trace's continuation lines
+     weigh in with the event they belong to, and the rate times the size is
+     the file over its span. With no rate, the average line stands in. */
   function shape(file, r, ms, status, drain, other, time) {
     var s = ms / 1000;
+    if (time) time.bytesPerEvent = (time.perSecond !== null && time.stamped > 0) ? r.contentBytes / time.stamped : null;
     return {
       schemaVersion: 1,
       status: status,

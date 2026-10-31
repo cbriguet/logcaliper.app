@@ -388,6 +388,24 @@ test("worker: templates and time are the same whatever the chunking", function (
   });
 });
 
+test("worker: bytes per event are every line's content over the stamped lines, so a stack trace weighs in with its event", function () {
+  var lines = ["2026-10-09T13:16:00Z app ERROR charge failed", "java.lang.NullPointerException: invoice is null",
+    "\tat com.example.billing.InvoiceService.charge(InvoiceService.java:584)", "\tat com.example.jobs.Worker.run(Worker.java:117)",
+    "2026-10-09T13:16:10Z app INFO charge retried", ""];
+  var content = lines.reduce(function (n, l) { return n + Buffer.byteLength(l); }, 0);
+  return runWorker(fakeFile(new Uint8Array(Buffer.from(lines.join("\n") + "\n")), "trace.log"), 65536).then(function (posted) {
+    var r = posted[posted.length - 1].result, tm = r.time;
+    assert.equal(tm.stamped, 2);
+    assert.equal(tm.unstamped, 3);
+    assert.equal(tm.bytesPerEvent, content / 2);
+    assert.equal(tm.perSecond * tm.bytesPerEvent * tm.spanSeconds, content, "the rate times the size is the file's content over its span");
+    assert.ok(tm.bytesPerEvent > 2.5 * r.totals.avgLineBytes, "where the average line would size it at a fraction of that");
+    return runWorker(fakeFile(new Uint8Array(Buffer.from("plain a\nplain b\n")), "plain.log"), 65536);
+  }).then(function (posted) {
+    assert.equal(posted[posted.length - 1].result.time.bytesPerEvent, null, "no rate, no bytes per event: the page falls back to the average line");
+  });
+});
+
 test("worker: a BOM is stripped and counted", function () {
   var bytes = bytesOf("bom.log");
   return runWorker(fakeFile(bytes, "bom.log"), 65536).then(function (posted) {

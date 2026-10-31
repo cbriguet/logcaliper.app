@@ -32,14 +32,18 @@
    year: a stamp that lands more than two days before the previous one, or
    more than half a year after it, is read in the years either side as
    well, and the reading kept is the nearest that is at most two days back
-   and half a year forward, failing that the smallest step forward, since a
-   log is written in order; so a line a few seconds out of order at New
-   Year is not a year out, and a January-to-September file is not read as
-   September-to-January.
+   and half a year forward; failing that, the nearest step back of up to
+   three months, which is what rotated files joined newest first look like
+   (cat auth.log*: this week, then last week); failing that, the smallest
+   step forward, since a log is written in order. So a line a few seconds
+   out of order at New Year is not a year out, a week joined after the one
+   that followed it is not a year later, and a January-to-September file is
+   not read as September-to-January.
 
    The result: the format, how many lines carried a stamp and how many did
-   not, the first and last stamps as written, the span between the
-   earliest and the latest, and the stamped lines per second over it. No
+   not, the first and last stamps as written, the earliest and the latest
+   as written, the span between those two, and the stamped lines per
+   second over it. No
    rate is given for a span under a second or a single stamp. Same shape as
    reader.js: a global, a guarded module.exports, ES5 throughout. */
 var LCStamps = (function () {
@@ -51,6 +55,7 @@ var LCStamps = (function () {
   var YEARLESS = 2024;             // a leap year, for stamps that carry no year
   var HALF_MS = 183 * 86400000;    // a step forward longer than this, in a year-less file, is looked at again
   var SLACK_MS = 2 * 86400000;     // and so is a step back longer than this
+  var BACK_MS = 92 * 86400000;     // a step back up to this is taken as one, before a year forward
   var MONTH = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
   var MON = "(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)";
   var B = "(?:^|[^0-9A-Za-z])";   // a stamp starts after something that is not a letter or a digit
@@ -163,15 +168,15 @@ var LCStamps = (function () {
   function createTracker() {
     var heads = [], format = null, decided = false;
     var stamped = 0, unstamped = 0, lines = 0, zoned = false, yearless = false;
-    var first = null, last = null, min = Infinity, max = -Infinity, firstText = "", lastText = "";
+    var first = null, last = null, min = Infinity, max = -Infinity, firstText = "", lastText = "", minText = "", maxText = "";
     var prev = null, backwards = 0, bump = 0;
 
     /* A year-less stamp is read in the current year; when that lands more
        than two days before the previous stamp or more than half a year
        after it, the years either side are read too. The reading kept is
-       the nearest one within that window, failing that the smallest step
-       forward, failing that the smallest step back; the current year
-       follows it. */
+       the nearest one within that window, failing that the nearest step
+       back of up to three months, failing that the smallest step forward,
+       failing that the smallest step back; the current year follows it. */
     function readYearless(text) {
       var r = read(format, text, YEARLESS + bump), c, i, d, x, best = null, bestCost = Infinity;
       if (r === null || prev === null) return r;
@@ -185,6 +190,10 @@ var LCStamps = (function () {
       for (i = 0; i < c.length; i++) {
         d = c[i].r.t - prev;
         if (d >= -SLACK_MS && d <= HALF_MS && Math.abs(d) < bestCost) { best = c[i]; bestCost = Math.abs(d); }
+      }
+      if (best === null) for (i = 0; i < c.length; i++) {
+        d = prev - c[i].r.t;
+        if (d > 0 && d <= BACK_MS && d < bestCost) { best = c[i]; bestCost = d; }
       }
       if (best === null) for (i = 0; i < c.length; i++) {
         d = c[i].r.t - prev;
@@ -208,8 +217,8 @@ var LCStamps = (function () {
       stamped++;
       if (first === null) { first = r.t; firstText = r.text; }
       last = r.t; lastText = r.text;
-      if (r.t < min) min = r.t;
-      if (r.t > max) max = r.t;
+      if (r.t < min) { min = r.t; minText = r.text; }
+      if (r.t > max) { max = r.t; maxText = r.text; }
     }
 
     function decide() {
@@ -244,6 +253,7 @@ var LCStamps = (function () {
         lines: lines, stamped: stamped, unstamped: unstamped,
         zoned: zoned, yearless: yearless, backwards: backwards,
         first: first, last: last, firstText: firstText, lastText: lastText,
+        earliestText: minText, latestText: maxText,
         spanSeconds: span,
         perSecond: (stamped >= 2 && span >= 1) ? stamped / span : null
       };

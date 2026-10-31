@@ -209,6 +209,25 @@ test("tracker: a year-less file running from December into January", function ()
   assert.equal(r.spanSeconds, 86400 + 1, "a file written newest first is read forward at the turn of the year: a log is taken to be in order (a known limit)");
 });
 
+test("tracker: rotated year-less files joined newest first, as cat auth.log* joins them", function () {
+  var r = tracker(["Oct 26 06:25:01 h a", "Nov  1 06:24:59 h b", "Oct 19 06:25:01 h c", "Oct 26 06:24:59 h d"]);
+  assert.equal(r.spanSeconds, 13 * 86400 - 2, "last week after this week is a step back, not the next year");
+  assert.equal(r.backwards, 1);
+  assert.equal(r.firstText, "Oct 26 06:25:01");
+  assert.equal(r.lastText, "Oct 26 06:24:59");
+  assert.equal(r.earliestText, "Oct 19 06:25:01", "the span's two ends as written, which are not the file's first and last lines");
+  assert.equal(r.latestText, "Nov  1 06:24:59");
+  r = tracker(["Jan  2 06:25:01 h", "Jan  9 06:24:59 h", "Dec 26 06:25:01 h", "Dec 31 23:59:59 h", "Jan  2 06:24:59 h"]);
+  assert.equal(r.spanSeconds, 14 * 86400 - 2, "across New Year: the week before is December of the year before, and its January is this one");
+  assert.equal(r.earliestText, "Dec 26 06:25:01");
+  assert.equal(r.latestText, "Jan  9 06:24:59");
+  r = tracker(["Oct  1 00:00:00 h", "Oct 31 23:59:59 h", "Sep  1 00:00:00 h", "Sep 30 23:59:59 h"]);
+  assert.equal(r.spanSeconds, 61 * 86400 - 1, "monthly files: two months back is still a step back");
+  r = tracker(["Oct  9 13:16:00 h", "Oct  9 13:16:05 h"]);
+  assert.equal(r.earliestText, "Oct  9 13:16:00");
+  assert.equal(r.latestText, "Oct  9 13:16:05", "in a file in order, the earliest and the latest are the first and the last");
+});
+
 test("tracker: the format is chosen on the first 200 lines and applied to the rest", function () {
   var lines = [], i;
   for (i = 0; i < 199; i++) lines.push("plain line " + i);

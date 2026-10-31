@@ -402,8 +402,9 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
        log parsing algorithm, groups each line with the template it shares at least 40% of its words with and
        wildcards the words that differ; up to 4,000 templates are kept, and past that the least recently used are
        folded into Other. The rate is the lines that carry a timestamp over the span from the earliest to the
-       latest, in whichever of six common formats the first 200 lines use. The storage line is the arithmetic of
-       the app's Storage tab, at the retention and compression you pick.<span id="howFallback" hidden> In this browser the worker was loaded from worker.js directly
+       latest, in whichever of six common formats the first 200 lines use. The bytes per event are the bytes of
+       all the lines over the stamped ones, so a stack trace weighs in with its event, and the storage line is the
+       arithmetic of the app's Storage tab, at the retention and compression you pick.<span id="howFallback" hidden> In this browser the worker was loaded from worker.js directly
        rather than built inside the page; it is the same code, and after a stop that had to shut it down it is
        loaded again the same way.</span></p>
 
@@ -859,7 +860,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
       return;
     }
     items = ["Timestamps in " + tme.format.name + " on ", fig(tme.stamped === tme.lines ? "every line" : shareText(tme.stamped, tme.lines)), tme.stamped === tme.lines ? "" : " of lines",
-      (tme.yearless ? " (no year in them)" : "") + ", from ", fig(tme.firstText), " to ", fig(tme.lastText)];
+      (tme.yearless ? " (no year in them)" : "") + ", from ", fig(tme.earliestText || tme.firstText), " to ", fig(tme.latestText || tme.lastText)];
     if (tme.perSecond !== null && tme.perSecond !== undefined) {
       items.push(", ", fig(spanText(tme.spanSeconds)), ": ", fig(rateText(tme.perSecond)), " events per second.");
     } else if (tme.stamped < 2) {
@@ -868,7 +869,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
       items.push(", under a second: too short for a rate.");
     }
     if (tme.unstamped > 0) {
-      items.push(" The ", fig(num(tme.unstamped)), tme.unstamped === 1 ? " line without a stamp (a continuation line, most likely) is not in the rate." : " lines without a stamp (continuation lines, most likely) are not in the rate.");
+      items.push(" The ", fig(num(tme.unstamped)), tme.unstamped === 1 ? " line without a stamp (a continuation line, most likely) is not in the rate" : " lines without a stamp (continuation lines, most likely) are not in the rate",
+        tme.bytesPerEvent ? (tme.unstamped === 1 ? "; its bytes are in the bytes per event." : "; their bytes are in the bytes per event.") : ".");
     }
     if (tme.backwards > 0) {
       items.push(" ", fig(num(tme.backwards)), tme.backwards === 1 ? " line is earlier than the one before it." : " lines are earlier than the one before them.");
@@ -909,9 +911,9 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
   }
 
   function fillEstimator(r) {
-    var tme = r.time, t = r.totals;
+    var tme = r.time, t = r.totals, b = (tme && tme.bytesPerEvent) ? tme.bytesPerEvent : (t && t.avgLineBytes);
     el("eEps").value = (tme && tme.perSecond) ? String(Math.round(tme.perSecond * 100) / 100) : "";
-    el("eBytes").value = (t && t.avgLineBytes) ? String(Math.round(t.avgLineBytes)) : "";
+    el("eBytes").value = b ? String(Math.round(b)) : "";
     estimate();
   }
 
