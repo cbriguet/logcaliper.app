@@ -71,3 +71,9 @@ over 64 KB, over 16 MB), `timing`, `reconciliation`; since the second,
 the cap and the eviction count) and `time` (the format, the stamped and
 unstamped lines, the first and last stamps as written, the span and the
 rate). The JSON download is this object as it is.
+
+## Licence
+
+MIT, for this folder: see [LICENSE](LICENSE). `drain.js` and
+`test/drain.test.js` are derived from
+[Drain3](https://github.com/logpai/Drain3), MIT, and carry its notice.
